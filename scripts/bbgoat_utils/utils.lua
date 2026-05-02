@@ -3,6 +3,8 @@ function Import(file_name, file_env)
 	if f and type(f) == "function" then
         GLOBAL.setfenv(f, file_env or env)
         return f()
+	else
+		MOD_util:Warning("Import文件失败，文件名: " .. file_name, 3)
 	end
 end
 

@@ -41,7 +41,7 @@ GameEvents = {
     daywalkerspawner = RequireEvent("DST/daywalkerspawner"),
     shadowthrallmanager = RequireEvent("DST/shadowthrallmanager"),
     toadstoolspawner = RequireEvent("DST/toadstoolspawner"),
-    atrium_gate = RequireEvent("DST/atriium_gate"),
+    atrium_gate = RequireEvent("DST/atrium_gate"),
     nightmareclock = RequireEvent("DST/nightmareclock"),
     quaker = RequireEvent("DST/quaker"),
 
