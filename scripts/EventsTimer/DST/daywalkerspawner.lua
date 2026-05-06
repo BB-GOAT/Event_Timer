@@ -2,6 +2,14 @@
 
 local info
 info = {
+    postinitfn = function()
+        if not TheNet:GetIsServer() then return end
+        AddPrefabPostInit("world", function()
+            if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then
+                info.gettimefn = function() end -- 防止奇怪的模组给我一个虚假的计时
+            end
+        end)
+    end,
     gettimefn = function()
         local self = TheWorld.components.daywalkerspawner
         if not self then return end

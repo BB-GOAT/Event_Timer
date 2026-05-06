@@ -1,4 +1,4 @@
--- 本文件更新时间：2026年4月13日
+-- 本文件更新时间：2026年5月6日
 local Upvaluehelper = Upvaluehelper
 local MOD_util = MOD_util
 
@@ -144,12 +144,16 @@ RPC_HANDLERS[bbgoat_remote_rpc_code] = function(player, cmd, inst, res_rpc_code)
     if not func then
         TheNet:SendRPCToClient(res_rpc_code, player.userid, DataDumper({err = loadErr}))
     else
-        local env = {
+        local env = setmetatable(
+        {
             ThePlayer = player,
             inst = inst,
-        }
-        env = setmetatable(env, {
+        },
+        {
             __index = _G,
+            __newindex = function(t, k, v)
+                GLOBAL.rawset(GLOBAL, k, v)
+            end
         })
         setfenv(func, env)
         local success, fn_res = pcall(func)
@@ -281,11 +285,15 @@ if not (MOD_RPC["BBGOAT_RPC"] and CLIENT_MOD_RPC["BBGOAT_RPC"]) then
             if not func then
                 SendModRPCToClient(CLIENT_MOD_RPC["BBGOAT_RPC"]["log_from_server"], player.userid, loadErr)
             else
-                local env = {
-                    ThePlayer = player
-                }
-                env = setmetatable(env, {
+                local env = setmetatable(
+                {
+                    ThePlayer = player,
+                },
+                {
                     __index = _G,
+                    __newindex = function(t, k, v)
+                        GLOBAL.rawset(GLOBAL, k, v)
+                    end
                 })
                 setfenv(func, env)
                 local success, execErr = pcall(func)
