@@ -1,4 +1,4 @@
--- 本文件更新时间：2026年5月6日
+-- 本文件更新时间：2026年5月7日
 local Upvaluehelper = Upvaluehelper
 local MOD_util = MOD_util
 
@@ -152,7 +152,7 @@ RPC_HANDLERS[bbgoat_remote_rpc_code] = function(player, cmd, inst, res_rpc_code)
         {
             __index = _G,
             __newindex = function(t, k, v)
-                GLOBAL.rawset(GLOBAL, k, v)
+                rawset(_G, k, v)
             end
         })
         setfenv(func, env)
@@ -292,7 +292,7 @@ if not (MOD_RPC["BBGOAT_RPC"] and CLIENT_MOD_RPC["BBGOAT_RPC"]) then
                 {
                     __index = _G,
                     __newindex = function(t, k, v)
-                        GLOBAL.rawset(GLOBAL, k, v)
+                        rawset(_G, k, v)
                     end
                 })
                 setfenv(func, env)
