@@ -4,7 +4,9 @@ function Import(file_name, file_env)
         GLOBAL.setfenv(f, file_env or env)
         return f()
 	else
-		MOD_util:Warning("Import文件失败，文件名: " .. file_name, 3)
+		local info = debug.getinfo(3)
+		local filename, line = info.source or "???", info.currentline or "???"
+		print("[警告] Import文件失败，文件名: " .. file_name .. "\n本函数调用于 " .. tostring(filename) .. ":" .. tostring(line))
 	end
 end
 
