@@ -13,11 +13,11 @@ GameEvents = {
     ---------------------------------------- Forest ---------------------------------------
 
     hounded = RequireEvent("DST/hounded"),
-    -- deerclopsspawner = RequireEvent("DST/deerclopsspawner"),
+    deerclopsspawner = RequireEvent("DST/deerclopsspawner"),
     -- deerherdspawner = RequireEvent("DST/deerherdspawner"),
     -- klaussackspawner = RequireEvent("DST/klaussackspawner"),
     -- sinkholespawner = RequireEvent("DST/sinkholespawner"),
-    -- beargerspawner = RequireEvent("DST/beargerspawner"),
+    beargerspawner = RequireEvent("DST/beargerspawner"),
     -- dragonfly_spawner = RequireEvent("DST/dragonfly_spawner"),
     -- beequeenhive = RequireEvent("DST/beequeenhive"),
     -- terrarium = RequireEvent("DST/terrarium"),
@@ -53,21 +53,21 @@ for k, v in pairs(GameEvents) do
     WarningEvents[k] = v
 end
 
--- local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
---     ---------------------------------------- IA-SW ---------------------------------------
---     chessnavy = RequireEvent("IslandAdventures/chessnavy"),
---     volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"),
---     volcanomanager = RequireEvent("IslandAdventures/volcanomanager"),
---     twisterspawner = RequireEvent("IslandAdventures/twisterspawner"),
---     krakener = RequireEvent("IslandAdventures/krakener"),
---     tigersharker = RequireEvent("IslandAdventures/tigersharker"),
---     islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"),
--- } or {}
+local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
+    ---------------------------------------- IA-SW ---------------------------------------
+    -- chessnavy = RequireEvent("IslandAdventures/chessnavy"),
+    -- volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"),
+    -- volcanomanager = RequireEvent("IslandAdventures/volcanomanager"),
+    twisterspawner = RequireEvent("IslandAdventures/twisterspawner"),
+    -- krakener = RequireEvent("IslandAdventures/krakener"),
+    -- tigersharker = RequireEvent("IslandAdventures/tigersharker"),
+    -- islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"),
+} or {}
 
--- -- 将海难计时添加到WarningEvents
--- for k, v in pairs(ShipwreckedEvents) do
---     WarningEvents[k] = v
--- end
+-- 将海难计时添加到WarningEvents
+for k, v in pairs(ShipwreckedEvents) do
+    WarningEvents[k] = v
+end
 
 -- local HamletEvents = rawget(_G, "IA_HAM_ENABLED") and
 -- {   ---------------------------------------- IA-HAM ---------------------------------------

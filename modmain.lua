@@ -106,7 +106,7 @@ EventTimer = {
     TimerTips = GetModConfigData("ShowTips"), -- 醒目提示
 }
 -- 是否使用远程命令获取时间数据
-EventTimer.GetTimeFromRemoteCommand = true and GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
+EventTimer.GetTimeFromRemoteCommand = false and GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
 
 GLOBAL.EventTimer = EventTimer
 
