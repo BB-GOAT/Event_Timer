@@ -1,0 +1,301 @@
+local RW_Data = EventTimer.env.RW_Data
+local TimeToString = EventTimer.env.TimeToString
+
+local Image = require "widgets/image"
+local ImageButton = require "widgets/imagebutton"
+local Text = require "widgets/text"
+local Widget = require "widgets/widget"
+local TEMPLATES = require "widgets/redux/templates"
+local UIAnim = require "widgets/uianim"
+
+local WarningEventHUD = Class(Widget, function(self, owner)
+    Widget._ctor(self, "WarningEventHUD")
+    self.owner = owner
+    self.isopen = true
+    self:SetScaleMode(SCALEMODE_PROPORTIONAL) -- 等比缩放模式
+    self:SetMaxPropUpscale(MAX_HUD_SCALE) -- 设置界面最大比例上限
+    self:SetPosition(0, 0, 0) -- 设置坐标
+    self:SetVAnchor(ANCHOR_MIDDLE) -- 垂直居中对齐
+    self:SetHAnchor(ANCHOR_MIDDLE) -- 水平居中对齐
+
+    self.scalingroot = self:AddChild(Widget("warningeventscalingroot"))
+    self.scalingroot:SetScale(TheFrontEnd:GetHUDScale())
+    --监听从暂停状态恢复到继续状态，更新尺寸
+    self.inst:ListenForEvent(
+        "continuefrompause",
+        function()
+            if self.isopen then
+                self.scalingroot:SetScale(TheFrontEnd:GetHUDScale())
+            end
+        end,
+        TheWorld
+    )
+    --监听界面尺寸变化，更新尺寸
+    self.inst:ListenForEvent(
+        "refreshhudsize",
+        function(hud, scale)
+            if self.isopen then
+                self.scalingroot:SetScale(scale)
+            end
+        end,
+        owner.inst
+    )
+
+    -- TEMPLATES.RectangleWindow() 方法的构造方法参数如下
+    -- TEMPLATES.RectangleWindow(sizeX, sizeY, title_text, bottom_buttons, button_spacing, body_text)
+    -- sizeX: 宽
+    -- sizeY: 高
+    -- title_text 面板title
+    -- bottom_buttons 底部按钮
+    -- button_spacing 按钮间距
+    -- body_text 面板的文本
+    self.panel = self.scalingroot:AddChild(TEMPLATES.RectangleWindow(464, 520, STRINGS.eventtimer.ui_title,
+    {
+        {
+            text = STRINGS.UI.OPTIONS.CLOSE,
+            cb = function()
+                self.owner.EventTimerButton:ToggleEventTimerUI()
+            end,
+            offset = nil
+        },
+    }))
+
+    ------------------------------------scroll-----------------------------------------
+
+    -- 初始化每一项的方法
+    local function DestItemCtor(content, index)
+        local widget = Widget("widget-"..index)
+
+        widget:SetOnGainFocus(function()
+            self.scrollpanel:OnWidgetFocus(widget)
+        end)
+        -- self:InitDestItem() 每一项里的控件布局
+        widget.destitem = widget:AddChild(self:InitDestItem())
+
+        return widget
+    end
+
+    -- 给每一项赋值，添加事件的方法
+    local function DestApply(context, widget, data, index)
+        widget.destitem:Hide()
+
+        if widget.destitem.image then
+            widget.destitem.image:Kill()
+        end
+        if widget.destitem.anim then
+            widget.destitem.anim:Kill()
+        end
+
+        local text = data and data.text
+        if text then
+            -- 设置文字
+            widget.destitem.describe:SetString(text)
+
+            if data.animchangefn then
+                data:animchangefn()
+            end
+
+            if data.imagechangefn then
+                data:imagechangefn()
+            end
+
+            -- 移除背景，暂未使用
+            if data.nobackground and widget.destitem.background then
+                widget.destitem.background:Kill()
+            end
+
+            if data.image and data.image.atlas and data.image.tex then -- 设置图片
+                local pos = { -- 默认位置
+                    x = -180,
+                    y = 0
+                }
+                if data.image.uioffset then -- 偏移位置
+                    pos.x = pos.x + (data.image.uioffset.x or 0)
+                    pos.y = pos.y + (data.image.uioffset.y or 0)
+                end
+
+                widget.destitem.image = widget.destitem:AddChild(Image(
+                    data.image.atlas,
+                    data.image.tex
+                ))
+                widget.destitem.image:SetPosition(pos.x, pos.y, 0)
+                widget.destitem.image:SetScale(data.image.scale or 0.099)
+            elseif data.anim then -- 设置动画
+                local pos = { -- 默认位置
+                    x = -180,
+                    y = -15,
+                }
+                if data.anim.uioffset then -- 偏移位置
+                    pos.x = pos.x + (data.anim.uioffset.x or 0)
+                    pos.y = pos.y + (data.anim.uioffset.y or 0)
+                end
+                widget.destitem.anim = widget.destitem:AddChild(UIAnim())
+                widget.destitem.anim:SetPosition(pos.x, pos.y, 0)
+                widget.destitem.anim:SetScale(data.anim.scale or 0.099)
+                widget.destitem.anim:GetAnimState():SetBank(data.anim.bank)
+                widget.destitem.anim:GetAnimState():SetBuild(data.anim.build)
+                widget.destitem.anim:GetAnimState():PlayAnimation(data.anim.animation or "idle", data.anim.loop)
+                if data.anim.hidesymbol then
+                    for _, s in ipairs(data.anim.hidesymbol) do
+                        widget.destitem.anim:GetAnimState():HideSymbol(s)
+                    end
+                end
+                if data.anim.overridesymbol then
+                    widget.destitem.anim:GetAnimState():OverrideSymbol(data.anim.overridesymbol[1], data.anim.overridesymbol[2], data.anim.overridesymbol[3])
+                end
+                if data.anim.overridebuild then
+                    local _, b = next(data.anim.overridebuild)
+                    widget.destitem.anim:GetAnimState():AddOverrideBuild(b)
+                end
+                if data.anim.multcolour then
+                    widget.destitem.anim:GetAnimState():SetMultColour(data.anim.multcolour[1], data.anim.multcolour[2], data.anim.multcolour[3], data.anim.multcolour[4])
+                end
+                if data.anim.orientation then
+                    widget.destitem.anim:GetAnimState():SetOrientation(data.anim.orientation)
+                end
+                widget.destitem.anim:GetAnimState():Pause()
+            end
+
+            -- if data.gettimefn then -- 旧的判断方法
+            if ThePlayer.HUD.WarningEventTimeData[data.name .. "_time"] > 0 then
+                if not widget.destitem.checkbox then
+                    widget.destitem.checkbox = widget.destitem:AddChild(ImageButton(
+                        "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
+                    ))
+                    widget.destitem.checkbox:SetPosition(184, 0)
+                    widget.destitem.checkbox:SetScale(1)
+                end
+
+                -- 更新复选框状态
+                if ThePlayer.HUD[data.name].force then
+                    widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
+                else
+                    widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
+                end
+
+                -- 设置复选框按下后执行的函数
+                widget.destitem.checkbox:SetOnClick(function()
+                    ThePlayer.HUD[data.name].force = not ThePlayer.HUD[data.name].force
+
+                    -- 根据切换结果设置 checkbox 状态
+                    if ThePlayer.HUD[data.name].force then
+                        RW_Data:SetValue(data.name, true)
+                        widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
+                    else
+                        RW_Data:SetValue(data.name, nil)
+                        widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
+                    end
+
+                    RW_Data:Save()
+                end)
+            elseif widget.destitem.checkbox then
+                widget.destitem.checkbox:Kill()
+                widget.destitem.checkbox = nil
+            end
+
+            -- 点击倒计时后触发的事件
+            widget.destitem.backing:SetOnClick(function()
+                if type(data.announcefn) == "function" then
+                    local res = data.announcefn()
+                    if type(res) == "string" then
+                        TheNet:Say(STRINGS.LMB .. ' ' .. res, TheInput:IsKeyDown(KEY_CTRL))
+                    end
+                end
+            end)
+
+            widget.destitem:Show()
+            widget.destitem.describe._index = data.index
+        end
+    end
+
+    -- 将滚动条添加到self.panel里去
+    self.scrollpanel = self.panel:AddChild(TEMPLATES.ScrollingGrid({}, {
+        num_columns = 1,              -- 有几个滚动条
+        num_visible_rows = 4,         -- 滚动条内最多显示多少行
+        item_ctor_fn = DestItemCtor,  -- 每一项的构造方法
+        apply_fn = DestApply,         -- 给每一项赋值，添加事件等
+        widget_width = 470,           -- 每一项的宽
+        widget_height = 110,          -- 每一项的高
+        peek_percent = 0,             -- 在底部可以看到多少行，相当于拉到底了还能往上拉多少
+        allow_bottom_empty_row = true -- 是否允许底部有空行
+    }))
+    -----------------------------------------------------------------------------------
+    self:UpdateDestItem() -- 立刻更新一次数据，防止暂停时没数据
+    -- Scheduler:ExecutePeriodic(period, fn, limit, initialdelay, id, ...)
+    self.updatetask = scheduler:ExecutePeriodic(FRAMES * 10, self.UpdateDestItem, nil, 0, "updatedestitems", self) -- 持续刷新数据
+
+    -- 最后要把滚动条挂到父组件上的 self.default_focus 对象上去
+    self.default_focus = self.scrollpanel
+end)
+
+-- 更新数据
+function WarningEventHUD:UpdateDestItem()
+    local data_list = {}
+    local eventsdata = ThePlayer.HUD.WarningEventTimeData
+    for name, value in pairs(WarningEvents) do
+        local datatext = eventsdata[name .. "_text"]
+        local datatime = eventsdata[name .. "_time"]
+        value.name = name -- name在这定义，注意这一点
+        if type(datatext) == "string" and datatext ~= "" then
+            if value.playerly then
+                local text = json.decode(datatext)
+                if type(text) == "table" and text[ThePlayer.userid] then
+                    value.text = text[ThePlayer.userid]
+                    data_list[#data_list + 1] = value -- 必须条件都满足了才添加到data_list，否则会影响事件列表长度
+                end
+            else
+                value.text = datatext
+                data_list[#data_list + 1] = value
+            end
+        elseif type(datatime) == "number" and datatime > 0 then
+            value.text = TimeToString(datatime)
+            data_list[#data_list + 1] = value
+        end
+    end
+    self.scrollpanel:SetItemsData(data_list)
+end
+
+-- 关闭面板
+function WarningEventHUD:Close()
+    if self.isopen then
+        self.attach = nil
+        self.panel:Kill()
+        self.isopen = false
+        self.updatetask:Cancel()
+        self.updatetask = nil
+    end
+end
+
+-- 定义每一项内的控件布局
+function WarningEventHUD:InitDestItem()
+    local dest = Widget("destination")
+    local width, height = 470, 110
+    dest.backing = dest:AddChild(TEMPLATES.ListItemBackground(width, height, function() end))
+    dest.backing.move_on_click = true -- 按下后有视觉反馈
+
+    -- 图片/动画背景
+    dest.background = dest:AddChild(Image("images/scrapbook.xml", "inv_item_background.tex"))
+    dest.background:SetPosition(-180, 0, 0)
+    dest.background:SetScale(0.5, 0.5)
+
+    -- TEXT控件
+    dest.describe = dest:AddChild(Text(BODYTEXTFONT, 30)) -- 添加TEXT控件 字体，大小，文字
+    dest.describe:SetColour(255, 255, 255, 1)
+    dest.describe:SetVAlign(ANCHOR_MIDDLE) -- 设置上下对齐
+    dest.describe:SetHAlign(ANCHOR_MIDDLE) -- 设置左右对齐
+    dest.describe:SetPosition(10, 0, 0) -- 设置坐标 X，Y，Z
+    dest.describe:SetRegionSize(400, 100) -- 设置文字区域大小
+    dest.describe:SetScale(0.8, 0.8) -- 设置文字大小
+
+    -- 复选框
+    dest.checkbox = dest:AddChild(ImageButton(
+        "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
+    ))
+    dest.checkbox:SetPosition(184, 0)
+    dest.checkbox:SetScale(1)
+
+    -- 将定义好的组件返回
+    return dest
+end
+
+return WarningEventHUD
