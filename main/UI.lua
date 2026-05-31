@@ -18,9 +18,21 @@ local function AddWarningEvents(self)
         local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
         local worldid = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
         local need_save = false
-        if worldid and worldid == filedata.worldid then
-            for name, time in pairs(filedata) do
-                if name ~= "worldid" and checknumber(time) then
+
+        -- 清理长期未游玩的存档数据
+        local current_os_time = os.time()
+        for MasterSessionId, world_data in pairs(filedata) do
+            if current_os_time and world_data.save_time and ((current_os_time - world_data.save_time) > ((24 * 60 * 60) * 30)) and MasterSessionId ~= worldid then -- 30天未游玩
+                print("[全局事件计时器 - 客户端版] 清理超过30天未游玩的存档事件数据记录：", MasterSessionId)
+                filedata[MasterSessionId] = nil
+                need_save = true
+            end
+        end
+
+        -- 读取记录的数据
+        if worldid and filedata[worldid] then
+            for name, time in pairs(filedata[worldid] or {}) do
+                if checknumber(time) then
                     local diff_time = time - GetWorldTime()
                     if diff_time > 0 then
                         SaveTimeData(name, diff_time, true)
@@ -30,13 +42,12 @@ local function AddWarningEvents(self)
                     end
                 end
             end
-        elseif worldid and worldid ~= filedata.worldid then -- 数据不匹配，重置数据
-            filedata = { worldid = worldid }
+        else
+            filedata[worldid] = {}
             need_save = true
         end
         if need_save then
             RW_Data:SetValue("WarningEventTimeData", filedata)
-            -- RW_Data:Save() -- 等真正有数据更新的时候再存到文件里吧
         end
     end)
 

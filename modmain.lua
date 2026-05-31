@@ -108,7 +108,7 @@ EventTimer = {
     TimerTips = GetModConfigData("ShowTips"), -- 醒目提示
 }
 -- 是否使用远程命令获取时间数据
-EventTimer.GetTimeFromRemoteCommand = false and GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
+EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
 
 GLOBAL.EventTimer = EventTimer
 
@@ -282,6 +282,7 @@ function GetWorldTime()
     return Last_time
 end
 
+local worldid
 function SaveTimeData(name, time, from_prediction)
     if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checknumber(time)) then
         return
@@ -290,16 +291,20 @@ function SaveTimeData(name, time, from_prediction)
     ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = time
 
     -- 存储倒计时数据至文件
-    if not from_prediction and not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    if not from_prediction and not (WarningEvents[name] and WarningEvents[name].DisableSaveTime) then
         local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
-        if time == 0 then
-            filedata[name] = nil
-        else
-            local next_attack_time = GetWorldTime() + time -- 下次袭击的世界时间点
-            filedata[name] = next_attack_time
+        worldid = worldid or (TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId())
+        local world_data = filedata[worldid]
+        if world_data then
+            if time == 0 then
+                world_data[name] = nil
+            else
+                local next_attack_time = GetWorldTime() + time -- 下次袭击的世界时间点
+                world_data[name] = next_attack_time
+            end
+            world_data.save_time = os.time() -- 记录此存档最后一次更新事件记录的时间，以便清理长期未游玩的存档数据
+            RW_Data:SetValue("WarningEventTimeData", filedata)
         end
-        filedata.worldid = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
-        RW_Data:SetValue("WarningEventTimeData", filedata)
     end
 
     -- 预测倒计时功能

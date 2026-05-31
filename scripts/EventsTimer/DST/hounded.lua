@@ -95,7 +95,7 @@ local next_wave_is_wormboss, _wave_override_chance, task
 local remotegettextfn = function()
     if not TheWorld:HasTag("cave") then return end
     local cmd = [[
-        local self = TheWorld.components.hounded
+        local self = TheWorld and TheWorld.components.hounded
         if not self then return end
 
         local next_wave_is_wormboss = BBGOAT_FN.getval(self.DoWarningSpeech, "_wave_pre_upgraded")
@@ -151,19 +151,22 @@ local info
 info = {
     remotegettimefn = function()
         local cmd = [[
-            if TheWorld.components.hounded then
+            if TheWorld and TheWorld.components.hounded then
                 local data = TheWorld.components.hounded:OnSave()
                 local time = data and data.timetoattack
                 return DataDumper({time = time})
             end
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
-            if res and res.time then
+            if res.err then
+                print('[警告] hounded remotegettimefn error:', res.err)
+            elseif res and res.time then
                 SaveTimeData("hounded", res.time)
             end
         end)
     end,
     remotegettextfn = remotegettextfn,
+    DisableSaveTime = true,
     imagechangefn = function(self)
         local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
         local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
