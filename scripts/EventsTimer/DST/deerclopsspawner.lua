@@ -1,5 +1,5 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
     -- 根据警告等级（2~4）和当前等级内的触发次数，估算 Boss 距离到达的秒数并播报
     -- 等级越高 = 越近；同一等级每次触发间隔约 15 秒
     local record_table = {}
@@ -53,15 +53,78 @@
             end)
         end)
     end
--- end
+end
 
 ----------------------------------------------------------------------------------------------
 
+local need_update_data = true -- 是否需要更新袭击数据
+local target_name, task
+local remotegettextfn = function()
+    if ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time == 0 then return end
+
+    local cmd = [[
+        local self = TheWorld and TheWorld.components.deerclopsspawner
+        if not self then return end
+
+        local target = BBGOAT_FN.getval(self.OnUpdate, "_targetplayer")
+        local name = target and target.name
+
+        return DataDumper({target_name = name})
+    ]]
+
+    local function fn()
+        if target_name then
+            local str = string.format(STRINGS.eventtimer.deerclopsspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time))
+            SaveTextData("deerclopsspawner", str, true)
+        else
+            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.cooldown), TimeToString(ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time))
+            SaveTextData("deerclopsspawner", str, true)
+        end
+    end
+
+    if need_update_data then
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res.err then
+                print('[警告] deerclopsspawner remotegettextfn error:', res.err)
+                -- 取消任务
+                if task then
+                    task:Cancel()
+                    task = true
+                end
+            elseif res then
+                target_name = res.target_name
+                fn()
+            end
+            need_update_data = false
+        end)
+    else
+        fn()
+    end
+
+    if not task then
+        target_name = nil
+        task = TheWorld:DoTaskInTime(ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time - 55, function() -- 尽可能在最后一分钟开始获取攻击数据
+            need_update_data = true
+            task = nil
+        end)
+    end
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    remotegettimefn = function()
+        GetWorldSettingsTimeLeft("deerclops_timetoattack", nil, function(res)
+            if res.err then
+                print('[警告] deerclopsspawner remotegettimefn error:', res.err)
+            elseif res and res.time then
+                SaveTimeData("deerclopsspawner", res.time)
+            end
+        end)
+    end,
+    remotegettextfn = remotegettextfn,
+    remotegettextfninterval = 1,
     animchangefn = ChangeanimByWintersFeast,
     defaultanim = {
         scale = 0.044,

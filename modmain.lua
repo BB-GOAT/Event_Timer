@@ -87,9 +87,7 @@ else
     ModLanguage = "en"
 end
 
-modimport("Languages/" .. ModLanguage) -- 加载模组字符串
 modimport("scripts/bbgoat_utils/utils") -- 加载模组工具
-modimport("main/timerprefab")
 RW_Data = PersistentData('mod_config_data/Events_Timer.json') -- 存取数据
 RW_Data:Load()
 
@@ -111,6 +109,8 @@ EventTimer = {
 EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
 
 GLOBAL.EventTimer = EventTimer
+
+modimport("Languages/" .. ModLanguage) -- 加载模组字符串
 
 ----------------------------------------定义模组环境函数---------------------------------------
 
@@ -241,17 +241,25 @@ end
 
 -- 更新客户端预测倒计时
 local function UpdateClientPrediction(name)
+    if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData) then
+        return
+    end
+
     -- time
     local time = ThePlayer.HUD.WarningEventTimeData[name .. "_time"]
     time = time - 1
     if time >= 0 then
         SaveTimeData(name, time, true)
     else
-        SaveTimeData(name, 0)
+        -- 时间结束，清理任务
+        ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = 0
+        ThePlayer.HUD.WarningEventTimeData[name .. "_text"] = ""
         if client_prediction_tasks[name] then
             client_prediction_tasks[name]:Cancel()
             client_prediction_tasks[name] = nil
         end
+        ThePlayer.HUD:UpdateWarningEvents()
+        return
     end
 
     -- text
@@ -288,7 +296,8 @@ function SaveTimeData(name, time, from_prediction)
         return
     end
 
-    ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = time
+    ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = math.floor(time)
+    ThePlayer.HUD:UpdateWarningEvents()
 
     -- 存储倒计时数据至文件
     if not from_prediction and not (WarningEvents[name] and WarningEvents[name].DisableSaveTime) then
@@ -324,6 +333,7 @@ function SaveTextData(name, text, from_prediction)
     end
 
     ThePlayer.HUD.WarningEventTimeData[name .. "_text"] = text
+    ThePlayer.HUD:UpdateWarningEvents()
 
     -- 预测倒计时功能
     if not from_prediction and client_prediction_tasks[name] then
@@ -352,20 +362,25 @@ Upvaluehelper.HideFn(GLOBAL.MigrateToServer, _MigrateToServer)
 
 ----------------------------------------事件计时需要用到的函数---------------------------------------
 
--- 从worldsettingstimer或TimerPrefabs获取倒计时
-local function GetWorldSettingsTimeLeft(name, prefab)
-    return function()
-        local ent = GLOBAL.TheWorld
-        if prefab then
-            ent = GLOBAL.TimerPrefabs[prefab]
-        end
-        if ent and ent.components.worldsettingstimer then
-            if not ent.components.worldsettingstimer:IsPaused(name) then
-                local time = ent.components.worldsettingstimer:GetTimeLeft(name)
-                return time and time < 65535 and time
-            end
-        end
+local function fmtval(v)
+    if v == nil then
+        return "nil"
+    elseif type(v) == "string" then
+        return string.format("%q", v)
+    else
+        return tostring(v)
     end
+end
+
+-- 从worldsettingstimer或TimerPrefabs获取倒计时
+local function GetWorldSettingsTimeLeft(name, prefab, fn)
+    local cmd = [[
+local name = %s
+local prefab = %s
+local time = _G.EventTimerClient.GetWorldSettingsTimeLeft(name, prefab)
+return DataDumper( { time = time } )
+]]
+    BBGOAT_util:remote(string.format(cmd, fmtval(name), fmtval(prefab)), nil, fn)
 end
 
 -- 合并字符串
@@ -476,7 +491,6 @@ local file_env = {
     AddComponentPostInit = AddComponentPostInit,
     ---
     GetWorldSettingsTimeLeft = GetWorldSettingsTimeLeft, -- 从worldsettingstimer或TimerPrefabs获取倒计时
-    TimerPrefabs = GLOBAL.TimerPrefabs,
     CombineLines = CombineLines, -- 合并字符串
     ---
     ChangeanimByWintersFeast = ChangeanimByWintersFeast, -- 根据冬季盛宴活动决定anim

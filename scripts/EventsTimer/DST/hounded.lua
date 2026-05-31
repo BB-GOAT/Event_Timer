@@ -104,6 +104,16 @@ local remotegettextfn = function()
         return DataDumper({next_wave_is_wormboss = next_wave_is_wormboss, _wave_override_chance = _wave_override_chance})
     ]]
 
+    local function fn()
+        if next_wave_is_wormboss then
+            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time))
+            SaveTextData("hounded", str, true)
+        elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
+            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
+            SaveTextData("hounded", str, true)
+        end
+    end
+
     if need_update_data then
         BBGOAT_util:remote(cmd, nil, function(res)
             if res.err then
@@ -116,25 +126,12 @@ local remotegettextfn = function()
             elseif res then
                 next_wave_is_wormboss = res.next_wave_is_wormboss
                 _wave_override_chance = res._wave_override_chance
-
-                if next_wave_is_wormboss then
-                    local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time))
-                    SaveTextData("hounded", str)
-                elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
-                    local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
-                    SaveTextData("hounded", str)
-                end
+                fn()
             end
             need_update_data = false
         end)
     else
-        if next_wave_is_wormboss then
-            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time))
-            SaveTextData("hounded", str)
-        elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
-            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
-            SaveTextData("hounded", str)
-        end
+        fn()
     end
 
     if not task then

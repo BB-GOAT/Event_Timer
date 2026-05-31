@@ -1,6 +1,9 @@
 local STRINGS = GLOBAL.STRINGS
+local remote_mode = GLOBAL.EventTimer.GetTimeFromRemoteCommand
+local from_server_mod_mode = GLOBAL.EventTimer.GetTimeFromServerMod
+
 STRINGS.eventtimer = {
-    ui_title = "事件计时器",
+    ui_title = "事件计时器 - 数据来源：" .. (remote_mode and "服务器" or from_server_mod_mode and "服务器模组" or "本地预测"),
     ui_desc = "事件计时器\n右键拖拽",
     worldid = "世界%s", -- 跨世界同步计时，文字添加前缀
     worldtype = {
