@@ -1,31 +1,33 @@
--- 梦魇疯猪
-
-local info
-info = {
-    postinitfn = function()
-        if not TheNet:GetIsServer() then return end
-        AddPrefabPostInit("world", function()
-            if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then
-                info.gettimefn = function() end -- 防止奇怪的模组给我一个虚假的计时
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    AddPrefabPostInit("daywalker", function(boss)
+        boss:DoTaskInTime(0.2, function(inst)
+            SaveTimeData("daywalkerspawner", 0)
+            SaveTimeData("forestdaywalkerspawner", 0)
+            if inst and inst.components and inst.components.talker and inst.components.talker.Say then
+                local _Say = inst.components.talker.Say
+                inst.components.talker.Say = function(self, str_say, ...)
+                    for _, str in pairs(STRINGS.DAYWALKER_POWERDOWN or {}) do
+                        if str == str_say then
+                            SaveTimeData("forestdaywalkerspawner", (TUNING.DAYWALKER_RESPAWN_DAYS_COUNT + 1) * TUNING.TOTAL_DAY_TIME - TheWorld.state.time*TUNING.TOTAL_DAY_TIME)
+                            break
+                        end
+                    end
+                    return _Say(self, str_say, ...)
+                end
             end
         end)
-    end,
-    gettimefn = function()
-        local self = TheWorld.components.daywalkerspawner
-        if not self then return end
-        local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
-        if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "cavejail" or self.daywalker ~= nil or not self.days_to_spawn or not CalcTimeOfDay then
-            return
-        end
-        return (self.days_to_spawn + 1) * TUNING.TOTAL_DAY_TIME - CalcTimeOfDay()
-    end,
-    gettextfn = function()
-        local self = TheWorld.components.daywalkerspawner
-        if not self then return end
-        if self.daywalker ~= nil then
-            return ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.ready)
-        end
-    end,
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
+-- 梦魇疯猪
+local info
+info = {
     anim = {
         scale = 0.05,
         build = "daywalker_build",

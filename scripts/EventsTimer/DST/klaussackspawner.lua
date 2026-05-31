@@ -1,26 +1,25 @@
-local info
-info ={
-    gettimefn = GetWorldSettingsTimeLeft("klaussack_spawntimer"),
-    gettextfn = function(time)
-        local self = TheWorld.components.klaussackspawner
-        if not self then return end
-
-        local function sack_can_despawn(inst)
-            if not IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) and
-                inst.components.entitytracker:GetEntity("klaus") == nil and
-                inst.components.entitytracker:GetEntity("key") == nil then
-                return true
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    AddPrefabPostInit("klaus_sack", function(inst)
+        inst:ListenForEvent("onremove", function(inst)
+            local pos = inst:GetPosition()
+            local bundle = TheSim:FindEntities(pos.x, 0, pos.z, 4, {"bundle"}, { 'FX', 'DECOR', 'INLIMBO', 'NOCLICK', 'player' })
+            if #bundle > 0 then
+                if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
+                    SaveTimeData("klaussackspawner", TUNING.KLAUSSACK_EVENT_RESPAWN_TIME)
+                end
             end
-            return false
-        end
+        end)
+    end)
+-- end
 
-        local sack = Upvaluehelper.GetUpvalue(self.GetDebugString, "_sack")
-        if sack and sack:IsValid() and sack.despawnday and sack_can_despawn(sack) then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.despawntext), sack.despawnday)
-        else
-            return time and TimeToString(time)
-        end
-    end,
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
+local info
+info = {
     anim = {
         scale = 0.1,
         bank = "klaus_bag",

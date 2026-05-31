@@ -1,7 +1,5 @@
-----------------------------------------------------------------------------------------------
-
 -- 纯本地获取方式
-if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
     -- 根据警告等级（2~4）和当前等级内的触发次数，估算 Boss 距离到达的秒数并播报
     -- 等级越高 = 越近；同一等级每次触发间隔约 15 秒
     local record_table = {}
@@ -55,7 +53,7 @@ if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) 
             end)
         end)
     end
-end
+-- end
 
 ----------------------------------------------------------------------------------------------
 

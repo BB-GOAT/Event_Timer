@@ -10,44 +10,44 @@ GLOBAL.setfenv(1, GLOBAL)
 WarningEvents = rawget(_G, "WarningEvents") or {}
 local GameEvents
 GameEvents = {
-    ---------------------------------------- Forest ---------------------------------------
+    ---------------------------------------- Forest ----------------------------------------
 
-    hounded = RequireEvent("DST/hounded"),
-    deerclopsspawner = RequireEvent("DST/deerclopsspawner"),
-    -- deerherdspawner = RequireEvent("DST/deerherdspawner"),
-    -- klaussackspawner = RequireEvent("DST/klaussackspawner"),
-    -- sinkholespawner = RequireEvent("DST/sinkholespawner"),
-    beargerspawner = RequireEvent("DST/beargerspawner"),
-    -- dragonfly_spawner = RequireEvent("DST/dragonfly_spawner"),
-    -- beequeenhive = RequireEvent("DST/beequeenhive"),
-    -- terrarium = RequireEvent("DST/terrarium"),
-    -- malbatrossspawner = RequireEvent("DST/malbatrossspawner"),
-    -- crabkingspawner = RequireEvent("DST/crabkingspawner"),
-    -- moon = RequireEvent("DST/moon"),
-    -- farming_manager = RequireEvent("DST/farming_manager"),
-    -- piratespawner = RequireEvent("DST/piratespawner"),
-    -- forestdaywalkerspawner = RequireEvent("DST/forestdaywalkerspawner"),
-    -- messagebottlemanager = RequireEvent("DST/messagebottlemanager"),
-    -- lunarthrall_plantspawner = RequireEvent("DST/lunarthrall_plantspawner"),
-    -- lunar_riftspawner = RequireEvent("DST/lunar_riftspawner"),
-    -- shadow_riftspawner = RequireEvent("DST/shadow_riftspawner"),
-    -- rift_portal = RequireEvent("DST/rift_portal"),
+    hounded = RequireEvent("DST/hounded"), -- 猎犬/洞穴蠕虫/鳄狗/吸血蝙蝠
+    deerclopsspawner = RequireEvent("DST/deerclopsspawner"), -- 独眼巨鹿
+    -- deerherdspawner = RequireEvent("DST/deerherdspawner"), -- 无眼鹿(无法纯本地)
+    klaussackspawner = RequireEvent("DST/klaussackspawner"), -- 赃物袋
+    -- sinkholespawner = RequireEvent("DST/sinkholespawner"), -- 蚁狮(无法纯本地)
+    beargerspawner = RequireEvent("DST/beargerspawner"), -- 熊獾
+    dragonfly_spawner = RequireEvent("DST/dragonfly_spawner"), -- 龙蝇
+    beequeenhive = RequireEvent("DST/beequeenhive"), -- 蜂后
+    terrarium = RequireEvent("DST/terrarium"), -- 盒中泰拉
+    malbatrossspawner = RequireEvent("DST/malbatrossspawner"), -- 邪天翁
+    crabkingspawner = RequireEvent("DST/crabkingspawner"), -- 帝王蟹
+    -- moon = RequireEvent("DST/moon"), -- 月相(不需要纯本地)
+    -- farming_manager = RequireEvent("DST/farming_manager"), -- 果蝇王(无法纯本地)
+    -- piratespawner = RequireEvent("DST/piratespawner"), -- 海盗袭击(无法纯本地)
+    forestdaywalkerspawner = RequireEvent("DST/forestdaywalkerspawner"), -- 拾荒疯猪
+    -- messagebottlemanager = RequireEvent("DST/messagebottlemanager"), -- 宝藏信息(无法纯本地)
+    -- lunarthrall_plantspawner = RequireEvent("DST/lunarthrall_plantspawner"), -- 致命亮茄(无法纯本地)
+    lunar_riftspawner = RequireEvent("DST/lunar_riftspawner"), -- 月亮裂隙生成倒计时
+    shadow_riftspawner = RequireEvent("DST/shadow_riftspawner"), -- 暗影裂隙生成倒计时
+    -- rift_portal = RequireEvent("DST/rift_portal"), -- 月亮裂隙信息(无法纯本地)
 
-    -- ---------------------------------------- Cave ----------------------------------------
+    ---------------------------------------- Cave ----------------------------------------
 
-    -- shadowrift_portal = RequireEvent("DST/shadowrift_portal"),
-    -- daywalkerspawner = RequireEvent("DST/daywalkerspawner"),
-    -- shadowthrallmanager = RequireEvent("DST/shadowthrallmanager"),
-    -- toadstoolspawner = RequireEvent("DST/toadstoolspawner"),
-    -- atrium_gate = RequireEvent("DST/atrium_gate"),
-    -- nightmareclock = RequireEvent("DST/nightmareclock"),
-    -- quaker = RequireEvent("DST/quaker"),
+    -- shadowrift_portal = RequireEvent("DST/shadowrift_portal"), -- 暗影裂隙信息(无法纯本地)
+    daywalkerspawner = RequireEvent("DST/daywalkerspawner"), -- 梦魇疯猪
+    -- shadowthrallmanager = RequireEvent("DST/shadowthrallmanager"), -- 梦魇裂隙/墨荒(暂未确定)
+    toadstoolspawner = RequireEvent("DST/toadstoolspawner"), -- 毒菌蟾蜍
+    atrium_gate = RequireEvent("DST/atrium_gate"), -- 远古大门
+    nightmareclock = RequireEvent("DST/nightmareclock"), -- 遗迹当前阶段(纯本地)
+    -- quaker = RequireEvent("DST/quaker"), -- 地震
 
-    -- ---------------------------------------- Player ----------------------------------------
+    ---------------------------------------- Player ----------------------------------------
 
     -- -- 针对单个玩家的事件，不支持gettimefn，gettextfn返回一个包含所有玩家信息的json字符串。不支持跨世界同步
-    -- flotsamgenerator = RequireEvent("DST/flotsamgenerator"),
-    -- yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"),
+    -- flotsamgenerator = RequireEvent("DST/flotsamgenerator"), -- 瓶中信
+    -- yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"), -- 镀金骑士
 }
 for k, v in pairs(GameEvents) do
     WarningEvents[k] = v

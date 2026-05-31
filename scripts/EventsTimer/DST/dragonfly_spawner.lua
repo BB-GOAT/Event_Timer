@@ -1,6 +1,17 @@
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    HookDeath("dragonfly", "dragonfly_spawner", function(event)
+        SaveTimeData(event, TUNING.DRAGONFLY_RESPAWN_TIME)
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("regen_dragonfly", "dragonfly_spawner"),
     animchangefn = ChangeanimByWintersFeast,
     defaultanim = {
         scale = 0.044,

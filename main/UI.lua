@@ -1,4 +1,6 @@
 local AddClassPostConstruct = AddClassPostConstruct
+local GetWorldTime = GetWorldTime
+local SaveTimeData = SaveTimeData
 local RW_Data = RW_Data
 local env = env
 GLOBAL.setfenv(1, GLOBAL)
@@ -11,6 +13,31 @@ local last_tips_cache = {} -- 记录事件是否提示过（如果保存在ThePl
 local function AddWarningEvents(self)
     self.inst:DoTaskInTime(2,function()
         game_ready = true
+
+        -- 尝试恢复之前记录的倒计时数据(如果服务器回档了，可能会发生BOSS没被打死但记录有效的情况，暂时不考虑解决这种情况)
+        local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
+        local worldid = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
+        local need_save = false
+        if worldid and worldid == filedata.worldid then
+            for name, time in pairs(filedata) do
+                if name ~= "worldid" and checknumber(time) then
+                    local diff_time = time - GetWorldTime()
+                    if diff_time > 0 then
+                        SaveTimeData(name, diff_time, true)
+                    else
+                        filedata[name] = nil
+                        need_save = true
+                    end
+                end
+            end
+        elseif worldid and worldid ~= filedata.worldid then -- 数据不匹配，重置数据
+            filedata = { worldid = worldid }
+            need_save = true
+        end
+        if need_save then
+            RW_Data:SetValue("WarningEventTimeData", filedata)
+            -- RW_Data:Save() -- 等真正有数据更新的时候再存到文件里吧
+        end
     end)
 
     local warningtips_messages = {}
@@ -89,7 +116,6 @@ local function AddWarningEvents(self)
     ---------------------------------------------------------------------------------------------------------------
 
     -- 屏幕左上角倒计时
-
     local eventstime = {}
     for warningevent, data in pairs(WarningEvents) do
         eventstime[warningevent .. "_text"] = ""
@@ -99,7 +125,7 @@ local function AddWarningEvents(self)
         self[warningevent]:Hide()
         self[warningevent].force = RW_Data:GetValue(warningevent) -- 读取存储的数据来决定是否显示计时器在屏幕左上角
     end
-    self.WarningEventTimeData = eventstime
+    self.WarningEventTimeData = eventstime -- 全局倒计时数据表
 
     function self:UpdateWarningEvents()
         local eventsdata = self.WarningEventTimeData

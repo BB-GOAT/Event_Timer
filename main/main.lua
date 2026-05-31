@@ -8,27 +8,6 @@ AddPrefabPostInit("world",function(inst)
         end
         ThePlayer.HUD:UpdateWarningEvents()
     end)
-
-    -- 更新倒计时数据
-    -- inst:DoPeriodicTask(GLOBAL.EventTimer.UpdateTime, function()
-    --     for warningevent, data in pairs(WarningEvents) do
-    --         local time
-    --         if data.gettimefn then
-    --             time = data.gettimefn()
-    --             if time then
-    --                 if time < 0 then time = 0 end -- 避免被负数影响
-    --                 SaveTimeData(warningevent, time)
-    --             end
-    --         end
-
-    --         -- if data.gettextfn then
-    --         --     local text = data.gettextfn(time)
-    --         --     if text then
-
-    --         --     end
-    --         -- end
-    --     end
-    -- end)
 end)
 
 MOD_util:AddPlayerPostInit(function(world, player)

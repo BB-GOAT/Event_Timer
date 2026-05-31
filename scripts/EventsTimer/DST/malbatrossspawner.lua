@@ -1,6 +1,17 @@
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    HookDeath("malbatross", "malbatrossspawner", function(event)
+        SaveTimeData(event, TUNING.MALBATROSS_SPAWNDELAY_BASE)
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("malbatross_timetospawn"),
     anim = {
         scale = 0.035,
         bank = "malbatross",

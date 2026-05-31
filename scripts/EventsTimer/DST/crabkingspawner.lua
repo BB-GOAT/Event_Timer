@@ -1,6 +1,17 @@
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    HookDeath("crabking", "crabkingspawner", function(event)
+        SaveTimeData(event, TUNING.CRABKING_RESPAWN_TIME)
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("regen_crabking", "crabking_spawner"),
     anim = {
         scale = 0.022,
         bank = "king_crab",

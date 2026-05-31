@@ -1,12 +1,31 @@
--- 暗影裂隙生成倒计时（为了跨世界同步数据修改了事件名。原事件名 riftspawner）
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    AddPrefabPostInit("shadowrift_portal", function()
+        SaveTimeData("shadow_riftspawner", 0)
+    end)
+    AddPrefabPostInit("charlie_hand", function(inst)
+        inst:DoTaskInTime(0.2, function(inst)
+            inst:ListenForEvent("onremove", function(inst)
+                if inst and inst:IsValid() and inst.AnimState then
+                    local bank, anim, frame = inst.AnimState:GetHistoryData()
+                    if anim:find("grab_pst") then
+                        SaveTimeData("shadow_riftspawner", TUNING.RIFTS_SPAWNDELAY) -- 暗影裂隙生成倒计时
+                        SaveTimeData("atrium_gate", TUNING.ATRIUM_GATE_COOLDOWN) -- 远古大门重置倒计时
+                    end
+                end
+            end)
+        end)
+    end)
+-- end
 
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
+-- 暗影裂隙生成倒计时
 local info
 info = {
-    gettimefn = function() -- 当裂隙出现时，不显示
-        if TheWorld and TheWorld:HasTag("cave") and TheWorld.net.components.warningtimer.inst.replica.warningtimer.shadowrift_portal_text:value() == "" then
-            return GetWorldSettingsTimeLeft("rift_spawn_timer")()
-        end
-    end,
     image = {
         atlas = "minimap/minimap_data.xml",
         tex = "shadowrift_portal.png",

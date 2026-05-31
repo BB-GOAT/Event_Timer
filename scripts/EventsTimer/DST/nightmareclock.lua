@@ -1,18 +1,3 @@
-local function NightmareWild()
-    local nightmareclock = TheWorld.net.components.nightmareclock
-    if not nightmareclock then
-        return
-    end
-
-    local data = nightmareclock:OnSave()
-    local locked = data.lockedphase
-    local remainingtimeinphase = data.remainingtimeinphase
-
-    if locked then return end
-
-    return remainingtimeinphase
-end
-
 local STATES = {
     none = "calm_loop", -- 默认
     calm = "calm_loop", -- 平静
@@ -21,6 +6,8 @@ local STATES = {
     dawn = "dawn_loop", -- 黎明
     lock = "wild_lock", -- 锁定暴动阶段
 }
+
+local locked -- 是否在暴动锁定阶段
 local NightmareWildAnimChange_task
 local function NightmareWildAnimChange(self)
     if TheNet:IsDedicated() then
@@ -30,8 +17,7 @@ local function NightmareWildAnimChange(self)
     local last_anim
     if not NightmareWildAnimChange_task then
         NightmareWildAnimChange_task = TheWorld:DoPeriodicTask(1, function()
-            local text = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.nightmareclock_text
-            if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
+            if locked then
                 self.anim.animation = STATES.wild -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
             elseif ThePlayer and ThePlayer.HUD.nightmareclock then
                 self.anim.animation = STATES[TheWorld.state.nightmarephase]
@@ -45,18 +31,34 @@ local function NightmareWildAnimChange(self)
     end
 end
 
+----------------------------------------------------------------------------------------------
+
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    AddComponentPostInit('nightmareclock', function(clock)
+        local _remainingtimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_remainingtimeinphase")
+        local _totaltimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_totaltimeinphase")
+        if not (_remainingtimeinphase and _totaltimeinphase) then return end
+
+        clock.inst:DoPeriodicTask(1, function()
+            local remain = _remainingtimeinphase:value()
+            local total = _totaltimeinphase:value()
+
+            locked = remain == 0 and total ~= 0 -- 是否在暴动锁定阶段
+
+            -- SaveTimeData("nightmareclock", remain)
+            if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData then
+                ThePlayer.HUD.WarningEventTimeData["nightmareclock_time"] = remain -- 直接设置，不需要保存和预测
+            end
+            SaveTextData("nightmareclock", locked and STRINGS.eventtimer.nightmareclock.phase_locked_text or "")
+        end)
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
 local info
 info = {
-    gettimefn = NightmareWild, -- 仅返回倒计时
-    gettextfn = function() -- 仅锁定阶段返回
-        local nightmareclock = TheWorld.net.components.nightmareclock
-        if not nightmareclock then
-            return
-        end
-
-        local data = nightmareclock:OnSave()
-        return data.lockedphase and STRINGS.eventtimer.nightmareclock.phase_locked_text
-    end,
     anim = {
         scale = 0.5,
         bank = "nigthmarephaseindicator",

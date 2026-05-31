@@ -1,5 +1,36 @@
--- 月亮裂隙生成倒计时（为了跨世界同步数据修改了事件名。原事件名 riftspawner）
+-- 纯本地获取方式
+-- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+    AddPrefabPostInit("lunarrift_portal", function()
+        SaveTimeData("lunar_riftspawner", 0)
+    end)
 
+    local need_save = false
+    AddPrefabPostInit("wagstaff_npc_pstboss", function(inst)
+        need_save = true
+        inst:DoTaskInTime(0.2, function(inst)
+            if inst and inst.components and inst.components.talker and inst.components.talker.Say then
+                local _Say = inst.components.talker.Say
+                inst.components.talker.Say = function(self, str_say, ...)
+                    for _, str in pairs({STRINGS.WAGSTAFF_NPC_CAPTURESTOP1, STRINGS.WAGSTAFF_NPC_CAPTURESTOP3}) do
+                        if str == str_say and need_save then
+                            need_save = false
+                            SaveTimeData("lunar_riftspawner", TUNING.RIFTS_SPAWNDELAY)
+                            break
+                        end
+                    end
+                    return _Say(self, str_say, ...)
+                end
+            end
+        end)
+    end)
+-- end
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------
+
+-- 月亮裂隙生成倒计时
 local info
 info = {
     gettimefn = function() -- 当裂隙出现时，不显示

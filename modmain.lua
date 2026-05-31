@@ -90,6 +90,8 @@ end
 modimport("Languages/" .. ModLanguage) -- 加载模组字符串
 modimport("scripts/bbgoat_utils/utils") -- 加载模组工具
 modimport("main/timerprefab")
+RW_Data = PersistentData('mod_config_data/Events_Timer.json') -- 存取数据
+RW_Data:Load()
 
 ----------------------------------------模组环境映射到全局环境---------------------------------------
 
@@ -245,6 +247,7 @@ local function UpdateClientPrediction(name)
     if time >= 0 then
         SaveTimeData(name, time, true)
     else
+        SaveTimeData(name, 0)
         if client_prediction_tasks[name] then
             client_prediction_tasks[name]:Cancel()
             client_prediction_tasks[name] = nil
@@ -259,13 +262,45 @@ local function UpdateClientPrediction(name)
     end
 end
 
--- 存储倒计时数据
+-- 获取当前世界运行时间
+function GetWorldTime()
+    local world = GLOBAL.TheWorld
+    local state_time = world.state.time
+    local state_cycles = world.state.cycles
+    local total_day_time = TUNING.TOTAL_DAY_TIME
+    local sys_time = (state_cycles + state_time) * total_day_time
+
+    if Last_time then
+        local diff_time = sys_time - Last_time
+        if state_time < 0.98 or diff_time > total_day_time + 5 or diff_time < total_day_time - 5 then
+            Last_time = sys_time
+        end
+    else
+        Last_time = sys_time
+    end
+
+    return Last_time
+end
+
 function SaveTimeData(name, time, from_prediction)
-    if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData) then
+    if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checknumber(time)) then
         return
     end
 
     ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = time
+
+    -- 存储倒计时数据至文件
+    if not from_prediction and not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+        local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
+        if time == 0 then
+            filedata[name] = nil
+        else
+            local next_attack_time = GetWorldTime() + time -- 下次袭击的世界时间点
+            filedata[name] = next_attack_time
+        end
+        filedata.worldid = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
+        RW_Data:SetValue("WarningEventTimeData", filedata)
+    end
 
     -- 预测倒计时功能
     if not from_prediction and client_prediction_tasks[name] then
@@ -277,8 +312,9 @@ function SaveTimeData(name, time, from_prediction)
     end
 end
 
+-- 存储文本倒计时数据
 function SaveTextData(name, text, from_prediction)
-    if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData) then
+    if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checkstring(text)) then
         return
     end
 
@@ -293,6 +329,21 @@ function SaveTextData(name, text, from_prediction)
         client_prediction_tasks[name] = TheWorld:DoPeriodicTask(1, function() UpdateClientPrediction(name) end)
     end
 end
+
+-- 退出房间/穿越世界时写入数据到文件
+local _DoRestart = GLOBAL.DoRestart
+function GLOBAL.DoRestart(...)
+    RW_Data:Save()
+    return _DoRestart(...)
+end
+Upvaluehelper.HideFn(GLOBAL.DoRestart, _DoRestart)
+
+local _MigrateToServer = GLOBAL.MigrateToServer
+function GLOBAL.MigrateToServer(ip, port, ...)
+    RW_Data:Save()
+    return _MigrateToServer(ip, port, ...)
+end
+Upvaluehelper.HideFn(GLOBAL.MigrateToServer, _MigrateToServer)
 
 ----------------------------------------事件计时需要用到的函数---------------------------------------
 
@@ -387,11 +438,27 @@ local function ready_attack(time)
     return false
 end
 
+-- 目标死亡时开始计时
+local function HookDeath(prefab, event, func)
+    AddPrefabPostInit(prefab, function(inst)
+        SaveTimeData(event, 0)
+        inst:ListenForEvent("onremove", function(inst)
+            if inst and inst:IsValid() and inst.AnimState then
+                local bank, anim, frame = inst.AnimState:GetHistoryData()
+                if anim:find("death") then
+                    func(event, inst)
+                end
+            end
+        end)
+    end)
+end
+
 -- 获取事件计时
 local file_env = {
     EventTimer = EventTimer,
     SaveTimeData = SaveTimeData,
     SaveTextData = SaveTextData,
+    HookDeath = HookDeath,
     TimeToString = TimeToString, -- 格式化时间
     StringToTime = StringToTime, -- 将字符串转换为时间
     Upvaluehelper = Upvaluehelper,
@@ -456,9 +523,6 @@ function RequireEvent(file_name)
 end
 
 ----------------------------------------加载模组---------------------------------------
-
-RW_Data = PersistentData('mod_config_data/Events_Timer.json') -- 存取数据
-RW_Data:Load()
 
 modimport("keybind") -- 键位绑定优化
 -- modimport("main/commands") -- 调试指令
