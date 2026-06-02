@@ -1,10 +1,20 @@
 local info
 info = {
-    gettimefn = function()
-        if TheWorld.components.deerherdspawner then
-            local data = TheWorld.components.deerherdspawner:OnSave()
-            return data and data._timetospawn
-        end
+    remotegettimefn = function()
+        local cmd = [[
+            if TheWorld and TheWorld.components.deerherdspawner then
+                local data = TheWorld.components.deerherdspawner:OnSave()
+                local time = data and data._timetospawn
+                return DataDumper({time = time})
+            end
+        ]]
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res and res.err then
+                print('[警告] deerherdspawner remotegettimefn error:', res.err)
+            elseif res and res.time then
+                SaveTimeData("deerherdspawner", res.time)
+            end
+        end)
     end,
     anim = {
         scale = 0.088,

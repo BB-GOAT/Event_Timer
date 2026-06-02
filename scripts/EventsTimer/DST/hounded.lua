@@ -58,10 +58,11 @@ end)
 ----------------------------------------------------------------------------------------------
 
 -- 纯本地获取方式
-if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     local hounded_warning = {
         hound = true,
         worm  = true,
+        crocodog = true,
     }
     local current_level
     for attacker in pairs(hounded_warning) do
@@ -116,7 +117,7 @@ local remotegettextfn = function()
 
     if need_update_data then
         BBGOAT_util:remote(cmd, nil, function(res)
-            if res.err then
+            if res and res.err then
                 print('[警告] hounded remotegettextfn error:', res.err)
                 -- 取消任务
                 if task then
@@ -146,6 +147,7 @@ end
 
 local info
 info = {
+    localgettimefn = localgettimefn,
     remotegettimefn = function()
         local cmd = [[
             if TheWorld and TheWorld.components.hounded then
@@ -155,7 +157,7 @@ info = {
             end
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
-            if res.err then
+            if res and res.err then
                 print('[警告] hounded remotegettimefn error:', res.err)
             elseif res and res.time then
                 SaveTimeData("hounded", res.time)

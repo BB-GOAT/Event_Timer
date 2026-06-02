@@ -1,5 +1,5 @@
 -- 纯本地获取方式
-if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     -- 根据警告等级（2~4）和当前等级内的触发次数，估算 Boss 距离到达的秒数并播报
     -- 等级越高 = 越近；同一等级每次触发间隔约 15 秒
     local record_table = {}
@@ -84,7 +84,7 @@ local remotegettextfn = function()
 
     if need_update_data then
         BBGOAT_util:remote(cmd, nil, function(res)
-            if res.err then
+            if res and res.err then
                 print('[警告] deerclopsspawner remotegettextfn error:', res.err)
                 -- 取消任务
                 if task then
@@ -114,6 +114,7 @@ end
 
 local info
 info = {
+    localgettimefn = localgettimefn,
     remotegettimefn = function()
         GetWorldSettingsTimeLeft("deerclops_timetoattack", nil, function(res)
             if res.err then

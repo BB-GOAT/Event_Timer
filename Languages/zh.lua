@@ -186,11 +186,11 @@ STRINGS.eventtimer = {
         eruption = "火山爆发剩余时间：%s",
     },
     volcanomanager = { -- 距离火山开始爆发的倒计时
-        cooldown = "<prefab=volcano>将于%s后爆发。",
+        cooldown = "<prefab=volcano>将于%s后爆发",
         attack = "警告：<prefab=volcano>爆发！！！",
     },
     twisterspawner = { -- 豹卷风
-        cooldown = "<prefab=twister>会在%s后生成。",
+        cooldown = "<prefab=twister>会在%s后生成",
         target = "<prefab=twister>会生成在%s周围于%s后",
         targeted = "目标：%s -> %s",
         attack = "警告：<prefab=twister>攻击开始！！！",

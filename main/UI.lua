@@ -32,7 +32,7 @@ local function AddWarningEvents(self)
         -- 读取记录的数据
         if worldid and filedata[worldid] then
             for name, time in pairs(filedata[worldid] or {}) do
-                if checknumber(time) then
+                if name ~= "save_time" and checknumber(time) then
                     local diff_time = time - GetWorldTime()
                     if diff_time > 0 then
                         SaveTimeData(name, diff_time, true)

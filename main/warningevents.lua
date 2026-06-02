@@ -14,7 +14,7 @@ GameEvents = {
 
     hounded = RequireEvent("DST/hounded"), -- 猎犬/洞穴蠕虫/鳄狗/吸血蝙蝠
     deerclopsspawner = RequireEvent("DST/deerclopsspawner"), -- 独眼巨鹿
-    -- deerherdspawner = RequireEvent("DST/deerherdspawner"), -- 无眼鹿(无法纯本地)
+    deerherdspawner = RequireEvent("DST/deerherdspawner"), -- 无眼鹿(无法纯本地)
     klaussackspawner = RequireEvent("DST/klaussackspawner"), -- 赃物袋
     -- sinkholespawner = RequireEvent("DST/sinkholespawner"), -- 蚁狮(无法纯本地)
     beargerspawner = RequireEvent("DST/beargerspawner"), -- 熊獾

@@ -1,42 +1,50 @@
 -- main, what can i say?
 
+-- 本地预测时间数据
+if not (GLOBAL.EventTimer.GetTimeFromRemoteCommand or GLOBAL.EventTimer.GetTimeFromServerMod) then
+    for k, v in pairs(WarningEvents) do
+        if v.localgettimefn then
+            v.localgettimefn()
+        end
+    end
+end
+
 MOD_util:AddPlayerPostInit(function(world, player)
     if player ~= GLOBAL.ThePlayer then return end
     -- 从远程命令获取时间数据
     if GLOBAL.EventTimer.GetTimeFromRemoteCommand then
         player:DoTaskInTime(2, function()
             local cmd = [[
-if not rawget(_G, "EventTimerClient") then
-    rawset(_G, "EventTimerClient" , {})
-    _G.EventTimerClient.TimerPrefabs = {}
+                if not rawget(_G, "EventTimerClient") then
+                    rawset(_G, "EventTimerClient" , {})
+                    _G.EventTimerClient.TimerPrefabs = {}
 
-    local function HookPrefab(prefab)
-        for guid, ent in pairs(Ents) do
-            if ent.prefab == prefab then
-                _G.EventTimerClient.TimerPrefabs[prefab] = ent
-                ent:ListenForEvent("onremove", function()
-                    _G.EventTimerClient.TimerPrefabs[prefab] = nil
-                end)
-                return ent
-            end
-        end
-    end
+                    local function HookPrefab(prefab)
+                        for guid, ent in pairs(Ents) do
+                            if ent.prefab == prefab then
+                                _G.EventTimerClient.TimerPrefabs[prefab] = ent
+                                ent:ListenForEvent("onremove", function()
+                                    _G.EventTimerClient.TimerPrefabs[prefab] = nil
+                                end)
+                                return ent
+                            end
+                        end
+                    end
 
-    _G.EventTimerClient.GetWorldSettingsTimeLeft = function(name, prefab)
-        local ent = TheWorld
-        if prefab then
-            ent = _G.EventTimerClient.TimerPrefabs[prefab] or HookPrefab(prefab)
-        end
-        if ent and ent.components.worldsettingstimer then
-            if not ent.components.worldsettingstimer:IsPaused(name) then
-                local time = ent.components.worldsettingstimer:GetTimeLeft(name)
-                return time
-            end
-        end
-        return 0
-    end
-end
-            ]]
+                    _G.EventTimerClient.GetWorldSettingsTimeLeft = function(name, prefab)
+                        local ent = TheWorld
+                        if prefab then
+                            ent = _G.EventTimerClient.TimerPrefabs[prefab] or HookPrefab(prefab)
+                        end
+                        if ent and ent.components.worldsettingstimer then
+                            if not ent.components.worldsettingstimer:IsPaused(name) then
+                                local time = ent.components.worldsettingstimer:GetTimeLeft(name)
+                                return time or 0
+                            end
+                        end
+                        return 0
+                    end
+                end]]
             BBGOAT_util:remote(cmd, nil, function(res)
                 if res and res.err then
                     print("[警告] 在服务器初始化EventTimerClient失败：\n" .. tostring(res.err))
@@ -56,7 +64,10 @@ end
                                 -- print("DEBUG: 正在触发事件" .. warningevent .. "的远程timefn")
                                 data.remotegettimefn() -- 存数据的过程应该在fn内完成
                             end
-                            GLOBAL.Sleep(data.remotegettimefninterval or 30) -- 该事件每30秒请求一次
+
+                            local sleep_time = GLOBAL.type(data.remotegettimefninterval) == "number" and data.remotegettimefninterval
+                                                or GLOBAL.type(data.remotegettimefninterval) == "function" and data.remotegettimefninterval()
+                            GLOBAL.Sleep(GLOBAL.checknumber(sleep_time) and sleep_time or 30)
                         end
                     end, "EventTimerModGetTimeFromRemoteCommand_" .. warningevent)
 
@@ -70,7 +81,9 @@ end
                                 -- print("DEBUG: 正在触发事件" .. warningevent .. "的远程textfn")
                                 data.remotegettextfn() -- 存数据的过程应该在fn内完成
                             end
-                            GLOBAL.Sleep(data.remotegettextfninterval or 30) -- 该事件每30秒请求一次
+                            local sleep_time = GLOBAL.type(data.remotegettextfninterval) == "number" and data.remotegettextfninterval
+                                                or GLOBAL.type(data.remotegettextfninterval) == "function" and data.remotegettextfninterval()
+                            GLOBAL.Sleep(GLOBAL.checknumber(sleep_time) and sleep_time or 30)
                         end
                     end, "EventTimerModGetTextFromRemoteCommand_" .. warningevent)
 

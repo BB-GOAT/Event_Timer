@@ -2,7 +2,7 @@
 GLOBAL.setmetatable(env, {
     __index = function(t, k)
         -- local info = GLOBAL.debug.getinfo(2)
-        -- print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
+        -- print("[全局事件计时器 - 客户端版] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
         return GLOBAL.rawget(GLOBAL, k)
     end
 })
@@ -253,7 +253,12 @@ local function UpdateClientPrediction(name)
     else
         -- 时间结束，清理任务
         ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = 0
-        ThePlayer.HUD.WarningEventTimeData[name .. "_text"] = ""
+
+        -- 支持设置不清理文本
+        if not (WarningEvents[name] and WarningEvents[name].DisableClientPredictionClearText) then
+            ThePlayer.HUD.WarningEventTimeData[name .. "_text"] = ""
+        end
+
         if client_prediction_tasks[name] then
             client_prediction_tasks[name]:Cancel()
             client_prediction_tasks[name] = nil
