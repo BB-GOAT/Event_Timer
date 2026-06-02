@@ -15,28 +15,28 @@ end
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
-	Asset("ATLAS", "images/Hound.xml"), -- 猎犬
-	Asset("IMAGE", "images/Hound.tex"),
+    Asset("ATLAS", "images/Hound.xml"), -- 猎犬
+    Asset("IMAGE", "images/Hound.tex"),
     Asset("ATLAS", "images/Depths_Worm.xml"), -- 洞穴蠕虫
-	Asset("IMAGE", "images/Depths_Worm.tex"),
+    Asset("IMAGE", "images/Depths_Worm.tex"),
     Asset("ATLAS", "images/Worm_boss.xml"), -- 巨大洞穴蠕虫
-	Asset("IMAGE", "images/Worm_boss.tex"),
+    Asset("IMAGE", "images/Worm_boss.tex"),
     Asset("ATLAS", "images/Daywalker.xml"), -- 梦魇疯猪
-	Asset("IMAGE", "images/Daywalker.tex"),
+    Asset("IMAGE", "images/Daywalker.tex"),
     -- Asset("ATLAS", "images/Rift_Split.xml"), -- 双裂隙
-	-- Asset("IMAGE", "images/Rift_Split.tex"),
+    -- Asset("IMAGE", "images/Rift_Split.tex"),
     Asset("ATLAS", "images/Dreadstone_Outcrop.xml"), -- 被控制的梦魇裂隙
-	Asset("IMAGE", "images/Dreadstone_Outcrop.tex"),
+    Asset("IMAGE", "images/Dreadstone_Outcrop.tex"),
     Asset("ATLAS", "images/moon_full.xml"), -- 月圆
-	Asset("IMAGE", "images/moon_full.tex"),
+    Asset("IMAGE", "images/moon_full.tex"),
     Asset("ATLAS", "images/moon_new.xml"), -- 月黑
-	Asset("IMAGE", "images/moon_new.tex"),
+    Asset("IMAGE", "images/moon_new.tex"),
     Asset("ATLAS", "images/Moose.xml"), -- 麋鹿鹅
-	Asset("IMAGE", "images/Moose.tex"),
+    Asset("IMAGE", "images/Moose.tex"),
     Asset("ATLAS", "images/Dragonfly.xml"), -- 龙蝇
-	Asset("IMAGE", "images/Dragonfly.tex"),
-	Asset("ATLAS", "images/Twister.xml"), -- 豹卷风
-	Asset("IMAGE", "images/Twister.tex"),
+    Asset("IMAGE", "images/Dragonfly.tex"),
+    Asset("ATLAS", "images/Twister.xml"), -- 豹卷风
+    Asset("IMAGE", "images/Twister.tex"),
     Asset("ATLAS", "images/Volcano_Active.xml"), -- 正在爆发的火山
     Asset("IMAGE", "images/Volcano_Active.tex"),
     Asset("ATLAS", "images/scrapbook.xml"), -- 图标背景
@@ -50,8 +50,8 @@ Assets = {
     Asset("IMAGE", "images/Ancient_Herald.tex"),
     Asset("ATLAS", "images/Roc.xml"), -- 友善的大鹏
     Asset("IMAGE", "images/Roc.tex"),
-	Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- Tips部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
-	Asset("IMAGE", "images/dyc_panel_shadow.tex"),
+    Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- Tips部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
+    Asset("IMAGE", "images/dyc_panel_shadow.tex"),
     Asset("ANIM", "anim/nigthmarephaseindicator.zip"), -- 远古遗迹阶段倒计时贴图，来自【Nightmare phase indicator】模组
 }
 
@@ -60,25 +60,25 @@ Assets = {
 ModLanguage = GetModConfigData("language")
 
 local _languages = {
-	-- de = "de", --german
-	-- es = "es", --spanish
-	-- fr = "fr", --french
-	-- it = "it", --italian
-	-- ko = "ko", --korean
-	--Note: The only language mod I found that uses "pt" is also brazilian portuguese -M
-	-- pt = "pt", --portuguese
-	-- br = "pt", --brazilian portuguese
-	-- pl = "pl", --polish
-	-- ru = "ru", --russian
-	zh = "zh", --Chinese for Steam
-	zhr = "zh", --Chinese for WeGame
-	ch = "zh", --Chinese mod
-	chs = "zh", --Chinese mod
-	sc = "zh", --simple Chinese
-	chinese = "zh", --Chinese mod
-	zht = "zh", --traditional Chinese for Steam
-	tc = "zh", --traditional Chinese
-	cht = "zh", --Chinese mod
+    -- de = "de", -- german
+    -- es = "es", -- spanish
+    -- fr = "fr", -- french
+    -- it = "it", -- italian
+    -- ko = "ko", -- korean
+    --Note: The only language mod I found that uses "pt" is also brazilian portuguese -M
+    -- pt = "pt", -- portuguese
+    -- br = "pt", -- brazilian portuguese
+    -- pl = "pl", -- polish
+    -- ru = "ru", -- russian
+    zh = "zh", -- Chinese for Steam
+    zhr = "zh", -- Chinese for WeGame
+    ch = "zh", -- Chinese mod
+    chs = "zh", -- Chinese mod
+    sc = "zh", -- simple Chinese
+    chinese = "zh", -- Chinese mod
+    zht = "zh", -- traditional Chinese for Steam
+    tc = "zh", -- traditional Chinese
+    cht = "zh", -- Chinese mod
 }
 
 if _languages[ModLanguage] ~= nil then
@@ -120,7 +120,7 @@ local STRINGS = GLOBAL.STRINGS
 --- @param str string
 --- @return string, number
 function ReplacePrefabName(str)
-	if not GLOBAL.checkstring(str) then return str end
+    if not GLOBAL.checkstring(str) then return str end
     return str:gsub("<prefab=(.-)>", function(prefab)
         local key = prefab:upper()
         return STRINGS.NAMES[key] or prefab
@@ -541,7 +541,7 @@ function RequireEvent(file_name)
     file_name = MODROOT .. "scripts/EventsTimer/" .. file_name .. ".lua"
 
     if not RequireEvent_list[file_name] then
-	    RequireEvent_list[file_name] = { Import(file_name, file_env) }
+        RequireEvent_list[file_name] = { Import(file_name, file_env) }
     end
     return GLOBAL.unpack(RequireEvent_list[file_name])
 end
@@ -611,17 +611,17 @@ env.AddClassPostConstruct("widgets/widget", ModFollowMouse)
 ----------------------------------------镜头缩放补丁---------------------------------------
 
 local function IsCursorOnHUD()
-	local input = TheInput
-	return input.hoverinst and input.hoverinst.Transform == nil
+    local input = TheInput
+    return input.hoverinst and input.hoverinst.Transform == nil
 end
 
 local function playercontroller_postinit(self)
-	local old_DoCameraControl = self.DoCameraControl
-	function self:DoCameraControl()
-		if not ((TheInput:IsControlPressed(CONTROL_ZOOM_IN) or TheInput:IsControlPressed(CONTROL_ZOOM_OUT)) and IsCursorOnHUD() ) then
-			if old_DoCameraControl ~= nil then old_DoCameraControl(self) end
-		end
-	end
+    local old_DoCameraControl = self.DoCameraControl
+    function self:DoCameraControl()
+        if not ((TheInput:IsControlPressed(CONTROL_ZOOM_IN) or TheInput:IsControlPressed(CONTROL_ZOOM_OUT)) and IsCursorOnHUD() ) then
+            if old_DoCameraControl ~= nil then old_DoCameraControl(self) end
+        end
+    end
 end
 
 env.AddComponentPostInit("playercontroller",playercontroller_postinit)
