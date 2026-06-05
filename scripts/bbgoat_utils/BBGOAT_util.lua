@@ -1,4 +1,4 @@
--- 本文件更新时间：2026年5月30日
+-- 本文件更新时间：2026年6月5日
 local Upvaluehelper = Upvaluehelper
 local MOD_util = MOD_util
 
@@ -57,12 +57,20 @@ function BBGOAT_util:GetNextRPCode(random_mode)
     MOD_util:Warning("BBGOAT_util:GetNextRPCode 执行失败", 3)
 end
 
+-- 记录我创建的临时RPC_HANDLERS
+local Tmp_CLIENT_RPC_HANDLERS = rawget(_G, "BBGOAT_util_Tmp_CLIENT_RPC_HANDLERS")
+if not Tmp_CLIENT_RPC_HANDLERS then
+    Tmp_CLIENT_RPC_HANDLERS = {}
+    rawset(_G, "BBGOAT_util_Tmp_CLIENT_RPC_HANDLERS", Tmp_CLIENT_RPC_HANDLERS)
+end
+
 ---@param found_i number
 ---@param cb function|nil
 -- 创建临时使用的回调函数
 local function Create_Tmp_CLIENT_RPC_HANDLERS(found_i, cb)
     CLIENT_RPC_HANDLERS[found_i] = function(str)
         CLIENT_RPC_HANDLERS[found_i] = nil
+        Tmp_CLIENT_RPC_HANDLERS[found_i] = nil
         if cb then
             if str and type(str) == "string" then
                 local fn, message = loadstring(str)
@@ -82,6 +90,11 @@ local function Create_Tmp_CLIENT_RPC_HANDLERS(found_i, cb)
             end
         end
     end
+    Tmp_CLIENT_RPC_HANDLERS[found_i] = CLIENT_RPC_HANDLERS[found_i]
+end
+
+function BBGOAT_util:Get_Tmp_CLIENT_RPC_HANDLERS()
+    return Tmp_CLIENT_RPC_HANDLERS
 end
 
 ---@param cmd string 发给服务器执行的代码

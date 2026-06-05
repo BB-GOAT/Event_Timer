@@ -57,14 +57,17 @@ end
 
 ----------------------------------------------------------------------------------------------
 
-local need_update_data = true -- 是否需要更新袭击数据
-local target_name, task
-local remotegettextfn = function()
+local target_name
+local remotegettextfn = function(Thread)
     if ThePlayer.HUD.WarningEventTimeData.twisterspawner_time == 0 then return end
 
     local cmd = [[
         local self = TheWorld and TheWorld.components.twisterspawner
-        if not self then return end
+        if not self then
+            return DataDumper({
+                not_found = true
+            })
+        end
 
         local target = BBGOAT_FN.getval(self.OnUpdate, "_targetplayer")
         local name = target and target.name
@@ -72,42 +75,26 @@ local remotegettextfn = function()
         return DataDumper({target_name = name})
     ]]
 
-    local function fn()
-        if target_name then
-            local str = string.format(STRINGS.eventtimer.twisterspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
-            SaveTextData("twisterspawner", str, true)
-        else
-            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
-            SaveTextData("twisterspawner", str, true)
-        end
-    end
-
-    if need_update_data then
-        BBGOAT_util:remote(cmd, nil, function(res)
-            if res and res.err then
-                print('[警告] twisterspawner remotegettextfn error:', res.err)
-                -- 取消任务
-                if task then
-                    task:Cancel()
-                    task = true
-                end
-            elseif res then
-                target_name = res.target_name
-                fn()
+    BBGOAT_util:remote(cmd, nil, function(res)
+        if res and res.err then
+            target_name = nil
+            SaveTextData("twisterspawner", "")
+            print('[警告] twisterspawner remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res then
+            target_name = res.target_name
+            if target_name then
+                local str = string.format(STRINGS.eventtimer.twisterspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
+                SaveTextData("twisterspawner", str)
+            else
+                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
+                SaveTextData("twisterspawner", str)
             end
-            need_update_data = false
-        end)
-    else
-        fn()
-    end
-
-    if not task then
-        target_name = nil
-        task = TheWorld:DoTaskInTime(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time - 55, function() -- 尽可能在最后一分钟开始获取攻击数据
-            need_update_data = true
-            task = nil
-        end)
-    end
+        end
+    end)
 end
 
 ----------------------------------------------------------------------------------------------
@@ -116,12 +103,24 @@ end
 local info
 info = {
     localgettimefn = localgettimefn,
-    remotegettimefn = function()
+    remotegettimefn = function(Thread)
         GetWorldSettingsTimeLeft("twister_timetoattack", nil, function(res)
-            if res.err then
+            if res and res.err then
+                target_name = nil
+                SaveTimeData("twisterspawner", 0)
+                SaveTextData("twisterspawner", "")
                 print('[警告] twisterspawner remotegettimefn error:', res.err)
+                -- 同时删除Text线程
+                local _, TextThreadList = GetRemoteThreadList()
+                if TextThreadList and TextThreadList.twisterspawner then
+                    KillThreadsWithID(TextThreadList.twisterspawner.id)
+                end
+                if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("twisterspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
             end
         end)
     end,

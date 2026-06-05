@@ -1,44 +1,69 @@
--- 致命亮茄信息，参考了Insight代码 https://steamcommunity.com/sharedfiles/filedetails/?id=2189004162 @penguin0616
-
-local lunarthrall_plant_table = {} -- 储存致命亮茄数量
-
-local info
-info = {
-    postinitfn = function()
-        if not TheNet:GetIsServer() then return end
-        -- 存储世界上亮茄的数量
-        AddPrefabPostInit("lunarthrall_plant", function(inst)
-            -- if not TheWorld.ismastersim then
-            --     return
-            -- end
-
-            table.insert(lunarthrall_plant_table, inst)
-            inst:ListenForEvent("onremove", function(inst)
-                local index = table.reverselookup(lunarthrall_plant_table, inst)
-                if index then
-                    table.remove(lunarthrall_plant_table, index)
-                end
-            end)
-        end)
-    end,
-    gettextfn = function()
+local remotegettextfninterval
+local remotegettextfn = function(Thread)
+    local cmd = [[
+        local count = 0
+        for guid, ent in pairs(Ents) do
+            if ent.prefab == "lunarthrall_plant" then
+                count = count + 1
+            end
+        end
         local self = TheWorld.components.lunarthrall_plantspawner
         if not self then return end
-        local count = #lunarthrall_plant_table
         if count == 0 and not self.waves_to_release then
             return
         end
-        local description = string.format(STRINGS.eventtimer.lunarthrall_plantspawner.infested_count, count)
-        if self._nextspawn then
-            description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.spawn, TimeToString(GetTaskRemaining(self._nextspawn)))
-        elseif self._spawntask then
-            description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.next_wave, TimeToString(GetTaskRemaining(self._spawntask)))
+
+        return DataDumper(
+            {
+                count = count,
+                _nextspawn = self._nextspawn and GetTaskRemaining(self._nextspawn),
+                _spawntask = self._spawntask and GetTaskRemaining(self._spawntask),
+                waves_to_release = self.waves_to_release
+            }
+        )
+    ]]
+
+    BBGOAT_util:remote(cmd, nil, function(res)
+        remotegettextfninterval = nil
+        if res and res.err then
+            SaveTextData("lunarthrall_plantspawner", "")
+            print('[警告] lunarthrall_plantspawner remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res and res.count then
+            if res.count == 0 and not res.waves_to_release then
+                SaveTextData("lunarthrall_plantspawner", "")
+                return
+            end
+            local description = string.format(STRINGS.eventtimer.lunarthrall_plantspawner.infested_count, res.count)
+            if res._nextspawn then
+                remotegettextfninterval = res._nextspawn
+                description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.spawn, TimeToString(res._nextspawn))
+            elseif res._spawntask then
+                remotegettextfninterval = res._spawntask
+                description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.next_wave, TimeToString(res._spawntask))
+            end
+            if res.waves_to_release and res.waves_to_release > 0 then
+                description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.remain_waves, res.waves_to_release)
+            end
+
+            if checknumber(remotegettextfninterval) and remotegettextfninterval < 0 then -- 防止该死的负数
+                remotegettextfninterval = 5
+            end
+
+            SaveTextData("lunarthrall_plantspawner", description)
         end
-        if self.waves_to_release and self.waves_to_release > 0 then
-            description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.remain_waves, self.waves_to_release)
-        end
-        return description
+    end)
+end
+
+----------------------------------------------------------------------------------------------
+
+local info
+info = {
+    remotegettextfn = remotegettextfn,
+    remotegettextfninterval = function()
+        return remotegettextfninterval
     end,
+    DisableClientPredictionClearText = true,
     image = {
         atlas = "minimap/minimap_data.xml",
         tex = "lunarthrall_plant.png",

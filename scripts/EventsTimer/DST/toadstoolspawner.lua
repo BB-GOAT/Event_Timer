@@ -1,5 +1,5 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     AddPrefabPostInit("toadstool_cap", function(inst)
         inst:DoTaskInTime(0.2, function(inst)
             if inst and inst:IsValid() and inst.AnimState then
@@ -16,15 +16,27 @@
             SaveTimeData(event, TUNING.TOADSTOOL_RESPAWN_TIME)
         end)
     end
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("toadstool_respawntask", nil, function(res)
+            if res and res.err then
+                SaveTimeData("toadstoolspawner", 0)
+                print('[警告] toadstoolspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("toadstoolspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     anim = {
         scale = 0.03,
         bank = "toadstool",

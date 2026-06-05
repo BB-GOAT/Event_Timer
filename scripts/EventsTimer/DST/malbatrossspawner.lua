@@ -1,17 +1,29 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     HookDeath("malbatross", "malbatrossspawner", function(event)
         SaveTimeData(event, TUNING.MALBATROSS_SPAWNDELAY_BASE)
     end)
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("malbatross_timetospawn", nil, function(res)
+            if res and res.err then
+                SaveTimeData("malbatrossspawner", 0)
+                print('[警告] malbatrossspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("malbatrossspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     anim = {
         scale = 0.035,
         bank = "malbatross",

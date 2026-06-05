@@ -1,17 +1,29 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     HookDeath("dragonfly", "dragonfly_spawner", function(event)
         SaveTimeData(event, TUNING.DRAGONFLY_RESPAWN_TIME)
     end)
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("regen_dragonfly", "dragonfly_spawner", function(res)
+            if res and res.err then
+                SaveTimeData("dragonfly_spawner", 0)
+                print('[警告] dragonfly_spawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("dragonfly_spawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     animchangefn = ChangeanimByWintersFeast,
     defaultanim = {
         scale = 0.044,
@@ -24,7 +36,6 @@ info = {
             y = -4,
         },
     },
-
     winterfeastanim = {
         scale = 0.044,
         bank = "dragonfly",

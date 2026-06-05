@@ -33,30 +33,6 @@ end
 
 ----------------------------------------------------------------------------------------------
 
--- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
-    AddComponentPostInit('nightmareclock', function(clock)
-        local _remainingtimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_remainingtimeinphase")
-        local _totaltimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_totaltimeinphase")
-        if not (_remainingtimeinphase and _totaltimeinphase) then return end
-
-        clock.inst:DoPeriodicTask(1, function()
-            local remain = _remainingtimeinphase:value()
-            local total = _totaltimeinphase:value()
-
-            locked = remain == 0 and total ~= 0 -- 是否在暴动锁定阶段
-
-            -- SaveTimeData("nightmareclock", remain)
-            if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData then
-                ThePlayer.HUD.WarningEventTimeData["nightmareclock_time"] = remain -- 直接设置，不需要保存和预测
-            end
-            SaveTextData("nightmareclock", locked and STRINGS.eventtimer.nightmareclock.phase_locked_text or "")
-        end)
-    end)
--- end
-
-----------------------------------------------------------------------------------------------
-
 local info
 info = {
     anim = {
@@ -74,7 +50,6 @@ info = {
         },
     },
     animchangefn = NightmareWildAnimChange,
-    DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.nightmareclock_time
         local text = ThePlayer.HUD.WarningEventTimeData.nightmareclock_text
@@ -89,5 +64,26 @@ info = {
         end
     end
 }
+----------------------------------------------------------------------------------------------
+
+-- 纯本地获取方式
+AddComponentPostInit('nightmareclock', function(clock)
+    local _remainingtimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_remainingtimeinphase")
+    local _totaltimeinphase = Upvaluehelper.GetUpvalue(clock.OnUpdate, "_totaltimeinphase")
+    if not (_remainingtimeinphase and _totaltimeinphase) then return end
+
+    info.DisableClientPrediction = true -- 满足条件，禁用预测倒计时功能，此事件本身每秒更新一次
+    clock.inst:DoPeriodicTask(1, function()
+        local remain = _remainingtimeinphase:value()
+        local total = _totaltimeinphase:value()
+
+        locked = remain == 0 and total ~= 0 -- 是否在暴动锁定阶段
+
+        SaveTimeData("nightmareclock", remain)
+        SaveTextData("nightmareclock", locked and STRINGS.eventtimer.nightmareclock.phase_locked_text or "")
+    end)
+end)
+
+----------------------------------------------------------------------------------------------
 
 return info

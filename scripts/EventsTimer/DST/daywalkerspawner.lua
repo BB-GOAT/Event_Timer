@@ -1,9 +1,16 @@
-local remotegettimefn = function()
-    if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then return end
+local remotegettimefn = function(Thread)
+    if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then
+        if Thread then KillThreadsWithID(Thread.id) end
+        return
+    end
 
     local cmd = [[
         local self = TheWorld.components.daywalkerspawner
-        if not self then return end
+        if not self then
+            return DataDumper({
+                not_found = true
+            })
+        end
         local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
         if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "cavejail" or self.daywalker ~= nil or not self.days_to_spawn then
             return
@@ -12,11 +19,16 @@ local remotegettimefn = function()
     ]]
     BBGOAT_util:remote(cmd, nil, function(res)
         if res and res.err then
+            -- SaveTimeData("daywalkerspawner", 0) -- 也许还有本地数据
             print('[警告] daywalkerspawner remotegettimefn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
         elseif res and res.days_to_spawn then
             local days_to_spawn = res.days_to_spawn
             local time = (days_to_spawn + 1) * TUNING.TOTAL_DAY_TIME - CalcTimeOfDay()
             SaveTimeData("daywalkerspawner", time)
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
         end
     end)
 end
@@ -24,19 +36,31 @@ end
 ----------------------------------------------------------------------------------------------
 
 local daywalker -- 梦魇疯猪是否已生成
-local remotegettextfn = function()
-    if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then return end
+local remotegettextfn = function(Thread)
+    if not (TheWorld:HasTag("cave") or TheWorld:HasTag("volcano")) then
+        if Thread then KillThreadsWithID(Thread.id) end
+        return
+    end
     if ThePlayer.HUD.WarningEventTimeData.daywalkerspawner_time > 0 then return end
 
     local cmd = [[
         local self = TheWorld.components.daywalkerspawner
-        if not self then return end
-        return DataDumper({daywalker = self.daywalker})
+        if not self then
+            return DataDumper({
+                not_found = true
+            })
+        end
+        return DataDumper({daywalker = self.daywalker ~= nil})
     ]]
 
     BBGOAT_util:remote(cmd, nil, function(res)
-        if res.err then
+        if res and res.err then
+            SaveTextData("daywalkerspawner", "")
             print('[警告] daywalkerspawner remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
         elseif res then
             daywalker = res.daywalker
             if daywalker then
@@ -119,7 +143,7 @@ info = {
             end
         else
             if daywalker then
-                return true, not (GetTime() < 10) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.tips)), 10, nil, 2
+                return true, not (GetTime() < 45) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.tips)), 10, nil, 2
             end
             return false
         end

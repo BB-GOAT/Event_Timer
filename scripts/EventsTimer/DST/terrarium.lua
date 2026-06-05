@@ -1,5 +1,5 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     local eyes_prefab = {"eyeofterror", "twinofterror1", "twinofterror2"}
     for _, prefab in ipairs(eyes_prefab) do
         AddPrefabPostInit(prefab, function(boss)
@@ -27,15 +27,27 @@
             end)
         end)
     end
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("cooldown", "terrarium", function(res)
+            if res and res.err then
+                SaveTimeData("terrarium", 0)
+                print('[警告] terrarium remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("terrarium", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     anim = {
         scale = 0.2,
         bank = "terrarium",
@@ -46,7 +58,6 @@ info = {
             y = -4,
         },
     },
-    DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.terrarium_time
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.terrarium.cooldown), TimeToString(time))

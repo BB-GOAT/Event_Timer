@@ -1,5 +1,5 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     AddPrefabPostInit("lunarrift_portal", function()
         SaveTimeData("lunar_riftspawner", 0)
     end)
@@ -23,20 +23,31 @@
             end
         end)
     end)
--- end
+end
 
 ----------------------------------------------------------------------------------------------
 
-
-----------------------------------------------------------------------------------------------
-
--- 月亮裂隙生成倒计时
 local info
 info = {
-    gettimefn = function() -- 当裂隙出现时，不显示
-        if TheWorld and TheWorld:HasTag("forest") and TheWorld.net.components.warningtimer.inst.replica.warningtimer.rift_portal_text:value() == "" then
-            return GetWorldSettingsTimeLeft("rift_spawn_timer")()
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.rift_portal_text ~= "" then -- 当裂隙出现时，不显示
+            SaveTimeData("lunar_riftspawner", 0)
+            return
         end
+
+        GetWorldSettingsTimeLeft("rift_spawn_timer", nil, function(res)
+            if res and res.err then
+                SaveTimeData("lunar_riftspawner", 0)
+                print('[警告] lunar_riftspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("lunar_riftspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
     end,
     image = {
         atlas = "minimap/minimap_data.xml",

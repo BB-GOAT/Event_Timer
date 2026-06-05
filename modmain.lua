@@ -99,20 +99,30 @@ local EventTimer
 EventTimer = {
     env = env,
     UpdateTime = GetModConfigData("UpdateTime"), -- 数据更新频率
-    GetTimeFromServerMod = false, -- TODO
+    GetTimeFromServerMod = {}, -- 交给服务器模组提供数据的事件列表
     TimerMode = TimerMode, -- 倒计时格式
     UIButton = GetModConfigData("UIButton"), -- UI开关何时显示
     ClientPrediction = GetModConfigData("ClientPrediction"), -- 客户端预测倒计时
     TimerTips = GetModConfigData("ShowTips"), -- 醒目提示
 }
 -- 是否使用远程命令获取时间数据
-EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin() and not EventTimer.GetTimeFromServerMod
+EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin()
 
 GLOBAL.EventTimer = EventTimer
 
 modimport("Languages/" .. ModLanguage) -- 加载模组字符串
 
 ----------------------------------------定义模组环境函数---------------------------------------
+
+-- 判断某个模组是否加载
+function Ismodloaded(name)
+	return GLOBAL.KnownModIndex:IsModEnabledAny(name)
+end
+
+-- 获取其它MOD的env
+function GetModenv(modname)
+	return GLOBAL.ModManager:GetMod(modname) and GLOBAL.ModManager:GetMod(modname).env
+end
 
 local STRINGS = GLOBAL.STRINGS
 
@@ -264,12 +274,11 @@ local function UpdateClientPrediction(name)
             client_prediction_tasks[name] = nil
         end
         ThePlayer.HUD:UpdateWarningEvents()
-        return
     end
 
     -- text
     local datatext = ThePlayer.HUD.WarningEventTimeData[name .. "_text"]
-    if datatext ~= "" then
+    if datatext and datatext ~= "" then
         local new_text = get_new_text(Getformat(datatext), datatext)
         SaveTextData(name, new_text or "", true)
     end
@@ -295,7 +304,7 @@ function GetWorldTime()
     return Last_time
 end
 
-local worldid
+local SessionId
 function SaveTimeData(name, time, from_prediction)
     if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checknumber(time)) then
         return
@@ -307,8 +316,8 @@ function SaveTimeData(name, time, from_prediction)
     -- 存储倒计时数据至文件
     if not from_prediction and not (WarningEvents[name] and WarningEvents[name].DisableSaveTime) then
         local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
-        worldid = worldid or (TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId())
-        local world_data = filedata[worldid]
+        SessionId = SessionId or (TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId())
+        local world_data = filedata[SessionId]
         if world_data then
             if time == 0 then
                 world_data[name] = nil
@@ -322,12 +331,14 @@ function SaveTimeData(name, time, from_prediction)
     end
 
     -- 预测倒计时功能
-    if not from_prediction and client_prediction_tasks[name] then
-        client_prediction_tasks[name]:Cancel()
-        client_prediction_tasks[name] = nil
-    end
-    if not client_prediction_tasks[name] then
-        client_prediction_tasks[name] = TheWorld:DoPeriodicTask(1, function() UpdateClientPrediction(name) end)
+    if not (WarningEvents[name] and WarningEvents[name].DisableClientPrediction) then
+        if not from_prediction and client_prediction_tasks[name] then
+            client_prediction_tasks[name]:Cancel()
+            client_prediction_tasks[name] = nil
+        end
+        if not client_prediction_tasks[name] then
+            client_prediction_tasks[name] = TheWorld:DoPeriodicTask(1, function() UpdateClientPrediction(name) end)
+        end
     end
 end
 
@@ -341,12 +352,14 @@ function SaveTextData(name, text, from_prediction)
     ThePlayer.HUD:UpdateWarningEvents()
 
     -- 预测倒计时功能
-    if not from_prediction and client_prediction_tasks[name] then
-        client_prediction_tasks[name]:Cancel()
-        client_prediction_tasks[name] = nil
-    end
-    if not client_prediction_tasks[name] then
-        client_prediction_tasks[name] = TheWorld:DoPeriodicTask(1, function() UpdateClientPrediction(name) end)
+    if not (WarningEvents[name] and WarningEvents[name].DisableClientPrediction) then
+        if not from_prediction and client_prediction_tasks[name] then
+            client_prediction_tasks[name]:Cancel()
+            client_prediction_tasks[name] = nil
+        end
+        if not client_prediction_tasks[name] then
+            client_prediction_tasks[name] = TheWorld:DoPeriodicTask(1, function() UpdateClientPrediction(name) end)
+        end
     end
 end
 
@@ -382,8 +395,8 @@ local function GetWorldSettingsTimeLeft(name, prefab, fn)
     local cmd = [[
 local name = %s
 local prefab = %s
-local time = _G.EventTimerClient.GetWorldSettingsTimeLeft(name, prefab)
-return DataDumper( { time = time } )
+local time, not_found = _G.EventTimerClient.GetWorldSettingsTimeLeft(name, prefab)
+return DataDumper( { time = time, not_found = not_found } )
 ]]
     BBGOAT_util:remote(string.format(cmd, fmtval(name), fmtval(prefab)), nil, fn)
 end

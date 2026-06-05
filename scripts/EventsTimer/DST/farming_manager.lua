@@ -1,23 +1,34 @@
--- 果蝇王
+-- 本地监听果蝇王是否生成，生成后提示玩家
+local need_tips = false
+AddPrefabPostInit("lordfruitfly", function(inst)
+    need_tips = true
+    inst:ListenForEvent("onremove", function(inst)
+        if inst and inst:IsValid() and inst.AnimState then
+            local bank, anim, frame = inst.AnimState:GetHistoryData()
+            if anim:find("death") then
+                need_tips = false
+            end
+        end
+    end)
+end)
 
-local lordfruitfly_spawned -- 果蝇王是否已生成
+----------------------------------------------------------------------------------------------
 
 local info
 info = {
-    postinitfn = function()
-        if not TheNet:GetIsServer() then return end
-        AddPrefabPostInit("lordfruitfly", function(inst)
-            lordfruitfly_spawned = true
-            inst:ListenForEvent("onremove", function()
-                lordfruitfly_spawned = false
-            end)
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("lordfruitfly_spawntime", nil, function(res)
+            if res and res.err then
+                SaveTimeData("farming_manager", 0)
+                print('[警告] farming_manager remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("farming_manager", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
         end)
-    end,
-    gettimefn = GetWorldSettingsTimeLeft("lordfruitfly_spawntime"),
-    gettextfn = function()
-        if lordfruitfly_spawned then
-            return ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
-        end
     end,
     anim = {
         scale = 0.2,
@@ -37,14 +48,12 @@ info = {
     DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.farming_manager_time
-        if time and time > 0 then
+        if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(time))
         end
     end,
     tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.farming_manager_text
-        local ready = text == ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
-        if ready then
+        if need_tips then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.farming_manager.tips)), 5, nil, 3
         end
         return false

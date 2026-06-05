@@ -1,17 +1,29 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     HookDeath("crabking", "crabkingspawner", function(event)
         SaveTimeData(event, TUNING.CRABKING_RESPAWN_TIME)
     end)
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        GetWorldSettingsTimeLeft("regen_crabking", "crabking_spawner", function(res)
+            if res and res.err then
+                SaveTimeData("crabkingspawner", 0)
+                print('[警告] crabkingspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("crabkingspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     anim = {
         scale = 0.022,
         bank = "king_crab",

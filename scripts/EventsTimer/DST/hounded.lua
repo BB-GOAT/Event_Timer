@@ -91,13 +91,16 @@ end
 
 ----------------------------------------------------------------------------------------------
 
-local need_update_data = true -- 是否需要更新蠕虫数据
-local next_wave_is_wormboss, _wave_override_chance, task
-local remotegettextfn = function()
+local next_wave_is_wormboss, _wave_override_chance
+local remotegettextfn = function(Thread)
     if not TheWorld:HasTag("cave") then return end
     local cmd = [[
         local self = TheWorld and TheWorld.components.hounded
-        if not self then return end
+        if not self then
+            return DataDumper({
+                not_found = true
+            })
+        end
 
         local next_wave_is_wormboss = BBGOAT_FN.getval(self.DoWarningSpeech, "_wave_pre_upgraded")
         local _wave_override_chance = self:OnSave().wave_override_chance
@@ -105,42 +108,23 @@ local remotegettextfn = function()
         return DataDumper({next_wave_is_wormboss = next_wave_is_wormboss, _wave_override_chance = _wave_override_chance})
     ]]
 
-    local function fn()
-        if next_wave_is_wormboss then
-            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time))
-            SaveTextData("hounded", str, true)
-        elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
-            local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
-            SaveTextData("hounded", str, true)
-        end
-    end
-
-    if need_update_data then
-        BBGOAT_util:remote(cmd, nil, function(res)
-            if res and res.err then
-                print('[警告] hounded remotegettextfn error:', res.err)
-                -- 取消任务
-                if task then
-                    task:Cancel()
-                    task = true
-                end
-            elseif res then
-                next_wave_is_wormboss = res.next_wave_is_wormboss
-                _wave_override_chance = res._wave_override_chance
-                fn()
+    BBGOAT_util:remote(cmd, nil, function(res)
+        if res and res.err then
+            SaveTextData("hounded", "")
+            print('[警告] hounded remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res then
+            next_wave_is_wormboss = res.next_wave_is_wormboss
+            _wave_override_chance = res._wave_override_chance
+            if next_wave_is_wormboss then
+                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time))
+                SaveTextData("hounded", str, true)
+            elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
+                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
+                SaveTextData("hounded", str, true)
             end
-            need_update_data = false
-        end)
-    else
-        fn()
-    end
-
-    if not task then
-        task = TheWorld:DoTaskInTime(ThePlayer.HUD.WarningEventTimeData.hounded_time + 5, function()
-            need_update_data = true
-            task = nil
-        end)
-    end
+        end
+    end)
 end
 
 ----------------------------------------------------------------------------------------------
@@ -148,24 +132,33 @@ end
 local info
 info = {
     localgettimefn = localgettimefn,
-    remotegettimefn = function()
+    remotegettimefn = function(Thread)
         local cmd = [[
             if TheWorld and TheWorld.components.hounded then
                 local data = TheWorld.components.hounded:OnSave()
                 local time = data and data.timetoattack
                 return DataDumper({time = time})
             end
+            return DataDumper({ not_found = true })
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.err then
+                SaveTimeData("hounded", 0)
                 print('[警告] hounded remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("hounded", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
             end
         end)
     end,
     remotegettextfn = remotegettextfn,
-    DisableSaveTime = true,
+    remotegettextfninterval = function()
+        return ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and (ThePlayer.HUD.WarningEventTimeData.hounded_time + 5)
+    end,
+    DisableSaveTime = true, -- 不同世界都有这个事件，保存了会数据冲突
     imagechangefn = function(self)
         local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
         local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))

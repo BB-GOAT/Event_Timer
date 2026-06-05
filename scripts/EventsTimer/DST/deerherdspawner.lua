@@ -1,18 +1,24 @@
 local info
 info = {
-    remotegettimefn = function()
+    remotegettimefn = function(Thread)
         local cmd = [[
             if TheWorld and TheWorld.components.deerherdspawner then
                 local data = TheWorld.components.deerherdspawner:OnSave()
                 local time = data and data._timetospawn
                 return DataDumper({time = time})
             end
+            return DataDumper({ not_found = true })
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.err then
+                SaveTimeData("deerherdspawner", 0)
                 print('[警告] deerherdspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("deerherdspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
             end
         end)
     end,

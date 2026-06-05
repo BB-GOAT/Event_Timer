@@ -16,7 +16,7 @@ local function AddWarningEvents(self)
 
         -- 尝试恢复之前记录的倒计时数据(如果服务器回档了，可能会发生BOSS没被打死但记录有效的情况，暂时不考虑解决这种情况)
         local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
-        local worldid = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
+        local SessionId = TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId()
         local need_save = false
 
         -- 清理长期未游玩的存档数据
@@ -30,8 +30,8 @@ local function AddWarningEvents(self)
         end
 
         -- 读取记录的数据
-        if worldid and filedata[worldid] then
-            for name, time in pairs(filedata[worldid] or {}) do
+        if SessionId and filedata[SessionId] then
+            for name, time in pairs(filedata[SessionId] or {}) do
                 if name ~= "save_time" and checknumber(time) then
                     local diff_time = time - GetWorldTime()
                     if diff_time > 0 then
@@ -43,7 +43,7 @@ local function AddWarningEvents(self)
                 end
             end
         else
-            filedata[worldid] = {}
+            filedata[SessionId] = {}
             need_save = true
         end
         if need_save then

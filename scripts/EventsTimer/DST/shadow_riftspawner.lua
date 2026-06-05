@@ -1,5 +1,5 @@
 -- 纯本地获取方式
--- if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+local localgettimefn = function()
     AddPrefabPostInit("shadowrift_portal", function()
         SaveTimeData("shadow_riftspawner", 0)
     end)
@@ -16,16 +16,33 @@
             end)
         end)
     end)
--- end
-
-----------------------------------------------------------------------------------------------
-
+end
 
 ----------------------------------------------------------------------------------------------
 
 -- 暗影裂隙生成倒计时
 local info
 info = {
+    localgettimefn = localgettimefn,
+    remotegettimefn = function(Thread)
+        if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.shadowrift_portal_text ~= "" then -- 当裂隙出现时，不显示
+            SaveTimeData("shadow_riftspawner", 0)
+            return
+        end
+
+        GetWorldSettingsTimeLeft("rift_spawn_timer", nil, function(res)
+            if res and res.err then
+                SaveTimeData("shadow_riftspawner", 0)
+                print('[警告] shadow_riftspawner remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("shadow_riftspawner", res.time)
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
+    end,
     image = {
         atlas = "minimap/minimap_data.xml",
         tex = "shadowrift_portal.png",

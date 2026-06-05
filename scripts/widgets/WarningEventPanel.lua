@@ -237,16 +237,8 @@ function WarningEventHUD:UpdateDestItem()
         local datatime = eventsdata[name .. "_time"]
         value.name = name -- name在这定义，注意这一点
         if type(datatext) == "string" and datatext ~= "" then
-            if value.playerly then
-                local text = json.decode(datatext)
-                if type(text) == "table" and text[ThePlayer.userid] then
-                    value.text = text[ThePlayer.userid]
-                    data_list[#data_list + 1] = value -- 必须条件都满足了才添加到data_list，否则会影响事件列表长度
-                end
-            else
-                value.text = datatext
-                data_list[#data_list + 1] = value
-            end
+            value.text = datatext
+            data_list[#data_list + 1] = value
         elseif type(datatime) == "number" and datatime > 0 then
             value.text = TimeToString(datatime)
             data_list[#data_list + 1] = value

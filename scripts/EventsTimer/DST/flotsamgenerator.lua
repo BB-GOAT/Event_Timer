@@ -1,48 +1,57 @@
 -- 瓶中信
 -- 参考了Insight代码 https://steamcommunity.com/sharedfiles/filedetails/?id=2189004162 @penguin0616
 
-local _guaranteed_spawn_tasks
-local player_userid = TheNet:GetUserID()
-
+local target_time_interval = 5
 local info
 info = {
-    postinitfn = function()
-        if not TheNet:GetIsServer() then return end
-        AddComponentPostInit("flotsamgenerator", function()
+    remotegettimefn = function(Thread)
+        local cmd = [[
+            local _guaranteed_spawn_tasks
             if TheWorld.components.flotsamgenerator and TheWorld.components.flotsamgenerator.ScheduleGuaranteedSpawn then
                 _guaranteed_spawn_tasks = Upvaluehelper.GetUpvalue(TheWorld.components.flotsamgenerator.ScheduleGuaranteedSpawn, "_guaranteed_spawn_tasks")
             end
-        end)
-    end,
-    gettextfn = function()
-        if not _guaranteed_spawn_tasks then return end
-        local time_list = {}
-        for _, player in pairs(AllPlayers) do
-            if player and player:IsValid() and player.userid then
+            if not _guaranteed_spawn_tasks then return DataDumper({ not_found = true }) end
+            local player = ThePlayer
+            if player and player:IsValid() then
                 local tasks = _guaranteed_spawn_tasks[player]
                 if tasks then
                     for v, task in pairs(tasks) do
                         if v.prefabs[1] == "messagebottle" then
-                            time_list[player.userid] = TimeToString(GetTaskRemaining(task))
+                            return DataDumper({ time = GetTaskRemaining(task) })
                         end
                     end
                 end
             end
-        end
-        return json.encode(time_list)
+        ]]
+
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res and res.time then
+                SaveTimeData("flotsamgenerator", res.time)
+                target_time_interval = res.time + 1
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            else
+                SaveTimeData("flotsamgenerator", 0)
+                target_time_interval = nil
+                if res and res.err then
+                    print('[警告] flotsamgenerator remotegettimefn error:', res.err)
+                    if Thread then KillThreadsWithID(Thread.id) end
+                end
+            end
+        end)
+    end,
+    remotegettextfninterval = function()
+        return target_time_interval
     end,
     image = {
         atlas = "images/inventoryimages2.xml",
         tex = "messagebottle.tex",
         scale = 0.9,
     },
-    playerly = true, -- 指明是针对单个玩家的事件
     announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.flotsamgenerator_text
-        if not text or text == "" then return end
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), data[player_userid])
+        local time = ThePlayer.HUD.WarningEventTimeData.flotsamgenerator_time
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), time)
     end
 }
 

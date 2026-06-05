@@ -1,9 +1,14 @@
-local remotegettimefn = function()
+local remotegettimefn = function(Thread)
     GetWorldSettingsTimeLeft("klaussack_spawntimer", nil, function(res)
-        if res.err then
+        if res and res.err then
+            SaveTimeData("klaussackspawner", 0)
             print('[警告] klaussackspawner remotegettimefn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
         elseif res and res.time then
             SaveTimeData("klaussackspawner", res.time)
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
         end
     end)
 end
@@ -11,12 +16,16 @@ end
 ----------------------------------------------------------------------------------------------
 
 local despawnday
-local remotegettextfn = function()
+local remotegettextfn = function(Thread)
     if ThePlayer.HUD.WarningEventTimeData.klaussackspawner_time > 0 then return end -- 赃物袋在生成倒计时，不存在消失时间
 
     local cmd = [[
         local self = TheWorld.components.klaussackspawner
-        if not self then return end
+        if not self then
+            return DataDumper({
+                not_found = true
+            })
+        end
 
         local function sack_can_despawn(inst)
             if not IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) and
@@ -37,7 +46,12 @@ local remotegettextfn = function()
 
     BBGOAT_util:remote(cmd, nil, function(res)
         if res and res.err then
+            SaveTextData("klaussackspawner", "")
             print('[警告] klaussackspawner remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
         elseif res then
             despawnday = res.despawnday
             if despawnday then
@@ -64,7 +78,7 @@ AddPrefabPostInit("klaus_sack", function(inst)
                     -- 从远程指令刷新时间
                     remotegettimefn()
                     SaveTextData("klaussackspawner", "")
-                elseif not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+                elseif not (GLOBAL.EventTimer.GetTimeFromServerMod[k] or GLOBAL.EventTimer.GetTimeFromRemoteCommand) then
                     -- 纯本地
                     SaveTimeData("klaussackspawner", TUNING.KLAUSSACK_EVENT_RESPAWN_TIME)
                 end

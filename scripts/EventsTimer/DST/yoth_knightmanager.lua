@@ -1,21 +1,36 @@
 -- 镀金骑士冷却倒计时
 
-local player_userid = TheNet:GetUserID()
-
+local target_time_interval
 local info
 info = {
-    gettextfn = function()
-        local time_list = {}
-        for _, player in pairs(AllPlayers) do
-            if player and player:IsValid() and player.userid then
+    remotegettimefn = function(Thread)
+        local cmd = [[
+            local player = ThePlayer
+            if player and player:IsValid() then
                 local debuff = player.components.debuffable and player.components.debuffable:GetDebuff("yoth_princesscooldown_buff")
                 if debuff then
                     local time = debuff.components and debuff.components.timer and debuff.components.timer:GetTimeLeft("buffover")
-                    time_list[player.userid] = time and TimeToString(time)
+                    return DataDumper({ time = time })
                 end
             end
-        end
-        return json.encode(time_list)
+        ]]
+
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res and res.time then
+                SaveTimeData("flotsamgenerator", res.time)
+                target_time_interval = res.time + 1
+            else
+                SaveTimeData("flotsamgenerator", 0)
+                target_time_interval = nil
+                if res and res.err then
+                    print('[警告] flotsamgenerator remotegettimefn error:', res.err)
+                    if Thread then KillThreadsWithID(Thread.id) end
+                end
+            end
+        end)
+    end,
+    remotegettextfninterval = function()
+        return target_time_interval
     end,
     anim = {
         scale = 0.08,
@@ -27,24 +42,12 @@ info = {
             y = -10,
         },
     },
-    playerly = true, -- 指明是针对单个玩家的事件
     announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_text
-        if not text or text == "" then return end
-
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), data[player_userid])
+        local time = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_time
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), time)
     end,
     tipsfn = function ()
-        local text = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_text
-        if not text or text == "" then return end
-
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-
-        local time = StringToTime(data[player_userid])
+        local time = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_time
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.tips)), 10, time, 2
         end
