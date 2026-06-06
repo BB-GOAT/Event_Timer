@@ -8,7 +8,7 @@ info = {
         local cmd = [[
             local _guaranteed_spawn_tasks
             if TheWorld.components.flotsamgenerator and TheWorld.components.flotsamgenerator.ScheduleGuaranteedSpawn then
-                _guaranteed_spawn_tasks = Upvaluehelper.GetUpvalue(TheWorld.components.flotsamgenerator.ScheduleGuaranteedSpawn, "_guaranteed_spawn_tasks")
+                _guaranteed_spawn_tasks = BBGOAT_FN.getval(TheWorld.components.flotsamgenerator.ScheduleGuaranteedSpawn, "_guaranteed_spawn_tasks")
             end
             if not _guaranteed_spawn_tasks then return DataDumper({ not_found = true }) end
             local player = ThePlayer

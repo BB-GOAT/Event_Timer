@@ -41,7 +41,7 @@ GameEvents = {
 
     -- 针对单个玩家的事件
     flotsamgenerator = RequireEvent("DST/flotsamgenerator"), -- 瓶中信(无法纯本地)
-    yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"), -- 镀金骑士(纯本地方法待制作)
+    yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"), -- 镀金骑士(每个玩家有单独的倒计时，纯本地可能被其他玩家影响)
 }
 for k, v in pairs(GameEvents) do
     WarningEvents[k] = v
@@ -49,13 +49,13 @@ end
 
 local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
     ---------------------------------------- IA-SW ---------------------------------------
-    -- chessnavy = RequireEvent("IslandAdventures/chessnavy"),
-    -- volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"),
-    -- volcanomanager = RequireEvent("IslandAdventures/volcanomanager"),
-    twisterspawner = RequireEvent("IslandAdventures/twisterspawner"),
-    -- krakener = RequireEvent("IslandAdventures/krakener"),
-    -- tigersharker = RequireEvent("IslandAdventures/tigersharker"),
-    -- islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"),
+    -- chessnavy = RequireEvent("IslandAdventures/chessnavy"), -- 浮船骑士
+    -- volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"), -- 火山爆发剩余时间
+    -- volcanomanager = RequireEvent("IslandAdventures/volcanomanager"), -- 距离火山开始爆发的倒计时
+    twisterspawner = RequireEvent("IslandAdventures/twisterspawner"), -- 豹卷风
+    -- krakener = RequireEvent("IslandAdventures/krakener"), -- 海妖
+    -- tigersharker = RequireEvent("IslandAdventures/tigersharker"), -- 虎鲨
+    -- islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"), -- 热带赃物袋
 } or {}
 
 -- 将海难计时添加到WarningEvents
@@ -69,12 +69,12 @@ end
 -- }
 -- or Ismodloaded("workshop-3322803908") and
 -- {   ---------------------------------------- Above The Clouds ---------------------------------------
---     pugalisk_fountain = RequireEvent("AboveTheClouds/pugalisk_fountain"),
---     banditmanager = RequireEvent("AboveTheClouds/banditmanager"),
---     aporkalypse = RequireEvent("AboveTheClouds/aporkalypse"),
---     aporkalypse_attack = select(2, RequireEvent("AboveTheClouds/aporkalypse")),
---     batted = select(3, RequireEvent("AboveTheClouds/aporkalypse")),
---     rocmanager = RequireEvent("AboveTheClouds/rocmanager"),
+--     pugalisk_fountain = RequireEvent("AboveTheClouds/pugalisk_fountain"), -- 不老泉
+--     banditmanager = RequireEvent("AboveTheClouds/banditmanager"), -- 蒙面猪人
+--     aporkalypse = RequireEvent("AboveTheClouds/aporkalypse"), -- 大灾变
+--     aporkalypse_attack = select(2, RequireEvent("AboveTheClouds/aporkalypse")), -- 大灾变
+--     batted = select(3, RequireEvent("AboveTheClouds/aporkalypse")), -- 吸血蝙蝠
+--     rocmanager = RequireEvent("AboveTheClouds/rocmanager"), -- 友善的大鹏
 -- } or {}
 
 -- -- 将猪镇计时添加到WarningEvents
@@ -84,8 +84,8 @@ end
 
 -- local UncompromisingEvents = TUNING.DSTU ~= nil and
 -- {
---     gmoosespawner = RequireEvent("UncompromisingMode/gmoosespawner"),
---     mock_dragonflyspawner = RequireEvent("UncompromisingMode/mock_dragonflyspawner"),
+--     gmoosespawner = RequireEvent("UncompromisingMode/gmoosespawner"), -- 麋鹿鹅
+--     mock_dragonflyspawner = RequireEvent("UncompromisingMode/mock_dragonflyspawner"), -- 龙蝇
 --     -- 巨鹿和原版的一样，不需要加
 -- } or {}
 

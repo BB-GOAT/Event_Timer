@@ -9,6 +9,11 @@ for k, v in pairs(GLOBAL.WarningEvents) do
     end
 end
 
+local function check_ThePlayer()
+    local ThePlayer = GLOBAL.ThePlayer
+    return ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData ~= nil
+end
+
 MOD_util:AddPlayerPostInit(function(world, player)
     if player ~= GLOBAL.ThePlayer then return end
     -- 从远程命令获取时间数据
@@ -22,8 +27,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
                         local co = GLOBAL.coroutine.running()
                         while true do
                             if not GLOBAL.scheduler.tasks[co] then break end
-                            local ThePlayer = GLOBAL.ThePlayer
-                            if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData then
+                            if check_ThePlayer() then
                                 -- print("DEBUG: 正在触发事件" .. warningevent .. "的远程timefn")
                                 data.remotegettimefn(GetTimeThreadList[warningevent]) -- 存数据的过程应该在fn内完成
                             end
@@ -31,7 +35,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
                             if not GLOBAL.scheduler.tasks[co] then break end
                             GLOBAL.Sleep(0.5) -- 等待0.5秒以便sleep_time更新
                             local sleep_time = GLOBAL.type(data.remotegettimefninterval) == "number" and data.remotegettimefninterval
-                                                or GLOBAL.type(data.remotegettimefninterval) == "function" and data.remotegettimefninterval()
+                                                or GLOBAL.type(data.remotegettimefninterval) == "function" and check_ThePlayer() and data.remotegettimefninterval()
                             -- print('DEBUG: remotegettimefn sleep', sleep_time, warningevent)
                             GLOBAL.Sleep(GLOBAL.checknumber(sleep_time) and sleep_time or 30)
                         end
@@ -53,7 +57,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
                             if not GLOBAL.scheduler.tasks[co] then break end
                             GLOBAL.Sleep(0.5) -- 等待0.5秒以便sleep_time更新
                             local sleep_time = GLOBAL.type(data.remotegettextfninterval) == "number" and data.remotegettextfninterval
-                                                or GLOBAL.type(data.remotegettextfninterval) == "function" and data.remotegettextfninterval()
+                                                or GLOBAL.type(data.remotegettextfninterval) == "function" and check_ThePlayer() and data.remotegettextfninterval()
                             -- print('DEBUG: remotegettextfn sleep', sleep_time, warningevent)
                             GLOBAL.Sleep(GLOBAL.checknumber(sleep_time) and sleep_time or 30)
                         end
