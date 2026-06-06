@@ -94,7 +94,7 @@ STRINGS.eventtimer = {
         tips = "警告：<prefab=lordfruitfly>攻击开始！！！",
     },
     piratespawner = { -- 海盗袭击
-        cooldown = "海盗袭击可能在%s后发生\n倒计时流逝速度：%s倍"
+        cooldown = "海盗袭击可能在%s后发生"
     },
     forestdaywalkerspawner = { -- 拾荒疯猪
         cooldown = "<prefab=daywalker2>会重生于%s后",

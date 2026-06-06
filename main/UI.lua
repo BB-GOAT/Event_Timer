@@ -35,7 +35,7 @@ local function AddWarningEvents(self)
                 if name ~= "save_time" and checknumber(time) then
                     local diff_time = time - GetWorldTime()
                     if diff_time > 0 then
-                        SaveTimeData(name, diff_time, true)
+                        SaveTimeData(name, diff_time)
                     else
                         filedata[name] = nil
                         need_save = true

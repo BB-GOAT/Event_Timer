@@ -22,7 +22,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
         local GetTimeThreadList, GetTextThreadList = {}, {}
         local MainFn = function()
             for warningevent, data in pairs(GLOBAL.WarningEvents) do
-                if data.remotegettimefn and not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] then
+                if data.remotegettimefn and (not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] or data.ForceEnableRemotegettimefn) then
                     GetTimeThreadList[warningevent] = GLOBAL.StartThread(function()
                         local co = GLOBAL.coroutine.running()
                         while true do
@@ -43,7 +43,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
 
                     GLOBAL.Sleep(0.5) -- gettime 和 gettext 间隔0.5秒
                 end
-                if data.remotegettextfn and not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] then
+                if data.remotegettextfn and (not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] or data.ForceEnableRemotegettextfn) then
                     GetTextThreadList[warningevent] = GLOBAL.StartThread(function()
                         local co = GLOBAL.coroutine.running()
                         while true do

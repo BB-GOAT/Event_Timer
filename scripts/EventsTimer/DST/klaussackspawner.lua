@@ -69,22 +69,24 @@ end
 
 -- 纯本地获取方式 / 开袋后刷新一遍数据
 AddPrefabPostInit("klaus_sack", function(inst)
-    inst:ListenForEvent("onremove", function(inst)
-        local pos = inst:GetPosition()
-        local bundle = TheSim:FindEntities(pos.x, 0, pos.z, 4, {"bundle"}, { 'FX', 'DECOR', 'INLIMBO', 'NOCLICK', 'player' })
-        if #bundle > 0 then
-            if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
-                if EventTimer.GetTimeFromRemoteCommand then
-                    -- 从远程指令刷新时间
-                    remotegettimefn()
-                    SaveTextData("klaussackspawner", "")
-                elseif not (GLOBAL.EventTimer.GetTimeFromServerMod[k] or GLOBAL.EventTimer.GetTimeFromRemoteCommand) then
-                    -- 纯本地
-                    SaveTimeData("klaussackspawner", TUNING.KLAUSSACK_EVENT_RESPAWN_TIME)
+    if not GLOBAL.EventTimer.GetTimeFromServerMod["klaussackspawner"] then
+        inst:ListenForEvent("onremove", function(inst)
+            local pos = inst:GetPosition()
+            local bundle = TheSim:FindEntities(pos.x, 0, pos.z, 4, {"bundle"}, { 'FX', 'DECOR', 'INLIMBO', 'NOCLICK', 'player' })
+            if #bundle > 0 then
+                if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
+                    if EventTimer.GetTimeFromRemoteCommand then
+                        -- 从远程指令刷新时间
+                        remotegettimefn()
+                        SaveTextData("klaussackspawner", "")
+                    else
+                        -- 纯本地
+                        SaveTimeData("klaussackspawner", TUNING.KLAUSSACK_EVENT_RESPAWN_TIME)
+                    end
                 end
             end
-        end
-    end)
+        end)
+    end
 end)
 
 ----------------------------------------------------------------------------------------------
@@ -96,6 +98,7 @@ info = {
     remotegettextfninterval = function() -- 直接返回CalcTimeOfDay的话会因未初始化而变为nil
         return CalcTimeOfDay()
     end,
+    ForceEnableRemotegettextfn = true, -- 第三方模组并不能给赃物袋消失时间
     DisableClientPredictionClearText = true,
     anim = {
         scale = 0.1,

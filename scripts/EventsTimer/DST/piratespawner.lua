@@ -12,9 +12,8 @@ info = {
         }
     },
     announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.piratespawner_text
-        text = string.gsub(text, "\n", ", ")
-        return text
+        local time = ThePlayer.HUD.WarningEventTimeData.piratespawner_time
+        return string.format(STRINGS.eventtimer.piratespawner.cooldown, TimeToString(time))
     end,
     tipsfn = nil -- 开始袭击的时候对应的玩家会说台词，不需要我来提醒
 }

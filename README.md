@@ -8,3 +8,6 @@ remotegettextfninterval: 远程获取文本的间隔，默认为 30 秒
 DisableSaveTime: 禁用保存时间数据
 DisableClientPrediction: 禁用客户端预测倒计时
 DisableClientPredictionClearText: 客户端预测倒计时至0秒后不清理text数据
+
+ForceEnableRemotegettimefn: 强制启用远程获取时间的函数(有管理员才行)
+ForceEnableRemotegettextfn: 强制启用远程获取文本的函数(有管理员才行)

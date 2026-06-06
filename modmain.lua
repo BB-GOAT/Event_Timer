@@ -402,7 +402,7 @@ return DataDumper( { time = time, not_found = not_found } )
 end
 
 -- 合并字符串
-local function CombineLines(...)
+function CombineLines(...)
     local lines, argnum = nil, select("#",...)
 
     for i = 1, argnum do

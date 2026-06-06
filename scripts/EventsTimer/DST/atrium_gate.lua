@@ -23,7 +23,6 @@ end
 
 ----------------------------------------------------------------------------------------------
 
-local cooldown_mode
 local remotegettextfn = function(Thread)
     local cmd = [[
         local TimerPrefabs = _G.EventTimerClient.TimerPrefabs
@@ -45,7 +44,7 @@ local remotegettextfn = function(Thread)
     ]]
     BBGOAT_util:remote(cmd, nil, function(res)
         if res and res.time then
-            cooldown_mode = res.cooldown_mode
+            local cooldown_mode = res.cooldown_mode
             SaveTimeData("atrium_gate", res.time)
             SaveTextData("atrium_gate",
                 cooldown_mode == 1 and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(res.time)) or
@@ -55,7 +54,6 @@ local remotegettextfn = function(Thread)
             -- 取消数据更新任务
             if Thread then KillThreadsWithID(Thread.id) end
         else
-            cooldown_mode = nil
             SaveTimeData("atrium_gate", 0)
             SaveTextData("atrium_gate", "")
             if res and res.err then
@@ -84,12 +82,7 @@ info = {
         },
     },
     announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.atrium_gate_time
-        if cooldown_mode == 1 then
-            return time and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(time))
-        elseif cooldown_mode == 2 then
-            return time and string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(time))
-        end
+        return ThePlayer.HUD.WarningEventTimeData.atrium_gate_text
     end,
 }
 

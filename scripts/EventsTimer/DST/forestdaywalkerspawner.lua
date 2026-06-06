@@ -141,7 +141,7 @@ info = {
         end
     end,
     tipsfn = function()
-        if not (EventTimer.GetTimeFromRemoteCommand or EventTimer.GetTimeFromServerMod) then
+        if EventTimer.GetTimeFromServerMod["forestdaywalkerspawner"] or not EventTimer.GetTimeFromRemoteCommand then
             local time = ThePlayer.HUD.WarningEventTimeData.forestdaywalkerspawner_time
             if ready_attack(time) then
                 return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.tips)), 10, time, 2

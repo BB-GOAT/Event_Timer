@@ -114,7 +114,7 @@ info = {
     remotegettextfninterval = function()
         return target_text_interval
     end,
-    DisableClientPredictionClearText = true, -- 没有time信息，需要此选项避免text被删除
+    DisableClientPredictionClearText = true, -- 正常情况下没有time信息，需要此选项避免text被删除
     image = {
         atlas = "images/Dreadstone_Outcrop.xml",
         tex = "Dreadstone_Outcrop.tex",
@@ -126,8 +126,15 @@ info = {
     },
     announcefn = function()
         local text = ThePlayer.HUD.WarningEventTimeData.shadowthrallmanager_text
-        text = string.gsub(text,"\n",", ")
-        return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. text
+        if text ~= "" then
+            text = string.gsub(text,"\n",", ")
+            return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. text
+        end
+        -- 用于兼容宣告第三方模组提供的数据
+        local time = ThePlayer.HUD.WarningEventTimeData.shadowthrallmanager_time
+        if time > 0 then
+            return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. string.format(STRINGS.eventtimer.shadowthrallmanager.fissure_cooldown, TimeToString(time))
+        end
     end,
 }
 
