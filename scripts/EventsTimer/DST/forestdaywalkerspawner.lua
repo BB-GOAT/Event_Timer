@@ -84,7 +84,7 @@ AddPrefabPostInit("daywalker2", function(boss)
     boss:DoTaskInTime(0.2, function(inst)
         SaveTimeData("daywalkerspawner", 0)
         SaveTimeData("forestdaywalkerspawner", 0)
-        if EventTimer.GetTimeFromRemoteCommand then
+        if EventTimer.GetTimeFromRemoteCommand and not EventTimer.GetTimeFromServerMod["forestdaywalkerspawner"] then
             SaveTextData("forestdaywalkerspawner", ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.exists)) -- 使用远程命令时，挖出疯猪时将状态改为正在出没(纯本地模式时不支持text)
         end
         if inst and inst.components and inst.components.talker and inst.components.talker.Say then

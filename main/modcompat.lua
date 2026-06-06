@@ -112,7 +112,7 @@ end
 -- 饥饥事件计时器
 if Ismodloaded("workshop-3511498282") then
     -- 关闭饥饥事件计时器的模组UI
-    AddClassPostConstruct("widgets/controls", function(self)
+    AddClassPostConstruct("widgets/controls", function()
         if ThePlayer.HUD and ThePlayer.HUD.timebox then
             -- ThePlayer.HUD.timebox:Hide()
         end
@@ -141,7 +141,7 @@ if Ismodloaded("workshop-3511498282") then
     }
 
     -- 初始化GetTimeFromServerMod表
-    for _, name in ipairs(events) do
+    for _, name in pairs(events) do
         EventTimer.GetTimeFromServerMod[name] = true
     end
     EventTimer.GetTimeFromServerMod["lunarthrall_plantspawner"] = true -- 致命亮茄

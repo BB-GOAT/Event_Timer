@@ -48,10 +48,14 @@ info = {
         atlas = "images/inventoryimages2.xml",
         tex = "messagebottle.tex",
         scale = 0.9,
+        offset = {
+           x = 0,
+           y = 8,
+        },
     },
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.flotsamgenerator_time
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), time)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), TimeToString(time))
     end
 }
 

@@ -17,13 +17,13 @@ info = {
 
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.time then
-                SaveTimeData("flotsamgenerator", res.time)
+                SaveTimeData("yoth_knightmanager", res.time)
                 target_time_interval = res.time + 1
             else
-                SaveTimeData("flotsamgenerator", 0)
+                SaveTimeData("yoth_knightmanager", 0)
                 target_time_interval = nil
                 if res and res.err then
-                    print('[警告] flotsamgenerator remotegettimefn error:', res.err)
+                    print('[警告] yoth_knightmanager remotegettimefn error:', res.err)
                     if Thread then KillThreadsWithID(Thread.id) end
                 end
             end
@@ -44,7 +44,7 @@ info = {
     },
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_time
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), time)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), TimeToString(time))
     end,
     tipsfn = function ()
         local time = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_time
