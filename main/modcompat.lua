@@ -1,6 +1,5 @@
 local AddClassPostConstruct = AddClassPostConstruct
 local AddPrefabPostInit = AddPrefabPostInit
--- local AddGamePostInit = AddGamePostInit
 local GetWorldtypeStr = GetWorldtypeStr
 local GetModenv = GetModenv
 local Ismodloaded = Ismodloaded
@@ -11,9 +10,11 @@ local ReplacePrefabName = ReplacePrefabName
 local CombineLines = CombineLines
 local ModLanguage = ModLanguage
 local zh = ModLanguage == "zh"
+local Import = Import
 local RW_Data = RW_Data
 local MOD_util = MOD_util
 local Upvaluehelper = Upvaluehelper
+local GetTimeFromRemoteCommand = EventTimer.GetTimeFromRemoteCommand
 GLOBAL.setfenv(1, GLOBAL)
 
 -- [Tips]提示猎狗和BOSS的攻击时间 / [Tips]刷新提示，优化版
@@ -114,7 +115,7 @@ if Ismodloaded("workshop-3511498282") then
     -- 关闭饥饥事件计时器的模组UI
     AddClassPostConstruct("widgets/controls", function()
         if ThePlayer.HUD and ThePlayer.HUD.timebox then
-            -- ThePlayer.HUD.timebox:Hide()
+            ThePlayer.HUD.timebox:Hide()
         end
     end)
 
@@ -236,12 +237,14 @@ if Ismodloaded("workshop-3511498282") then
             elseif atrium_gate_events[item.name] then -- 远古大门
                 if check_data_valid(item.name, item.time) then
                     local cooldown_mode = atrium_gate_events[item.name]
+                    SaveTimeData("atrium_gate", item.time)
                     SaveTextData("atrium_gate",
                         cooldown_mode == 1 and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(item.time)) or
                         cooldown_mode == 2 and string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(item.time))
                     )
                 else
                     atrium_gate_events[item.name] = nil
+                    SaveTimeData("atrium_gate", 0)
                     SaveTextData("atrium_gate", "")
                 end
             end
@@ -261,21 +264,168 @@ if Ismodloaded("workshop-3511498282") then
         end
     end
 end
-----------------------------------------检测重复功能的模组---------------------------------------
 
--- local function checkmod()
---     local tips = zh and "[全局事件计时器] 检测到你开启了 %s 模组，与本模组功能重复，请关闭它" or "[Global Events Timer] Detected that you have enabled the %s mod, which has overlapping functions with this mod. Please disable it."
+-- Boss预测器
+if Ismodloaded("workshop-2510473186") then
 
---     if Ismodloaded("workshop-3127230863") then
---         local text = string.format(tips, zh and "Boss生成倒计时" or "Boss Spawn Countdown")
---         c_announce(text)
---     end
+    -- 关闭Boss预测器的模组UI
+    AddClassPostConstruct("widgets/controls", function(hud)
+        if hud.houndswidget then
+            hud.houndswidget:Hide()
+        end
+        if hud.bosseswidget then
+            hud.bosseswidget:Hide()
+        end
+        if hud.riftswidget then
+            hud.riftswidget:Hide()
+        end
+    end)
 
---     if Ismodloaded("workshop-2510473186") then
---         local text = string.format(tips, zh and "Boss预测器" or "Boss Attack Predictor")
---         c_announce(text)
---     end
--- end
+    local bosses_table = Import(MODS_ROOT .. "workshop-2510473186/main/tables/bosses.lua", GetModenv("workshop-2510473186"))
+    -- 事件列表
+    local events = {
+        bearger           = "beargerspawner",      -- 熊獾
+        deerclops         = "deerclopsspawner",    -- 独眼巨鹿
+        klaus             = "klaussackspawner",    -- 赃物袋
+        fruitfly          = "farming_manager",     -- 果蝇王
+        malbatross        = "malbatrossspawner",   -- 邪天翁
+        toadstool         = "toadstoolspawner",    -- 毒菌蟾蜍
+        antlion           = "sinkholespawner",     -- 蚁狮
+        beequeenhive      = "beequeenhive",        -- 蜂后
+        dragonfly_spawner = "dragonfly_spawner",   -- 龙蝇
+        crabking_spawner  = "crabkingspawner",     -- 帝王蟹
+        nightmare_werepig = "daywalkerspawner",    -- 梦魇疯猪
+        scrappy_werepig   = "forestdaywalkerspawner" -- 拾荒疯猪
+    }
+
+    -- 远古大门相关事件
+    local atrium_gate_events = {
+        atrium_gate_cooldown = 1,
+        atrium_gate_destable = 2,
+    }
+
+    -- 初始化GetTimeFromServerMod表
+    for _, name in pairs(events) do
+        EventTimer.GetTimeFromServerMod[name] = true
+    end
+    EventTimer.GetTimeFromServerMod["atrium_gate"] = true -- 远古大门
+    EventTimer.GetTimeFromServerMod["lunarthrall_plantspawner"] = true -- 致命亮茄
+    EventTimer.GetTimeFromServerMod["rift_portal"] = true -- 月亮裂隙信息
+    EventTimer.GetTimeFromServerMod["lunar_riftspawner"] = true -- 月亮裂隙
+    EventTimer.GetTimeFromServerMod["shadow_riftspawner"] = true -- 暗影裂隙
+
+    -- 获取裂隙类型
+    local riftspawner_type, rift_portal_type
+    local function get_rift_type()
+        local is_cave = GetWorldtypeStr() == "cave"
+        riftspawner_type = is_cave and "shadow_riftspawner" or "lunar_riftspawner"
+        rift_portal_type = is_cave and "shadowrift_portal" or "rift_portal"
+    end
+
+    local network_worlds = { "forest", "cave", "shipwrecked", "volcanoworld", "porkland" }
+    for i, world in ipairs(network_worlds) do
+        AddPrefabPostInit(world .. "_network", function(inst)
+            inst:ListenForEvent("hound_time_to_attack_dirty", function(inst)
+                SaveTimeData("hounded", inst.boss_attack_predictor.net_hound_time_to_attack:value()) -- 猎犬/洞穴蠕虫/鳄狗
+            end)
+
+            if bosses_table then
+                for name in pairs(bosses_table.worldtimerkey) do
+                    local time_to_attack_dirty = name .. "_time_to_attack_dirty"
+                    local net_time_to_attack = "net_" .. name .. "_time_to_attack"
+                    if events[name] then
+                        inst:ListenForEvent(time_to_attack_dirty, function(inst)
+                            local timeleft = inst.boss_attack_predictor[net_time_to_attack]:value()
+                            if timeleft == nil or timeleft < 0 then
+                                SaveTimeData(events[name], 0)
+                            else
+                                SaveTimeData(events[name], timeleft)
+                            end
+                        end)
+                    elseif atrium_gate_events[name] then -- 远古大门
+                        local cooldown_mode = atrium_gate_events[name]
+                        inst:ListenForEvent(time_to_attack_dirty, function(inst)
+                            local timeleft = inst.boss_attack_predictor[net_time_to_attack]:value()
+                            if timeleft == nil or timeleft < 0 then
+                                SaveTimeData("atrium_gate", 0)
+                                SaveTextData("atrium_gate", "")
+                            else
+                                SaveTimeData("atrium_gate", timeleft)
+                                SaveTextData("atrium_gate",
+                                    cooldown_mode == 1 and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(timeleft)) or
+                                    cooldown_mode == 2 and string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(timeleft))
+                                )
+                            end
+                        end)
+                    end
+                end
+            else
+                MOD_util:Warning("Boss预测器模组的bosses_table获取失败")
+            end
+
+            -- 裂隙相关
+            local rift_time_to_next_phase, rift_wave_left
+            local rift_current_phase = 0 -- 裂隙阶段默认为0
+            get_rift_type() -- 获取裂隙事件名
+
+            -- 更新裂隙信息
+            local function ReFreshRiftData()
+                if rift_current_phase == 0 and rift_time_to_next_phase then
+                    SaveTimeData(riftspawner_type, rift_time_to_next_phase) -- 裂隙生成倒计时
+                    SaveTextData(rift_portal_type, "") -- 清空裂隙信息
+                elseif rift_current_phase and rift_current_phase > 0 then
+                    SaveTimeData(riftspawner_type, 0) -- 清空裂隙生成倒计时
+                    -- 裂隙阶段信息
+                    local stage_info = string.format(STRINGS.eventtimer.riftspawner.stage, rift_current_phase, TUNING.RIFT_LUNAR1_MAXSTAGE) -- 阶段信息，内容类似：阶段 1 / 3
+                    if rift_time_to_next_phase then
+                        if (rift_portal_type == "rift_portal" and rift_current_phase ~= TUNING.RIFT_LUNAR1_MAXSTAGE) or (rift_portal_type == "shadowrift_portal" and rift_current_phase ~= TUNING.RIFT_SHADOW1_MAXSTAGE) then
+                            stage_info = stage_info .. ": " .. string.format(STRINGS.eventtimer.rift_portal.next_stage, TimeToString(rift_time_to_next_phase)) -- 补充信息：%s后进入下一阶段
+                        elseif rift_portal_type == "shadowrift_portal" and rift_current_phase == TUNING.RIFT_SHADOW1_MAXSTAGE then
+                            stage_info = stage_info .. ": " .. string.format(ReplacePrefabName(STRINGS.eventtimer.shadowrift_portal.close), TimeToString(rift_time_to_next_phase)) -- 暗影裂隙关闭倒计时
+                        end
+                    end
+                    SaveTextData(rift_portal_type, stage_info)
+                end
+            end
+
+            -- 更新亮茄信息
+            local function ReFreshLunarThrallData()
+                local remain_waves, next_wave
+                if rift_wave_left then
+                    remain_waves = string.format(STRINGS.eventtimer.lunarthrall_plantspawner.remain_waves, rift_wave_left)
+                end
+                if rift_current_phase == 3 and rift_time_to_next_phase then
+                    next_wave = string.format(STRINGS.eventtimer.lunarthrall_plantspawner.next_wave, TimeToString(rift_time_to_next_phase))
+                end
+                SaveTextData("lunarthrall_plantspawner", CombineLines(next_wave, remain_waves) or "")
+            end
+
+            inst:ListenForEvent("rift_time_to_next_phase_dirty", function(inst) -- 监听裂隙距离下一阶段剩余时间/亮茄下一波入侵时间
+                local timeleft = inst.boss_attack_predictor.net_rift_time_to_next_phase:value()
+                if timeleft == nil or timeleft < 0 then
+                    rift_time_to_next_phase = nil
+                else
+                    rift_time_to_next_phase = timeleft
+                end
+                ReFreshRiftData()
+                ReFreshLunarThrallData()
+            end)
+            inst:ListenForEvent("rift_current_phase_dirty", function(inst) -- 监听裂隙当前阶段
+                rift_current_phase = inst.boss_attack_predictor.net_rift_current_phase:value()
+                ReFreshRiftData()
+            end)
+            inst:ListenForEvent("rift_wave_left_dirty", function(inst) -- 监听亮茄剩余波数
+                local waveleft = inst.boss_attack_predictor.net_rift_wave_left:value()
+                if waveleft == nil or waveleft < 0 then
+                    rift_wave_left = nil
+                else
+                    rift_wave_left = waveleft
+                end
+                ReFreshLunarThrallData()
+            end)
+        end)
+    end
+end
 
 ----------------------------------------兼容萌萌的新的模组设置---------------------------------------
 
