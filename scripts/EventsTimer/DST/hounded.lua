@@ -95,12 +95,8 @@ local next_wave_is_wormboss, _wave_override_chance
 local remotegettextfn = function(Thread)
     if not TheWorld:HasTag("cave") then return end
     local cmd = [[
-        local self = TheWorld and TheWorld.components.hounded
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        local self = TheWorld.components.hounded
+        if not self then return DataDumper({ not_found = true })end
 
         local next_wave_is_wormboss = BBGOAT_FN.getval(self.DoWarningSpeech, "_wave_pre_upgraded")
         local _wave_override_chance = self:OnSave().wave_override_chance
@@ -134,10 +130,10 @@ info = {
     localgettimefn = localgettimefn,
     remotegettimefn = function(Thread)
         local cmd = [[
-            if TheWorld and TheWorld.components.hounded then
+            if TheWorld.components.hounded then
                 local data = TheWorld.components.hounded:OnSave()
                 local time = data and data.timetoattack
-                return DataDumper({time = time})
+                return DataDumper({ time = time })
             end
             return DataDumper({ not_found = true })
         ]]

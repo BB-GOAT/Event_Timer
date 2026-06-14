@@ -62,7 +62,7 @@ local remotegettextfn = function(Thread)
     if ThePlayer.HUD.WarningEventTimeData.beargerspawner_time == 0 then return end
 
     local cmd = [[
-        local self = TheWorld and TheWorld.components.beargerspawner
+        local self = TheWorld.components.beargerspawner
         if not self then return end
 
         local target = BBGOAT_FN.getval(self.OnUpdate, "_targetplayer")

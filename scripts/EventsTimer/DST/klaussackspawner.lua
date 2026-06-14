@@ -21,11 +21,7 @@ local remotegettextfn = function(Thread)
 
     local cmd = [[
         local self = TheWorld.components.klaussackspawner
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        if not self then return DataDumper({ not_found = true }) end
 
         local function sack_can_despawn(inst)
             if not IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) and
@@ -68,8 +64,9 @@ end
 ----------------------------------------------------------------------------------------------
 
 -- 纯本地获取方式 / 开袋后刷新一遍数据
-AddPrefabPostInit("klaus_sack", function(inst)
-    if not GLOBAL.EventTimer.GetTimeFromServerMod["klaussackspawner"] then
+if not EventTimer.GetTimeFromServerMod["klaussackspawner"] then
+    AddPrefabPostInit("klaus_sack", function(inst)
+        if TheWorld:HasTag("island") or TheWorld:HasTag("volcano") then return end
         inst:ListenForEvent("onremove", function(inst)
             local pos = inst:GetPosition()
             local bundle = TheSim:FindEntities(pos.x, 0, pos.z, 4, {"bundle"}, { 'FX', 'DECOR', 'INLIMBO', 'NOCLICK', 'player' })
@@ -86,8 +83,8 @@ AddPrefabPostInit("klaus_sack", function(inst)
                 end
             end
         end)
-    end
-end)
+    end)
+end
 
 ----------------------------------------------------------------------------------------------
 

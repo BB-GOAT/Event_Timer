@@ -1,52 +1,50 @@
-local _eruption
-local _eruption_timer
-
+local target_time_interval
 local info
 info = {
     postinitfn = function()
-        if TheNet:GetIsServer() then
-            local network_worlds = {
-                "shipwrecked",
-                "volcanoworld",
-            }
-            for i, world in ipairs(network_worlds) do
-                AddPrefabPostInit(world .. "_network", function()
-                    local self = TheWorld.net.components.volcanoactivity
-                    if not self then return end
-                    _eruption = Upvaluehelper.GetUpvalue(self.OnUpdate, "_eruption") -- 火山是否正在爆发
-                    _eruption_timer = Upvaluehelper.GetUpvalue(self.OnUpdate, "_eruption_timer")
-
-                    info.DisableShardRPC = TheWorld:HasTag("volcano") -- 火山世界不同步倒计时，海难世界同步
-                end)
+        AddPrefabPostInit("world", function()
+            if GetWorldtypeStr() ~= "shipwrecked" then
+                info.tipsfn = nil -- 非海难火山世界不提示火山爆发
             end
-        else
-            AddPrefabPostInit("world", function()
-                if GetWorldtypeStr() ~= "shipwrecked" then
-                    info.tipsfn = nil -- 非海难火山世界不提示火山爆发
-                end
-            end)
-        end
+        end)
     end,
-    gettimefn = function()
-        local self = TheWorld.net.components.volcanoactivity
-        if not self then return end
-        if not _eruption then return end
+    remotegettimefn = function(Thread)
+        local cmd = [[
+            local self = TheWorld.net.components.volcanoactivity
+            if not self then return DataDumper({ not_found = true }) end
 
-        local remaining_time
-        local _firerain_duration = Upvaluehelper.GetUpvalue(self.OnUpdate, "_firerain_duration")
-
-        if _eruption:value() then
-            remaining_time = _firerain_duration - _eruption_timer:value()
-        end
-
-        return remaining_time
+            local _eruption = BBGOAT_FN.getval(self.OnUpdate, "_eruption")
+            local _eruption_timer = BBGOAT_FN.getval(self.OnUpdate, "_eruption_timer")
+            local _firerain_duration = BBGOAT_FN.getval(self.OnUpdate, "_firerain_duration")
+            local remaining_time
+            if _eruption and _eruption:value() then
+                remaining_time = _firerain_duration - _eruption_timer:value()
+            end
+            return DataDumper({ time = remaining_time })
+        ]]
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res and res.err then
+                SaveTimeData("volcanoactivity", 0)
+                SaveTextData("volcanoactivity", "")
+                print('[警告] volcanoactivity remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("volcanoactivity", res.time)
+                SaveTextData("volcanoactivity", res.time > 0 and string.format(STRINGS.eventtimer.volcanoactivity.eruption, TimeToString(res.time)) or "")
+                target_time_interval = res.time + 1
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            else -- 火山未爆发
+                SaveTimeData("volcanoactivity", 0)
+                SaveTextData("volcanoactivity", "")
+                local time = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.volcanomanager_time
+                target_time_interval = time ~= 0 and (time + 1) or nil
+            end
+        end)
     end,
-    gettextfn = function(remaining_time)
-        return remaining_time and remaining_time > 0 and
-            string.format(
-                STRINGS.eventtimer.volcanoactivity.eruption,
-                TimeToString(remaining_time)
-        )
+    remotegettimefninterval = function()
+        return target_time_interval
     end,
     image = {
         atlas = "images/Volcano_Active.xml",

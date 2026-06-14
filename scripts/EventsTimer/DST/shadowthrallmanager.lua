@@ -16,11 +16,7 @@ local THRALL_NAMES = setmetatable({
 local remotegettextfn = function(Thread)
     local cmd = [[
         local self = TheWorld.components.shadowthrallmanager
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        if not self then return DataDumper({ not_found = true }) end
 
         local data = self:OnSave()
         local fissure = self:GetControlledFissure()

@@ -2,10 +2,10 @@ local info
 info = {
     remotegettimefn = function(Thread)
         local cmd = [[
-            if TheWorld and TheWorld.components.deerherdspawner then
+            if TheWorld.components.deerherdspawner then
                 local data = TheWorld.components.deerherdspawner:OnSave()
                 local time = data and data._timetospawn
-                return DataDumper({time = time})
+                return DataDumper({ time = time })
             end
             return DataDumper({ not_found = true })
         ]]

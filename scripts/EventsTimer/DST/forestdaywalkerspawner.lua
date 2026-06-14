@@ -6,11 +6,7 @@ local remotegettimefn = function(Thread)
 
     local cmd = [[
         local self = TheWorld.components.forestdaywalkerspawner
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        if not self then return DataDumper({ not_found = true }) end
         local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
         if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "forestjunkpile" or self.daywalker ~= nil or self.bigjunk ~= nil or not self.days_to_spawn then
             return
@@ -45,11 +41,7 @@ local remotegettextfn = function(Thread)
 
     local cmd = [[
         local self = TheWorld.components.forestdaywalkerspawner
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        if not self then return DataDumper({ not_found = true }) end
         return DataDumper({bigjunk = self.bigjunk ~= nil, daywalker = self.daywalker ~= nil})
     ]]
 

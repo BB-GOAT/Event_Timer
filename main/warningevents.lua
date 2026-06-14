@@ -49,13 +49,13 @@ end
 
 local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
     ---------------------------------------- IA-SW ---------------------------------------
-    -- chessnavy = RequireEvent("IslandAdventures/chessnavy"), -- 浮船骑士
-    -- volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"), -- 火山爆发剩余时间
-    -- volcanomanager = RequireEvent("IslandAdventures/volcanomanager"), -- 距离火山开始爆发的倒计时
+    chessnavy = RequireEvent("IslandAdventures/chessnavy"), -- 浮船骑士(无法纯本地)
+    volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"), -- 火山爆发剩余时间(无法纯本地)
+    volcanomanager = RequireEvent("IslandAdventures/volcanomanager"), -- 距离火山开始爆发的倒计时(无法纯本地)
     twisterspawner = RequireEvent("IslandAdventures/twisterspawner"), -- 豹卷风
-    -- krakener = RequireEvent("IslandAdventures/krakener"), -- 海妖
-    -- tigersharker = RequireEvent("IslandAdventures/tigersharker"), -- 虎鲨
-    -- islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"), -- 热带赃物袋
+    krakener = RequireEvent("IslandAdventures/krakener"), -- 海妖(纯本地不可靠，海妖刷新倒计时不会同步)
+    tigersharker = RequireEvent("IslandAdventures/tigersharker"), -- 虎鲨(无法纯本地)
+    islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"), -- 热带赃物袋
 } or {}
 
 -- 将海难计时添加到WarningEvents

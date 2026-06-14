@@ -1,11 +1,7 @@
 local remotegettextfn = function(Thread)
     local cmd = [[
             local self = TheWorld.components.messagebottlemanager
-            if not self then
-                return DataDumper({
-                    not_found = true
-                })
-            end
+            if not self then return DataDumper({ not_found = true }) end
             local count = 0
             for _ in pairs(self.active_treasure_hunt_markers) do
                 count = count + 1

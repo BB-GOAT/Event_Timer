@@ -5,11 +5,7 @@ info = {
     remotegettimefn = function(Thread)
         local cmd = [[
             local self = TheWorld.net.components.quaker
-            if not self then
-                return DataDumper({
-                    not_found = true
-                })
-            end
+            if not self then return DataDumper({ not_found = true }) end
             local _task = BBGOAT_FN.getval(self.GetDebugString, "_task")
             if _task and GetTaskRemaining(_task) then
                 local time = GetTaskRemaining(_task)

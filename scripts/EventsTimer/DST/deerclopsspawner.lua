@@ -62,12 +62,8 @@ local remotegettextfn = function(Thread)
     if ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time == 0 then return end
 
     local cmd = [[
-        local self = TheWorld and TheWorld.components.deerclopsspawner
-        if not self then
-            return DataDumper({
-                not_found = true
-            })
-        end
+        local self = TheWorld.components.deerclopsspawner
+        if not self then return DataDumper({ not_found = true }) end
 
         local target = BBGOAT_FN.getval(self.OnUpdate, "_targetplayer")
         local name = target and target.name

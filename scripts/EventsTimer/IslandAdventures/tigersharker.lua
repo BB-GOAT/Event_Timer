@@ -1,26 +1,87 @@
-local info
-info = {
-    gettimefn = function()
+local remotegettimefn = function(Thread)
+    local cmd = [[
         local self = TheWorld.components.tigersharker
-        if not self then return end
+        if not self then return DataDumper({ not_found = true }) end
+
         local appear_time = self:TimeUntilCanAppear()
         local respawn_time = self:TimeUntilRespawn()
-        return math.max(appear_time, respawn_time)
-    end,
-    gettextfn = function(time)
+        local time = math.max(appear_time, respawn_time)
+        return DataDumper({ time = time })
+    ]]
+    BBGOAT_util:remote(cmd, nil, function(res)
+        if res and res.err then
+            SaveTimeData("tigersharker", 0)
+            print('[警告] tigersharker remotegettimefn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res and res.time then
+            SaveTimeData("tigersharker", res.time)
+        elseif res and res.not_found then
+            -- 取消数据更新任务
+            if Thread then KillThreadsWithID(Thread.id) end
+        end
+    end)
+end
+
+----------------------------------------------------------------------------------------------
+
+local remotegettextfn = function(Thread)
+    local cmd = [[
         local self = TheWorld.components.tigersharker
-        if not self then return end
+        if not self then return DataDumper({ not_found = true })end
         if self.shark then
-            return ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
+            return DataDumper({ shark = self.shark })
         elseif self:CanSpawn(true, true) then
-            if time and time > 0 then
-                return string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time))
-            else
-                return STRINGS.eventtimer.tigersharker.readytext
+            return DataDumper({ canspawn = true })
+        end
+        return DataDumper({ nospawn = true })
+    ]]
+
+    BBGOAT_util:remote(cmd, nil, function(res)
+        if res and res.err then
+            SaveTextData("tigersharker", "")
+            print('[警告] tigersharker remotegettextfn error:', res.err)
+            if Thread then KillThreadsWithID(Thread.id) end
+        elseif res then
+            local shark = res.shark
+            local canspawn = res.canspawn
+            local nospawn = res.nospawn
+            if shark then
+                SaveTextData("tigersharker", ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
+            elseif canspawn then
+                local time = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.tigersharker_time
+                if time and time > 0 then
+                    SaveTextData("tigersharker", string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time)))
+                else
+                    SaveTextData("tigersharker", STRINGS.eventtimer.tigersharker.readytext)
+                end
+            elseif nospawn then
+                SaveTextData("tigersharker", ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
             end
         end
-        return ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn)
-    end,
+    end)
+end
+
+----------------------------------------------------------------------------------------------
+
+-- 虎鲨出现/消失时刷新数据
+if not EventTimer.GetTimeFromServerMod["tigersharker"] and EventTimer.GetTimeFromRemoteCommand then
+    AddPrefabPostInit("tigearshark", function(inst)
+        -- remotegettimefn() -- 时间理论上是0，更新了个寂寞
+        remotegettextfn()
+        inst:ListenForEvent("onremove", function()
+            remotegettimefn()
+            remotegettextfn()
+        end)
+    end)
+end
+
+----------------------------------------------------------------------------------------------
+
+local info
+info = {
+    remotegettimefn = remotegettimefn,
+    remotegettextfn = remotegettextfn,
+    DisableClientPredictionClearText = true,
     anim = {
         scale = 0.03,
         bank = "tigershark",

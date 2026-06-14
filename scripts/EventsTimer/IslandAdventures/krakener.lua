@@ -1,17 +1,29 @@
 local info
 info = {
-    gettimefn = function()
-        if TheWorld.components.krakener then
-            return TheWorld.components.krakener:TimeUntilCanSpawn()
-        end
+    remotegettimefn = function(Thread)
+        local cmd = [[
+            if TheWorld.components.krakener then
+                local time = TheWorld.components.krakener:TimeUntilCanSpawn()
+                return DataDumper({ time = time })
+            end
+            return DataDumper({ not_found = true })
+        ]]
+        BBGOAT_util:remote(cmd, nil, function(res)
+            if res and res.err then
+                SaveTimeData("krakener", 0)
+                SaveTextData("krakener", "")
+                print('[警告] krakener remotegettimefn error:', res.err)
+                if Thread then KillThreadsWithID(Thread.id) end
+            elseif res and res.time then
+                SaveTimeData("krakener", res.time)
+                SaveTextData("krakener", res.time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(res.time)) or ReplacePrefabName(STRINGS.eventtimer.krakener.ready))
+            elseif res and res.not_found then
+                -- 取消数据更新任务
+                if Thread then KillThreadsWithID(Thread.id) end
+            end
+        end)
     end,
-    gettextfn = function(time)
-        if not TheWorld.components.krakener then return end
-        if time and time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
-        end
-        return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
-    end,
+    DisableClientPredictionClearText = true,
     anim = {
         scale = 0.027,
         bank = "quacken",
