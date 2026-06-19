@@ -9,9 +9,6 @@ local remotegettextfn = function(Thread)
         end
         local self = TheWorld.components.lunarthrall_plantspawner
         if not self then return end
-        if count == 0 and not self.waves_to_release then
-            return
-        end
 
         return DataDumper(
             {
@@ -36,10 +33,10 @@ local remotegettextfn = function(Thread)
             end
             local description = string.format(STRINGS.eventtimer.lunarthrall_plantspawner.infested_count, res.count)
             if res._nextspawn then
-                remotegettextfninterval = res._nextspawn
+                remotegettextfninterval = res._nextspawn + 5
                 description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.spawn, TimeToString(res._nextspawn))
             elseif res._spawntask then
-                remotegettextfninterval = res._spawntask
+                remotegettextfninterval = res._spawntask + 5
                 description = description .. "\n" .. string.format(STRINGS.eventtimer.lunarthrall_plantspawner.next_wave, TimeToString(res._spawntask))
             end
             if res.waves_to_release and res.waves_to_release > 0 then

@@ -53,7 +53,7 @@ local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
     volcanoactivity = RequireEvent("IslandAdventures/volcanoactivity"), -- 火山爆发剩余时间(无法纯本地)
     volcanomanager = RequireEvent("IslandAdventures/volcanomanager"), -- 距离火山开始爆发的倒计时(无法纯本地)
     twisterspawner = RequireEvent("IslandAdventures/twisterspawner"), -- 豹卷风
-    krakener = RequireEvent("IslandAdventures/krakener"), -- 海妖(纯本地不可靠，海妖刷新倒计时不会同步)
+    krakener = RequireEvent("IslandAdventures/krakener"), -- 海妖(纯本地不可靠，服务器的海妖重生所需时间不会同步到客户端)
     tigersharker = RequireEvent("IslandAdventures/tigersharker"), -- 虎鲨(无法纯本地)
     islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"), -- 热带赃物袋
 } or {}

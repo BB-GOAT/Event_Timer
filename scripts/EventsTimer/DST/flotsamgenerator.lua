@@ -27,7 +27,7 @@ info = {
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.time then
                 SaveTimeData("flotsamgenerator", res.time)
-                target_time_interval = res.time + 1
+                target_time_interval = res.time + 5
             elseif res and res.not_found then
                 -- 取消数据更新任务
                 if Thread then KillThreadsWithID(Thread.id) end
