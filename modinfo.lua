@@ -28,7 +28,7 @@ api_version = 10
 永不妥协公开测试版 priority = -10
 热带冒险 priority = -100
 ]]
-priority = -100010 -- 模组加载优先级
+priority = -100 -- 模组加载优先级
 
 dst_compatible = true -- 兼容联机版
 dont_starve_compatible = false -- 不兼容单机版

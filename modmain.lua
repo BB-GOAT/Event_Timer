@@ -12,6 +12,98 @@ if TUNING.GlobalEventsTimerEnabled then
     return
 end
 
+----------------------------------------加载我的工具---------------------------------------
+
+if not rawget(GLOBAL, "BBGOAT_utils") then
+    if TUNING.suggest_to_subscribe_bbgoat_basementmod then
+        return
+    end
+    TUNING.suggest_to_subscribe_bbgoat_basementmod = true
+
+	local function should_show_dig()
+		if TheNet:IsDedicated() then
+			return false
+		end
+		if not TheFrontEnd then
+			return false
+		end
+		if IsMigrating() then
+			return false
+		end
+		return not InGamePlay()
+	end
+
+	local _languages = {
+		zh = true, --Chinese for Steam
+		zhr = true, --Chinese for WeGame
+		ch = true, --Chinese mod
+		chs = true, --Chinese mod
+		sc = true, --simple Chinese
+		chinese = true, --Chinese mod
+		zht = true, --traditional Chinese for Steam
+		tc = true, --traditional Chinese
+		cht = true, --Chinese mod
+	}
+	local lang = _G.LanguageTranslator and _G.LanguageTranslator.defaultlang
+	local isCH = lang and _languages[lang]
+
+    AddGamePostInit(function()
+        TheGlobalInstance:DoTaskInTime(0.1, function()
+            if not should_show_dig() then return end
+            local PopupDialogScreen = require "screens/redux/popupdialog"
+            TheFrontEnd:PushScreen(PopupDialogScreen(
+                modinfo.name,
+                isCH and "模组基础运行库缺失！\n你缺少了模组基础运行库，你必须去订阅才能继续使用本模组" or
+                        "Mod Runtime Library Missing!\nYou are missing the required runtime library for this mod. Please subscribe to it before continuing to use this mod.",
+                {
+                    {
+                        text = isCH and "订阅/启用运行库模组" or "Subscribe/Enable mod",
+                        cb = function()
+                            local modname = "workshop-3750536829"
+                            if table.contains(TheSim:GetModDirectoryNames(), modname) then
+                                KnownModIndex:Enable(modname)
+                                KnownModIndex:Save()
+                                TheGlobalInstance:DoTaskInTime(0.5, function()
+                                    TheNet:Disconnect(true)
+                                    TheSim:ResetError()
+                                    StartNextInstance()
+                                end)
+                            else
+                                VisitURL("https://steamcommunity.com/sharedfiles/filedetails/?id=3750536829")
+                                TheSim:SubscribeToMod("workshop-3750536829")
+                                TheFrontEnd:PopScreen()
+                                TheFrontEnd:PushScreen(PopupDialogScreen(
+                                    isCH and "已订阅" or "Subscribed",
+                                    isCH and "请前往模组列表启用【冰冰羊的模组运行库】模组" or "Please go to the mod list to enable the runtime library mod named\n\"BBGOAT Utils\"",
+                                    {
+                                        {
+                                            text = isCH and "好的" or "OK",
+                                            cb = function()
+                                                TheFrontEnd:PopScreen()
+                                            end
+                                        }
+                                    }
+                                ))
+                            end
+                        end
+                    },
+                    {
+                        text = isCH and "返回" or "Back",
+                        cb = function()
+                            TheFrontEnd:PopScreen()
+                        end
+                    },
+                }
+            ))
+        end)
+    end)
+    return
+end
+
+Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper
+MOD_util = GLOBAL.BBGOAT_utils.MOD_util
+BBGOAT_util = GLOBAL.BBGOAT_utils.BBGOAT_util
+
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
@@ -87,7 +179,7 @@ else
     ModLanguage = "en"
 end
 
-modimport("scripts/bbgoat_utils/utils") -- 加载模组工具
+local PersistentData = GLOBAL.BBGOAT_utils.PersistentData
 RW_Data = PersistentData('mod_config_data/Events_Timer.json') -- 存取数据
 RW_Data:Load()
 
@@ -113,6 +205,18 @@ GLOBAL.EventTimer = EventTimer
 modimport("Languages/" .. ModLanguage) -- 加载模组字符串
 
 ----------------------------------------定义模组环境函数---------------------------------------
+
+function Import(file_name, file_env)
+	local f = GLOBAL.kleiloadlua(file_name)
+	if f and type(f) == "function" then
+        GLOBAL.setfenv(f, file_env or env)
+        return f()
+	else
+		local info = debug.getinfo(3)
+		local filename, line = info.source or "???", info.currentline or "???"
+		print("[警告] Import文件失败，文件名: " .. file_name .. "\n本函数调用于 " .. tostring(filename) .. ":" .. tostring(line))
+	end
+end
 
 -- 判断某个模组是否加载
 function Ismodloaded(name)
@@ -561,6 +665,7 @@ end
 
 ----------------------------------------加载模组---------------------------------------
 
+modimport("main/fe_patches.lua") -- 动态模组图标
 modimport("keybind") -- 键位绑定优化
 -- modimport("main/commands") -- 调试指令
 modimport("main/UI") -- 屏幕左上角倒计时/面板开关按钮/醒目提示UI
