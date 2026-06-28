@@ -12,7 +12,7 @@ local function BeequeenhiveGrown()
 
     if timer:GetTimeLeft("hivegrowth1") then
         return 2 * stagetimne + timer:GetTimeLeft("hivegrowth1")
-    elseif TimerPrefabs["beequeenhive"].components.timer:GetTimeLeft("hivegrowth2") then
+    elseif timer:GetTimeLeft("hivegrowth2") then
         return stagetimne + timer:GetTimeLeft("hivegrowth2")
     else
         return timer:GetTimeLeft("hivegrowth")

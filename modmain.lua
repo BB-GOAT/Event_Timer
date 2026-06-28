@@ -7,6 +7,8 @@ GLOBAL.setmetatable(env, {
     end
 })
 
+TUNING.GlobalEventsTimerEnabled = true
+
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
@@ -83,8 +85,37 @@ else
 end
 
 modimport("Languages/" .. ModLanguage) -- 加载模组字符串
-modimport("scripts/bbgoat_utils/utils") -- 加载模组工具
 modimport("main/timerprefab")
+
+----------------------------------------加载模组工具---------------------------------------
+
+function Import(file_name, file_env)
+	local f = GLOBAL.kleiloadlua(file_name)
+	if f and type(f) == "function" then
+        GLOBAL.setfenv(f, file_env or env)
+        return f()
+	else
+		local info = debug.getinfo(3)
+		local filename, line = info.source or "???", info.currentline or "???"
+		print("[警告] Import文件失败，文件名: " .. file_name .. "\n本函数调用于 " .. tostring(filename) .. ":" .. tostring(line))
+	end
+end
+
+if not rawget(GLOBAL, "BBGOAT_utils") then
+    modimport("scripts/bbgoat_utils/utils")
+    AddPrefabPostInit("world", function(inst)
+        inst:DoTaskInTime(5, function()
+            local modname = modinfo.name
+            local zh_str = "提示：【" .. modname .. "】mod下个版本开始需要【冰冰羊的模组运行库】mod才能正常运行\n请提前前往创意工坊订阅并在服务器上开启【冰冰羊的模组运行库】模组"
+            local en_str = "Important: Beginning with the next update, 【" .. modname .. "】 will depend on 【BBGOAT Utils】 to work correctly.\nPlease subscribe to 【BBGOAT Utils】 from the Steam Workshop and enable it on your server before updating."
+            c_announce(ModLanguage == "zh" and zh_str or en_str)
+        end)
+    end)
+else
+    PersistentData = GLOBAL.BBGOAT_utils.PersistentData
+    Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper
+    MOD_util = GLOBAL.BBGOAT_utils.MOD_util
+end
 
 ----------------------------------------定义模组环境函数---------------------------------------
 

@@ -6,10 +6,7 @@ info = {
         if not self then return end
         local data = self:OnSave()
         if data.roc then
-            return  ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)
-        end
-        if time and time > 0 then
-            return TimeToString(time)
+            return ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)
         end
     end,
     image = {

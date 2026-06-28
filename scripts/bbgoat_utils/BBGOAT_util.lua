@@ -1,4 +1,4 @@
--- 本文件更新时间：2026年5月7日
+-- 本文件更新时间：2026年6月19日
 local Upvaluehelper = Upvaluehelper
 local MOD_util = MOD_util
 
@@ -57,12 +57,21 @@ function BBGOAT_util:GetNextRPCode(random_mode)
     MOD_util:Warning("BBGOAT_util:GetNextRPCode 执行失败", 3)
 end
 
+-- 记录我创建的临时RPC_HANDLERS
+local Tmp_CLIENT_RPC_HANDLERS = rawget(_G, "BBGOAT_util_Tmp_CLIENT_RPC_HANDLERS")
+if not Tmp_CLIENT_RPC_HANDLERS then
+    Tmp_CLIENT_RPC_HANDLERS = {}
+    rawset(_G, "BBGOAT_util_Tmp_CLIENT_RPC_HANDLERS", Tmp_CLIENT_RPC_HANDLERS)
+end
+
 ---@param found_i number
 ---@param cb function|nil
 -- 创建临时使用的回调函数
 local function Create_Tmp_CLIENT_RPC_HANDLERS(found_i, cb)
+    if not found_i then return end
     CLIENT_RPC_HANDLERS[found_i] = function(str)
         CLIENT_RPC_HANDLERS[found_i] = nil
+        Tmp_CLIENT_RPC_HANDLERS[found_i] = nil
         if cb then
             if str and type(str) == "string" then
                 local fn, message = loadstring(str)
@@ -82,6 +91,11 @@ local function Create_Tmp_CLIENT_RPC_HANDLERS(found_i, cb)
             end
         end
     end
+    Tmp_CLIENT_RPC_HANDLERS[found_i] = CLIENT_RPC_HANDLERS[found_i]
+end
+
+function BBGOAT_util:Get_Tmp_CLIENT_RPC_HANDLERS()
+    return Tmp_CLIENT_RPC_HANDLERS
 end
 
 ---@param cmd string 发给服务器执行的代码
@@ -111,28 +125,44 @@ if not rawget(_G, "BBGOAT_FN") then
     rawset(_G, "BBGOAT_FN", {})
 end
 if not BBGOAT_FN.getval then
-    local visit = {}
     BBGOAT_FN.getval = function(fn, str)
-        if visit[fn] then return end
-        visit[fn] = true
-        for i = 1, math.huge do
-            local name, val = debug.getupvalue(fn, i)
-            if not name then break end
-            if name == str then visit = {} return val end
-            if type(val) == "function" then
-                local found = GetUpvalue(val, str)
-                if found then visit = {} return found end
+        local visit = {}
+        local function search(fn)
+            if visit[fn] then return end
+            visit[fn] = true
+            for i = 1, math.huge do
+                local name, val = debug.getupvalue(fn, i)
+                if not name then break end
+                if name == str then return val end
+                if type(val) == "function" then
+                    local found = search(val)
+                    if found then return found end
+                end
             end
         end
+        return search(fn)
     end
 end]]
 
-local bbgoat_remote_rpc_code -- TODO: 在不同模组中加载这个工具文件时，该变量的值不同步
+local bbgoat_remote_rpc_code
+
+function BBGOAT_util:SetRemoteRPCCode(rpc_code)
+    TUNING.bbgoat_remote_rpc_code = rpc_code
+end
+function BBGOAT_util:GetRemoteRPCCode()
+    return TUNING.bbgoat_remote_rpc_code
+end
+
+
 ---@param cmd string|nil 具体命令
 ---@param inst table|nil 实体
 ---@param callback function|nil 回调函数
 ---@param fastmode boolean|nil 快速执行（如果指令需要在玩家生成前就完成，则需要为true）
 function BBGOAT_util:remote(cmd, inst, callback, fastmode)
+    if not bbgoat_remote_rpc_code then
+        bbgoat_remote_rpc_code = BBGOAT_util:GetRemoteRPCCode()
+    end
+
     if not bbgoat_remote_rpc_code then
         local res_cmd = [[
 local RPC_HANDLERS = BBGOAT_FN.getval(SendRPCToServer, "RPC_HANDLERS")
@@ -173,6 +203,7 @@ BBGOAT_FN.bbgoat_remote_rpc_code = bbgoat_remote_rpc_code
                 if not (res and res.done) then -- 未注册
                     c_remote(ResServerBBGOATFNdefined) -- 初始化BBGOATFN
                     bbgoat_remote_rpc_code = BBGOAT_util:GetNextRPCode()
+                    BBGOAT_util:SetRemoteRPCCode(bbgoat_remote_rpc_code)
                     if not RPC_HANDLERS[bbgoat_remote_rpc_code] then RPC_HANDLERS[bbgoat_remote_rpc_code] = function() end end -- 占位RPC
                     TheGlobalInstance:DoTaskInTime(0, function()
                         c_remote(string.format(res_cmd, bbgoat_remote_rpc_code)) -- 注册rpc_code
@@ -188,6 +219,7 @@ BBGOAT_FN.bbgoat_remote_rpc_code = bbgoat_remote_rpc_code
                     function(res)
                         if res and res.code then
                             bbgoat_remote_rpc_code = res.code
+                            BBGOAT_util:SetRemoteRPCCode(bbgoat_remote_rpc_code)
                             if not RPC_HANDLERS[bbgoat_remote_rpc_code] then RPC_HANDLERS[bbgoat_remote_rpc_code] = function() end end
                             -- 发送需要执行的命令
                             TheGlobalInstance:DoTaskInTime(0, function()
@@ -197,6 +229,7 @@ BBGOAT_FN.bbgoat_remote_rpc_code = bbgoat_remote_rpc_code
                             end)
                         else
                             bbgoat_remote_rpc_code = BBGOAT_util:GetNextRPCode()
+                            BBGOAT_util:SetRemoteRPCCode(bbgoat_remote_rpc_code)
                             if not RPC_HANDLERS[bbgoat_remote_rpc_code] then RPC_HANDLERS[bbgoat_remote_rpc_code] = function() end end -- 占位RPC
                             TheGlobalInstance:DoTaskInTime(0, function()
                                 c_remote(string.format(res_cmd, bbgoat_remote_rpc_code)) -- 注册rpc_code
@@ -214,6 +247,7 @@ BBGOAT_FN.bbgoat_remote_rpc_code = bbgoat_remote_rpc_code
         else
             -- 无视服务器状态覆盖注册
             bbgoat_remote_rpc_code = BBGOAT_util:GetNextRPCode() -- 理论上所有人获取到的值是一样的
+            BBGOAT_util:SetRemoteRPCCode(bbgoat_remote_rpc_code)
             if not RPC_HANDLERS[bbgoat_remote_rpc_code] then RPC_HANDLERS[bbgoat_remote_rpc_code] = function() end end -- 占位RPC
             -- 服务器初始化
             c_remote(string.format(ResServerBBGOATFNdefined .. "\n" .. res_cmd, bbgoat_remote_rpc_code))

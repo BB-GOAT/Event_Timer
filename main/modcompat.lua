@@ -3,7 +3,6 @@ local AddPrefabPostInit = AddPrefabPostInit
 local ModLanguage = ModLanguage
 local zh = ModLanguage == "zh"
 local RW_Data = RW_Data
-local MOD_util = MOD_util
 GLOBAL.setfenv(1, GLOBAL)
 
 -- 判断某个模组是否加载
@@ -62,6 +61,10 @@ end)
 ----------------------------------------兼容萌萌的新的模组设置---------------------------------------
 
 if TheNet:IsDedicated() then return end
+if not rawget(_G, "MOD_util") then
+    print("[全局事件计时器] 未检测到玩家开启萌萌的新的【基础运行库】")
+    return
+end
 if not MOD_util:CanAddSetting() then
     print("[全局事件计时器] 未检测到玩家开启萌萌的新的【模组设置】")
 	return

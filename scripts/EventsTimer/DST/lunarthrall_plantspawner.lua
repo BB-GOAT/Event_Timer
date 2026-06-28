@@ -8,10 +8,6 @@ info = {
         if not TheNet:GetIsServer() then return end
         -- 存储世界上亮茄的数量
         AddPrefabPostInit("lunarthrall_plant", function(inst)
-            -- if not TheWorld.ismastersim then
-            --     return
-            -- end
-
             table.insert(lunarthrall_plant_table, inst)
             inst:ListenForEvent("onremove", function(inst)
                 local index = table.reverselookup(lunarthrall_plant_table, inst)

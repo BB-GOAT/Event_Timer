@@ -1,15 +1,3 @@
-function Import(file_name, file_env)
-	local f = GLOBAL.kleiloadlua(file_name)
-	if f and type(f) == "function" then
-        GLOBAL.setfenv(f, file_env or env)
-        return f()
-	else
-		local info = debug.getinfo(3)
-		local filename, line = info.source or "???", info.currentline or "???"
-		print("[警告] Import文件失败，文件名: " .. file_name .. "\n本函数调用于 " .. tostring(filename) .. ":" .. tostring(line))
-	end
-end
-
 local function require_util(file_name, file_env)
 	file_name = MODROOT .. "scripts/bbgoat_utils/" .. file_name
 	return Import(file_name, file_env)

@@ -1,7 +1,7 @@
 local info
 info ={
     gettimefn = GetWorldSettingsTimeLeft("klaussack_spawntimer"),
-    gettextfn = function(time)
+    gettextfn = function()
         local self = TheWorld.components.klaussackspawner
         if not self then return end
 
@@ -17,8 +17,6 @@ info ={
         local sack = Upvaluehelper.GetUpvalue(self.GetDebugString, "_sack")
         if sack and sack:IsValid() and sack.despawnday and sack_can_despawn(sack) then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.despawntext), sack.despawnday)
-        else
-            return time and TimeToString(time)
         end
     end,
     anim = {

@@ -37,7 +37,7 @@ info = {
     DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.farming_manager_time
-        if time and time > 0 then
+        if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(time))
         end
     end,

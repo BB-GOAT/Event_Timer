@@ -34,6 +34,7 @@ GameEvents = {
     lunar_riftspawner = RequireEvent("DST/lunar_riftspawner"),
     shadow_riftspawner = RequireEvent("DST/shadow_riftspawner"),
     rift_portal = RequireEvent("DST/rift_portal"),
+    walrus_camp = RequireEvent("DST/walrus_camp"),
 
     ---------------------------------------- Cave ----------------------------------------
 

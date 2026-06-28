@@ -17,13 +17,14 @@ You can tick the checkbox on the right side of the panel to keep the timer alway
 点击事件可宣告其信息
 ]])
 author = "冰冰羊，Jerry"
-version = "0.2.05" -- 模组版本
-version_compatible = "0.2.05" -- 最低兼容版本
+version = "0.2.06" -- 模组版本
+version_compatible = "0.2.06" -- 最低兼容版本
 api_version = 10
 
 --[[
 岛屿冒险-海难 priority = 4
 岛屿冒险-猪镇 priority = 3
+云霄国度 priority = -1
 永不妥协 priority = -10
 永不妥协公开测试版 priority = -10
 热带冒险 priority = -100
