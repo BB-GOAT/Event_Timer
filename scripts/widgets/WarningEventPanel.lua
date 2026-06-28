@@ -232,7 +232,7 @@ end)
 function WarningEventHUD:UpdateDestItem()
     local data_list = {}
     local eventsdata = ThePlayer.HUD.WarningEventTimeData
-    for name, value in pairs(WarningEvents) do
+    for name, value in pairs(ClientWarningEvents) do
         local datatext = eventsdata[name .. "_text"]
         local datatime = eventsdata[name .. "_time"]
         value.name = name -- name在这定义，注意这一点

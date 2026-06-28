@@ -1,7 +1,7 @@
 -- main, what can i say?
 
 -- 本地预测时间数据
-for k, v in pairs(GLOBAL.WarningEvents) do
+for k, v in pairs(GLOBAL.ClientWarningEvents) do
     if not (GLOBAL.EventTimer.GetTimeFromServerMod[k] or GLOBAL.EventTimer.GetTimeFromRemoteCommand) then
         if v.localgettimefn then
             v.localgettimefn()
@@ -21,7 +21,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
         local MainThread
         local GetTimeThreadList, GetTextThreadList = {}, {}
         local MainFn = function()
-            for warningevent, data in pairs(GLOBAL.WarningEvents) do
+            for warningevent, data in pairs(GLOBAL.ClientWarningEvents) do
                 if data.remotegettimefn and (not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] or data.ForceEnableRemotegettimefn) then
                     GetTimeThreadList[warningevent] = GLOBAL.StartThread(function()
                         local co = GLOBAL.coroutine.running()
@@ -48,8 +48,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
                         local co = GLOBAL.coroutine.running()
                         while true do
                             if not GLOBAL.scheduler.tasks[co] then break end
-                            local ThePlayer = GLOBAL.ThePlayer
-                            if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData then
+                            if check_ThePlayer() then
                                 -- print("DEBUG: 正在触发事件" .. warningevent .. "的远程textfn")
                                 data.remotegettextfn(GetTextThreadList[warningevent]) -- 存数据的过程应该在fn内完成
                             end

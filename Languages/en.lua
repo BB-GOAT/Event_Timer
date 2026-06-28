@@ -221,12 +221,13 @@ STRINGS.eventtimer = {
     banditmanager = {
         cooldown = "Try to spawn in: %s\n[Stolen Oincs: %s , Active Bandit: %s]",
         announce_cooldown = "<prefab=pigbandit> will try to spawn in %s    Currently stolen Oincs: %s",
+        announce_time = "<prefab=pigbandit> will try to spawn in %s",
         ready = "<prefab=pigbandit> is present. Currently stolen Oincs: %s",
         readytext = "<prefab=pigbandit> is present.\nCurrently stolen Oincs: %s",
         tips = "WARNING: <prefab=pigbandit> is present!",
     },
     aporkalypse = {
-        cooldown = "The Aporkalypse will arrive in %s.",
+        cooldown = "The Aporkalypse will arrive in %s",
         attack = "Next <prefab=vampirebat> attack: %s\nNext <prefab=ancient_herald> attack: %s",
         announce_attack = "Next <prefab=vampirebat>attack: %s    Next <prefab=ancient_herald> attack: %s",
         tips = "WARNING: The Aporkalypse will arrive in %s.",

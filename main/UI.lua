@@ -128,7 +128,7 @@ local function AddWarningEvents(self)
 
     -- 屏幕左上角倒计时
     local eventstime = {}
-    for warningevent, data in pairs(WarningEvents) do
+    for warningevent, data in pairs(ClientWarningEvents) do
         eventstime[warningevent .. "_text"] = ""
         eventstime[warningevent .. "_time"] = 0
 
@@ -143,7 +143,7 @@ local function AddWarningEvents(self)
         local i = 0
         local line_num = 2
         local scale = TheFrontEnd:GetHUDScale()
-        for warningevent, data in pairs(WarningEvents) do
+        for warningevent, data in pairs(ClientWarningEvents) do
             local row = math.floor(i/line_num)
             local line = i - row * line_num
             local x = (row * 150 + 80) * scale

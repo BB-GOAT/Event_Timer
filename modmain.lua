@@ -369,7 +369,7 @@ local function UpdateClientPrediction(name)
         ThePlayer.HUD.WarningEventTimeData[name .. "_time"] = 0
 
         -- 支持设置不清理文本
-        if not (WarningEvents[name] and WarningEvents[name].DisableClientPredictionClearText) then
+        if not (ClientWarningEvents[name] and ClientWarningEvents[name].DisableClientPredictionClearText) then
             ThePlayer.HUD.WarningEventTimeData[name .. "_text"] = ""
         end
 
@@ -418,7 +418,7 @@ function SaveTimeData(name, time, from_prediction)
     ThePlayer.HUD:UpdateWarningEvents()
 
     -- 存储倒计时数据至文件
-    if not from_prediction and not (WarningEvents[name] and WarningEvents[name].DisableSaveTime) then
+    if not from_prediction and not (ClientWarningEvents[name] and ClientWarningEvents[name].DisableSaveTime) then
         local filedata = RW_Data:GetValue("WarningEventTimeData") or {}
         SessionId = SessionId or (TheWorld and TheWorld.net and TheWorld.net.components.shardstate and TheWorld.net.components.shardstate:GetMasterSessionId())
         local world_data = filedata[SessionId]
@@ -435,7 +435,7 @@ function SaveTimeData(name, time, from_prediction)
     end
 
     -- 预测倒计时功能
-    if not (WarningEvents[name] and WarningEvents[name].DisableClientPrediction) then
+    if not (ClientWarningEvents[name] and ClientWarningEvents[name].DisableClientPrediction) then
         if not from_prediction and client_prediction_tasks[name] then
             client_prediction_tasks[name]:Cancel()
             client_prediction_tasks[name] = nil
@@ -456,7 +456,7 @@ function SaveTextData(name, text, from_prediction)
     ThePlayer.HUD:UpdateWarningEvents()
 
     -- 预测倒计时功能
-    if not (WarningEvents[name] and WarningEvents[name].DisableClientPrediction) then
+    if not (ClientWarningEvents[name] and ClientWarningEvents[name].DisableClientPrediction) then
         if not from_prediction and client_prediction_tasks[name] then
             client_prediction_tasks[name]:Cancel()
             client_prediction_tasks[name] = nil
@@ -467,7 +467,8 @@ function SaveTextData(name, text, from_prediction)
     end
 end
 
--- 退出房间/穿越世界时写入数据到文件
+----------------------------------------退出房间/穿越世界时写入数据到文件----------------------------------------
+
 local _DoRestart = GLOBAL.DoRestart
 function GLOBAL.DoRestart(...)
     RW_Data:Save()
@@ -673,9 +674,12 @@ modimport("main/warningevents") -- 事件列表
 modimport("main/modcompat") -- 检测其它模组
 modimport("main/main") -- 获取各事件计时时间
 
-----------------------------------------鼠标跟随---------------------------------------
+----------------------------------------修改环境----------------------------------------
 
 GLOBAL.setfenv(1, GLOBAL)
+
+----------------------------------------鼠标跟随---------------------------------------
+
 local function ModFollowMouse(self)
     local old_sva = self.SetVAnchor
     self.SetVAnchor = function (_self, anchor)

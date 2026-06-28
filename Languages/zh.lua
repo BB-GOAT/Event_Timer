@@ -220,13 +220,14 @@ STRINGS.eventtimer = {
     },
     banditmanager = { -- 蒙面猪人
         cooldown = "尝试刷新于: %s后\n[被盗的呼噜币数量: %s，当前盗贼出没: %s]",
+        announce_time = "<prefab=pigbandit>将于%s后尝试刷新。",
         announce_cooldown = "<prefab=pigbandit>将于%s后尝试刷新。当前已盗走%s个呼噜币。",
         ready = "<prefab=pigbandit>正在出没。当前盗走的呼噜币数量: %s",
         readytext = "<prefab=pigbandit>正在出没。\n当前盗走的呼噜币数量: %s",
         tips = "警告：<prefab=pigbandit>正在出没！！！",
     },
     aporkalypse = { -- 大灾变
-        cooldown = "大灾变将在%s后到来。",
+        cooldown = "大灾变将在%s后到来",
         attack = "下一次<prefab=vampirebat>袭击: %s后\n下一次<prefab=ancient_herald>袭击: %s后",
         announce_attack = "下一次<prefab=vampirebat>袭击: %s后    下一次<prefab=ancient_herald>袭击: %s后",
         tips = "警告：大灾变将在%s后到来！！！",

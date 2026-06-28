@@ -1,7 +1,8 @@
 local RequireEvent = RequireEvent
+local Ismodloaded = Ismodloaded
 GLOBAL.setfenv(1, GLOBAL)
 
-WarningEvents = rawget(_G, "WarningEvents") or {}
+ClientWarningEvents = rawget(_G, "ClientWarningEvents") or {}
 local GameEvents
 GameEvents = {
     ---------------------------------------- Forest ----------------------------------------
@@ -44,7 +45,7 @@ GameEvents = {
     yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"), -- 镀金骑士(每个玩家有单独的倒计时，纯本地可能被其他玩家影响)
 }
 for k, v in pairs(GameEvents) do
-    WarningEvents[k] = v
+    ClientWarningEvents[k] = v
 end
 
 local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
@@ -58,29 +59,29 @@ local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
     islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"), -- 热带赃物袋
 } or {}
 
--- 将海难计时添加到WarningEvents
+-- 将海难计时添加到ClientWarningEvents
 for k, v in pairs(ShipwreckedEvents) do
-    WarningEvents[k] = v
+    ClientWarningEvents[k] = v
 end
 
--- local HamletEvents = rawget(_G, "IA_HAM_ENABLED") and
--- {   ---------------------------------------- IA-HAM ---------------------------------------
---     -- TODO
--- }
--- or Ismodloaded("workshop-3322803908") and
--- {   ---------------------------------------- Above The Clouds ---------------------------------------
---     pugalisk_fountain = RequireEvent("AboveTheClouds/pugalisk_fountain"), -- 不老泉
---     banditmanager = RequireEvent("AboveTheClouds/banditmanager"), -- 蒙面猪人
---     aporkalypse = RequireEvent("AboveTheClouds/aporkalypse"), -- 大灾变
---     aporkalypse_attack = select(2, RequireEvent("AboveTheClouds/aporkalypse")), -- 大灾变
---     batted = select(3, RequireEvent("AboveTheClouds/aporkalypse")), -- 吸血蝙蝠
---     rocmanager = RequireEvent("AboveTheClouds/rocmanager"), -- 友善的大鹏
--- } or {}
+local HamletEvents = rawget(_G, "IA_HAM_ENABLED") and
+{   ---------------------------------------- IA-HAM ---------------------------------------
+    -- TODO
+}
+or Ismodloaded("workshop-3322803908") and
+{   ---------------------------------------- Above The Clouds ---------------------------------------
+    pugalisk_fountain = RequireEvent("AboveTheClouds/pugalisk_fountain"), -- 不老泉
+    banditmanager = RequireEvent("AboveTheClouds/banditmanager"), -- 蒙面猪人
+    aporkalypse = RequireEvent("AboveTheClouds/aporkalypse"), -- 大灾变倒计时
+    aporkalypse_attack = select(2, RequireEvent("AboveTheClouds/aporkalypse")), -- 大灾变期间的怪物袭击计时(无法纯本地)
+    batted = select(3, RequireEvent("AboveTheClouds/aporkalypse")), -- 吸血蝙蝠(无法纯本地)
+    rocmanager = RequireEvent("AboveTheClouds/rocmanager"), -- 友善的大鹏(无法纯本地)
+} or {}
 
--- -- 将猪镇计时添加到WarningEvents
--- for k, v in pairs(HamletEvents) do
---     WarningEvents[k] = v
--- end
+-- 将猪镇计时添加到ClientWarningEvents
+for k, v in pairs(HamletEvents) do
+    ClientWarningEvents[k] = v
+end
 
 -- local UncompromisingEvents = TUNING.DSTU ~= nil and
 -- {
@@ -89,13 +90,13 @@ end
 --     -- 巨鹿和原版的一样，不需要加
 -- } or {}
 
--- -- 将永不妥协计时添加到WarningEvents
+-- -- 将永不妥协计时添加到ClientWarningEvents
 -- for k, v in pairs(UncompromisingEvents) do
---     WarningEvents[k] = v
+--     ClientWarningEvents[k] = v
 -- end
 
 -- 初始化事件
-for k, v in pairs(WarningEvents) do
+for k, v in pairs(ClientWarningEvents) do
     if v.postinitfn then
         v.postinitfn()
     end
