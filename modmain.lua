@@ -101,16 +101,14 @@ function Import(file_name, file_env)
 	end
 end
 
-if not rawget(GLOBAL, "BBGOAT_utils") then
-    modimport("scripts/bbgoat_utils/utils")
-    AddPrefabPostInit("world", function(inst)
-        inst:DoTaskInTime(5, function()
-            local modname = modinfo.name
-            local zh_str = "提示：【" .. modname .. "】mod下个版本开始需要【冰冰羊的模组运行库】mod才能正常运行\n请提前前往创意工坊订阅并在服务器上开启【冰冰羊的模组运行库】模组"
-            local en_str = "Important: Beginning with the next update, 【" .. modname .. "】 will depend on 【BBGOAT Utils】 to work correctly.\nPlease subscribe to 【BBGOAT Utils】 from the Steam Workshop and enable it on your server before updating."
-            c_announce(ModLanguage == "zh" and zh_str or en_str)
-        end)
-    end)
+if not GLOBAL.rawget(GLOBAL, "BBGOAT_utils") then
+    local zh_str = "[" .. modinfo.name .. "] 模组基础运行库缺失！你未开启此模组依赖的基础运行库模组，你必须去订阅才能继续使用本模组\n请前往创意工坊订阅并在【服务器】开启【冰冰羊的模组运行库】模组"
+    local en_str = "[" .. modinfo.name .. "] Mod Runtime Library Missing!\nYou are missing the required runtime library for this mod. Please subscribe to [BBGOAT Utils] from the Steam Workshop and enable it on your server."
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(zh_str .. "\n\n" .. en_str)
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("强制退出游戏！")
+    return GLOBAL.TheSim:Quit()
 else
     PersistentData = GLOBAL.BBGOAT_utils.PersistentData
     Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper
