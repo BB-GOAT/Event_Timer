@@ -83,17 +83,17 @@ for k, v in pairs(HamletEvents) do
     ClientWarningEvents[k] = v
 end
 
--- local UncompromisingEvents = TUNING.DSTU ~= nil and
--- {
---     gmoosespawner = RequireEvent("UncompromisingMode/gmoosespawner"), -- 麋鹿鹅
---     mock_dragonflyspawner = RequireEvent("UncompromisingMode/mock_dragonflyspawner"), -- 龙蝇
---     -- 巨鹿和原版的一样，不需要加
--- } or {}
+local UncompromisingEvents = TUNING.DSTU ~= nil and
+{
+    gmoosespawner = RequireEvent("UncompromisingMode/gmoosespawner"), -- 麋鹿鹅
+    mock_dragonflyspawner = RequireEvent("UncompromisingMode/mock_dragonflyspawner"), -- 龙蝇
+    -- 巨鹿和原版的一样，不需要加
+} or {}
 
--- -- 将永不妥协计时添加到ClientWarningEvents
--- for k, v in pairs(UncompromisingEvents) do
---     ClientWarningEvents[k] = v
--- end
+-- 将永不妥协计时添加到ClientWarningEvents
+for k, v in pairs(UncompromisingEvents) do
+    ClientWarningEvents[k] = v
+end
 
 -- 初始化事件
 for k, v in pairs(ClientWarningEvents) do
