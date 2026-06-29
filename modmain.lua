@@ -14,7 +14,7 @@ end
 
 ----------------------------------------加载我的工具---------------------------------------
 
-if not rawget(GLOBAL, "BBGOAT_utils") then
+if not GLOBAL.rawget(GLOBAL, "BBGOAT_utils") then
     if TUNING.suggest_to_subscribe_bbgoat_basementmod then
         return
     end
@@ -122,7 +122,7 @@ local modid_list = {
     3139858765, -- 无资源海钓
 }
 
-local server_info = TheNet:GetServerListing()
+local server_info = GLOBAL.TheNet:GetServerListing()
 if server_info and server_info.mode then
     if mode_list[server_info.mode] then
         return
@@ -228,7 +228,7 @@ EventTimer = {
     TimerTips = GetModConfigData("ShowTips"), -- 醒目提示
 }
 -- 是否使用远程命令获取时间数据
-EventTimer.GetTimeFromRemoteCommand = false and GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin()
+EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and GLOBAL.TheNet:GetIsServerAdmin()
 
 GLOBAL.EventTimer = EventTimer
 
@@ -380,6 +380,9 @@ end
 
 -- 更新客户端预测倒计时
 local function UpdateClientPrediction(name)
+    local ThePlayer = GLOBAL.ThePlayer
+    local ClientWarningEvents = GLOBAL.ClientWarningEvents
+
     if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData) then
         return
     end
@@ -414,6 +417,7 @@ local function UpdateClientPrediction(name)
 end
 
 -- 获取当前世界运行时间
+local Last_time
 function GetWorldTime()
     local world = GLOBAL.TheWorld
     local state_time = world.state.time
@@ -435,6 +439,10 @@ end
 
 local SessionId
 function SaveTimeData(name, time, from_prediction)
+    local ThePlayer = GLOBAL.ThePlayer
+    local TheWorld = GLOBAL.TheWorld
+    local ClientWarningEvents = GLOBAL.ClientWarningEvents
+
     if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checknumber(time)) then
         return
     end
@@ -454,7 +462,7 @@ function SaveTimeData(name, time, from_prediction)
                 local next_attack_time = GetWorldTime() + time -- 下次袭击的世界时间点
                 world_data[name] = next_attack_time
             end
-            world_data.save_time = os.time() -- 记录此存档最后一次更新事件记录的时间，以便清理长期未游玩的存档数据
+            world_data.save_time = GLOBAL.os.time() -- 记录此存档最后一次更新事件记录的时间，以便清理长期未游玩的存档数据
             RW_Data:SetValue("WarningEventTimeData", filedata)
         end
     end
@@ -473,6 +481,10 @@ end
 
 -- 存储文本倒计时数据
 function SaveTextData(name, text, from_prediction)
+    local ThePlayer = GLOBAL.ThePlayer
+    local TheWorld = GLOBAL.TheWorld
+    local ClientWarningEvents = GLOBAL.ClientWarningEvents
+
     if not (ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and GLOBAL.checkstring(text)) then
         return
     end
@@ -650,8 +662,8 @@ local file_env = {
 }
 
 AddComponentPostInit('clock', function(clock)
-    local SW = TheWorld:HasTag("island") or TheWorld:HasTag("volcano")
-    local HAM = TheWorld:HasTag("porkland")
+    local SW = GLOBAL.TheWorld:HasTag("island") or GLOBAL.TheWorld:HasTag("volcano")
+    local HAM = GLOBAL.TheWorld:HasTag("porkland")
     local oldGetDebugString = SW and clock.GetDebugString_tropical or HAM and clock.GetDebugString_plateau or clock.GetDebugString
     local oldDump = SW and clock.Dump_tropical or HAM and clock.Dump_plateau or clock.Dump
 
