@@ -220,7 +220,6 @@ local env = env
 local EventTimer
 EventTimer = {
     env = env,
-    UpdateTime = GetModConfigData("UpdateTime"), -- 数据更新频率
     GetTimeFromServerMod = {}, -- 交给服务器模组提供数据的事件列表
     TimerMode = TimerMode, -- 倒计时格式
     UIButton = GetModConfigData("UIButton"), -- UI开关何时显示

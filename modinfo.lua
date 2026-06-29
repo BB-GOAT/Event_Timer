@@ -90,28 +90,9 @@ configuration_options = {
         options =
         {
             {description = "中文(Chinese)", data = "zh", hover = ""},
-            -- {description = "English(英语)", data = "en", hover = ""},
+            {description = "English(英语)", data = "en", hover = ""},
         },
-        default = "zh",
-    },
-    {
-        name = "UpdateTime",
-        label = en_zh("Data Update Frequency", "数据更新频率"),
-        options =
-        {
-            {description = "0.5s", data = 0.5},
-            {description = "1s", data = 1},
-            {description = "2s", data = 2},
-            {description = "3s", data = 3},
-            {description = "4s", data = 4},
-            {description = "5s", data = 5},
-            {description = "6s", data = 6},
-            {description = "7s", data = 7},
-            {description = "8s", data = 8},
-            {description = "9s", data = 9},
-            {description = "10s", data = 10},
-        },
-        default = 1,
+        default = en_zh("en", "zh"),
     },
     {
         name = "GetTimeFromRemoteCommand",
