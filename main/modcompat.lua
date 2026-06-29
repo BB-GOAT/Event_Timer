@@ -11,6 +11,7 @@ local CombineLines = CombineLines
 local ModLanguage = ModLanguage
 local zh = ModLanguage == "zh"
 local Import = Import
+local MOD_util = MOD_util
 local RW_Data = RW_Data
 local Upvaluehelper = Upvaluehelper
 GLOBAL.setfenv(1, GLOBAL)
@@ -433,6 +434,7 @@ if not rawget(_G, "MOD_util") then
     print("[全局事件计时器 - 客户端版] 未检测到玩家开启萌萌的新的【基础运行库】")
     return
 end
+local MOD_util = _G.MOD_util
 if not MOD_util:CanAddSetting() then
     print("[全局事件计时器 - 客户端版] 未检测到玩家开启萌萌的新的【模组设置】")
 	return
