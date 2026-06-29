@@ -1,7 +1,7 @@
 -- 纯本地获取方式
 local localgettimefn = function()
     HookDeath("malbatross", "malbatrossspawner", function(event)
-        SaveTimeData(event, TUNING.MALBATROSS_SPAWNDELAY_BASE)
+        SaveTimeData(event, TUNING.MALBATROSS_SPAWNDELAY_BASE + TUNING.MALBATROSS_SPAWNDELAY_RANDOM)
     end)
 end
 
