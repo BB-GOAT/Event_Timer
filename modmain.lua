@@ -104,6 +104,36 @@ Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper
 MOD_util = GLOBAL.BBGOAT_utils.MOD_util
 BBGOAT_util = GLOBAL.BBGOAT_utils.BBGOAT_util
 
+----------------------------------------判断某个模组是否加载---------------------------------------
+
+function Ismodloaded(name)
+	return GLOBAL.KnownModIndex:IsModEnabledAny(name)
+end
+
+----------------------------------------检查是否需要运行---------------------------------------
+
+local mode_list = {
+    OceanFishing = true, -- 海钓随机物品
+    DC_FGC_PVP = true, -- 花花世界-淘汰系统
+}
+local modid_list = {
+    3460376780, -- 欧皇模拟器
+    3183295941, -- 新海难抽奖机（并非新，已经很久没维护了）
+    3139858765, -- 无资源海钓
+}
+
+local server_info = TheNet:GetServerListing()
+if server_info and server_info.mode then
+    if mode_list[server_info.mode] then
+        return
+    end
+end
+for _, modid in ipairs(modid_list) do
+    if Ismodloaded("workshop-" .. modid) then
+        return
+    end
+end
+
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
@@ -198,7 +228,7 @@ EventTimer = {
     TimerTips = GetModConfigData("ShowTips"), -- 醒目提示
 }
 -- 是否使用远程命令获取时间数据
-EventTimer.GetTimeFromRemoteCommand = GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin()
+EventTimer.GetTimeFromRemoteCommand = false and GetModConfigData("GetTimeFromRemoteCommand") and TheNet:GetIsServerAdmin()
 
 GLOBAL.EventTimer = EventTimer
 
@@ -216,11 +246,6 @@ function Import(file_name, file_env)
 		local filename, line = info.source or "???", info.currentline or "???"
 		print("[警告] Import文件失败，文件名: " .. file_name .. "\n本函数调用于 " .. tostring(filename) .. ":" .. tostring(line))
 	end
-end
-
--- 判断某个模组是否加载
-function Ismodloaded(name)
-	return GLOBAL.KnownModIndex:IsModEnabledAny(name)
 end
 
 -- 获取其它MOD的env

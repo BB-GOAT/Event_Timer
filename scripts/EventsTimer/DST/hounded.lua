@@ -70,7 +70,7 @@ local localgettimefn = function()
             local level = tostring(i)
             AddPrefabPostInit(attacker .. "warning_lvl" .. level, function(inst)
                 -- 初始时间 = (5 - level) * 30 （level=2→90s，level=3→60s，level=4→30s）
-                if not current_level or current_level > i then
+                if not current_level or current_level < i then
                     local initial_time = (5 - i) * 30
                     SaveTimeData("hounded", initial_time)
 

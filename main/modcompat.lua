@@ -13,8 +13,8 @@ local zh = ModLanguage == "zh"
 local Import = Import
 local RW_Data = RW_Data
 local Upvaluehelper = Upvaluehelper
-local GetTimeFromRemoteCommand = EventTimer.GetTimeFromRemoteCommand
 GLOBAL.setfenv(1, GLOBAL)
+local GetTimeFromRemoteCommand = EventTimer.GetTimeFromRemoteCommand
 
 -- [Tips]提示猎狗和BOSS的攻击时间 / [Tips]刷新提示，优化版
 if Ismodloaded("workshop-1898292532") or Ismodloaded("workshop-3059131690") then
