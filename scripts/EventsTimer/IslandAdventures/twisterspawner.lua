@@ -22,7 +22,7 @@ local localgettimefn = function()
 
     for i = 2, 4 do
         local level = tostring(i)
-        AddPrefabPostInit("twisterswarning_lvl" .. level, function(inst)
+        AddPrefabPostInit("twisterwarning_lvl" .. level, function(inst)
             -- 取消上一个重置任务（若存在），并重新设置 60 秒后的自动重置
             -- 作用：如果 60 秒内没有新警告触发，则清空计数，准备下一轮
             if record_table.task then
