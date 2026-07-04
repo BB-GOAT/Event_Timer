@@ -67,7 +67,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
             end
 
             -- 主线程执行完成，自我销毁
-            print("[全局事件计时器客户端版] 初始化远程请求线程完成")
+            print("[全局事件计时器 - 客户端版] 初始化远程请求线程完成")
             GLOBAL.KillThreadsWithID(MainThread.id)
             MainThread = nil
         end
@@ -116,7 +116,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
                     print("[警告] 在服务器初始化EventTimerClient失败：\n" .. tostring(res.err))
                 elseif res and res.success then
                     MainThread = GLOBAL.StartThread(MainFn, "EventTimerModMainThread")
-                    print("[全局事件计时器客户端版] 正在初始化远程请求线程")
+                    print("[全局事件计时器 - 客户端版] 正在初始化远程请求线程")
                 end
             end) -- 初始化工具
         end)

@@ -1,8 +1,11 @@
 -- 纯本地获取方式
 local localgettimefn = function()
+    local need_hook = true
     local status
     AddPrefabPostInit("pugalisk_fountain", function(inst)
         -- 刷帧监听动画
+        if not need_hook then return end
+        need_hook = false
         inst:DoPeriodicTask(0.1, function()
             if inst and inst:IsValid() and inst.AnimState then
                 local bank, anim, frame = inst.AnimState:GetHistoryData()
@@ -14,6 +17,9 @@ local localgettimefn = function()
                     SaveTimeData("pugalisk_fountain", 0)
                 end
             end
+        end)
+        inst:ListenForEvent("onremove", function(inst)
+            need_hook = true
         end)
     end)
 end
