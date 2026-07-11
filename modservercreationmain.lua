@@ -121,4 +121,10 @@ end
 if rawget(_G, "TheFrontEnd") then
     menv.ReloadFrontEndAssets()
     DoFnForCurrentScreen(PreLoad)
+
+	-- 尝试自动开启依赖模组
+    local basementmod = rawget(_G, "BBGOAT_utils") and _G.BBGOAT_utils.server_folder_name
+    if basementmod and not _G.KnownModIndex:IsModEnabledAny(basementmod) then
+        _G.KnownModIndex:Enable(basementmod)
+    end
 end
