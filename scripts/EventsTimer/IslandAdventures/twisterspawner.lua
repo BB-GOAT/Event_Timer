@@ -15,7 +15,7 @@ local localgettimefn = function()
         end
 
         local data_time = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData["twisterspawner_time"]
-        if (time < data_time) or (data_time == 0) then
+        if data_time and (time < data_time) or (data_time == 0) then
             SaveTimeData("twisterspawner", time)
         end
     end

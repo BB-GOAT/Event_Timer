@@ -465,16 +465,6 @@ MOD_util:CreatePage(pagename, {
     order = pageorder,
     all_options = {
         {
-            description = zh and "客户端预测倒计时" or "Client Predicted Countdown", -- 名称
-            key = "EventsTimer_ClientPrediction", -- 对应设置项
-            default = true, -- 默认选项
-            options = enabledisableoption, -- 选项列表
-            onapplyfn = function()
-                EventTimer.ClientPrediction = MOD_util:GetMOption("EventsTimer_ClientPrediction", true)
-                ChangeModConfig("ClientPrediction", EventTimer.ClientPrediction)
-            end
-        },
-        {
             description = zh and "醒目提示" or "Highlight Tips",
             key = "EventsTimer_ShowTips",
             default = true,
