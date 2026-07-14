@@ -101,7 +101,6 @@ info = {
             y = -15,
         }
     },
-    DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.banditmanager_time
         local text = ThePlayer.HUD.WarningEventTimeData.banditmanager_text

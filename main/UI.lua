@@ -2,6 +2,7 @@ local AddClassPostConstruct = AddClassPostConstruct
 local GetWorldTime = GetWorldTime
 local SaveTimeData = SaveTimeData
 local RW_Data = RW_Data
+local DataFilePostInitFN = DataFilePostInitFN
 local env = env
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -37,10 +38,13 @@ local function AddWarningEvents(self)
                     if diff_time > 0 then
                         SaveTimeData(name, diff_time)
                     else
-                        filedata[name] = nil
-                        need_save = true
+                        filedata[SessionId][name] = nil
                     end
                 end
+            end
+
+            for _, fn in ipairs(DataFilePostInitFN) do
+                fn(filedata[SessionId])
             end
         else
             filedata[SessionId] = {}

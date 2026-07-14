@@ -123,10 +123,8 @@ local modid_list = {
 }
 
 local server_info = GLOBAL.TheNet:GetServerListing()
-if server_info and server_info.mode then
-    if mode_list[server_info.mode] then
-        return
-    end
+if server_info and server_info.mode and mode_list[server_info.mode] then
+    return
 end
 for _, modid in ipairs(modid_list) do
     if Ismodloaded("workshop-" .. modid) then
@@ -172,7 +170,7 @@ Assets = {
     Asset("IMAGE", "images/Ancient_Herald.tex"),
     Asset("ATLAS", "images/Roc.xml"), -- 友善的大鹏
     Asset("IMAGE", "images/Roc.tex"),
-    Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- Tips部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
+    Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- 醒目提示部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
     Asset("IMAGE", "images/dyc_panel_shadow.tex"),
     Asset("ANIM", "anim/nigthmarephaseindicator.zip"), -- 远古遗迹阶段倒计时贴图，来自【Nightmare phase indicator】模组
 }
@@ -503,6 +501,12 @@ function SaveTextData(name, text, from_prediction)
     end
 end
 
+-- 允许读取保存的自定义数据
+DataFilePostInitFN = {}
+function AddLoadDataFilePostInit(fn)
+    table.insert(DataFilePostInitFN, fn)
+end
+
 ----------------------------------------退出房间/穿越世界时写入数据到文件----------------------------------------
 
 local _DoRestart = GLOBAL.DoRestart
@@ -635,14 +639,17 @@ end
 -- 获取事件计时
 local file_env = {
     EventTimer = EventTimer,
+    GetWorldTime = GetWorldTime,
     SaveTimeData = SaveTimeData,
     SaveTextData = SaveTextData,
+    AddLoadDataFilePostInit = AddLoadDataFilePostInit,
     HookDeath = HookDeath,
     TimeToString = TimeToString, -- 格式化时间
     StringToTime = StringToTime, -- 将字符串转换为时间
     Upvaluehelper = Upvaluehelper,
     MOD_util = MOD_util,
     BBGOAT_util = BBGOAT_util,
+    RW_Data = RW_Data,
     ReplacePrefabName = ReplacePrefabName, -- 填充Prefab名字
     Extract_by_format = Extract_by_format, -- 反向提取信息
     GetWorldtypeStr = GetWorldtypeStr, -- 根据世界类型返回一段字符串

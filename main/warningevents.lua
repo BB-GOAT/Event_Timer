@@ -26,6 +26,7 @@ GameEvents = {
     lunarthrall_plantspawner = RequireEvent("DST/lunarthrall_plantspawner"), -- 致命亮茄(无法纯本地)
     lunar_riftspawner = RequireEvent("DST/lunar_riftspawner"), -- 月亮裂隙生成倒计时
     rift_portal = RequireEvent("DST/rift_portal"), -- 月亮裂隙信息(无法纯本地)
+    walrus_camp = RequireEvent("DST/walrus_camp"), -- 海象
 
     ---------------------------------------- Cave ----------------------------------------
 

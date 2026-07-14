@@ -45,7 +45,6 @@ info = {
         },
         loop = true,
     },
-    DisableShardRPC = true,
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.farming_manager_time
         if time > 0 then

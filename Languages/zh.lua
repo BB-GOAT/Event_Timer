@@ -122,6 +122,10 @@ STRINGS.eventtimer = {
     messagebottlemanager = {
         text = "待打捞宝藏数量: %d / %d",
     },
+    walrus_camp = { -- 海象巢
+        cooldown = "[%d] %s",
+        ready = "已就绪！",
+    },
 
     ----------------------------------------洞穴----------------------------------------
 

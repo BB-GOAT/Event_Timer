@@ -122,6 +122,10 @@ STRINGS.eventtimer = {
     messagebottlemanager = {
         text = "Treasures to grab: %d / %d",
     },
+    walrus_camp = {
+        cooldown = "[%d] %s",
+        ready = "Ready!",
+    },
 
     ----------------------------------------Cave----------------------------------------
     shadowrift_portal = {
