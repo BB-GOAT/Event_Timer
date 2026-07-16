@@ -17,8 +17,8 @@ You can tick the checkbox on the right side of the panel to keep the timer alway
 点击事件可宣告其信息
 ]])
 author = "冰冰羊，Jerry"
-version = "0.2.06" -- 模组版本
-version_compatible = "0.2.06" -- 最低兼容版本
+version = "0.2.07" -- 模组版本
+version_compatible = "0.2.07" -- 最低兼容版本
 api_version = 10
 
 --[[
@@ -100,7 +100,7 @@ configuration_options = {
             {description = "English(英语)", data = "en", hover = ""},
             -- {description = en_zh("Auto", "自动"), data = "auto", hover = en_zh("Automatically set according to the game language", "根据游戏语言自动设置")},
         },
-        default = "zh",
+        default = en_zh("en", "zh"),
     },
     {
         name = "UpdateTime",

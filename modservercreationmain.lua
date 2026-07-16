@@ -123,8 +123,69 @@ if rawget(_G, "TheFrontEnd") then
     DoFnForCurrentScreen(PreLoad)
 
 	-- 尝试自动开启依赖模组
-    local basementmod = rawget(_G, "BBGOAT_utils") and _G.BBGOAT_utils.server_folder_name
-    if basementmod and not _G.KnownModIndex:IsModEnabledAny(basementmod) then
-        _G.KnownModIndex:Enable(basementmod)
+    local basementmod = rawget(_G, "BBGOAT_utils") and BBGOAT_utils.server_folder_name
+    if basementmod and not KnownModIndex:IsModEnabledAny(basementmod) then
+        KnownModIndex:Enable(basementmod)
+    elseif not basementmod then -- 麻烦呐
+        local _languages = {
+            zh = true, --Chinese for Steam
+            zhr = true, --Chinese for WeGame
+            ch = true, --Chinese mod
+            chs = true, --Chinese mod
+            sc = true, --simple Chinese
+            chinese = true, --Chinese mod
+            zht = true, --traditional Chinese for Steam
+            tc = true, --traditional Chinese
+            cht = true, --Chinese mod
+        }
+        local lang = LanguageTranslator and LanguageTranslator.defaultlang
+        local isCH = lang and _languages[lang]
+        local PopupDialogScreen = require "screens/redux/popupdialog"
+        TheFrontEnd:PushScreen(PopupDialogScreen(
+            menv.modinfo.name,
+            isCH and "模组基础运行库缺失！\n你缺少了模组基础运行库，你必须去订阅才能继续使用本模组" or
+                    "Mod Runtime Library Missing!\nYou are missing the required runtime library for this mod. Please subscribe to it before continuing to use this mod.",
+            {
+                {
+                    text = isCH and "订阅/启用运行库模组" or "Subscribe/Enable mod",
+                    cb = function()
+                        local modname = "workshop-3750536829"
+                        if table.contains(TheSim:GetModDirectoryNames(), modname) then
+                            KnownModIndex:Enable(modname)
+                            KnownModIndex:Save()
+                            TheGlobalInstance:DoTaskInTime(0.5, function()
+                                TheNet:Disconnect(true)
+                                TheSim:ResetError()
+                                StartNextInstance()
+                            end)
+                        else
+                            TheSim:SubscribeToMod("workshop-3750536829")
+                            TheFrontEnd:PopScreen()
+                            TheFrontEnd:PushScreen(PopupDialogScreen(
+                                isCH and "已订阅" or "Subscribed",
+                                isCH and "请前往客户端模组列表启用【冰冰羊的模组运行库】模组" or "Please go to the client mods list to enable the runtime library mod named\n\"BBGOAT Utils\"",
+                                {
+                                    {
+                                        text = isCH and "好的" or "OK",
+                                        cb = function()
+                                            TheFrontEnd:PopScreen()
+                                            c_reset()
+                                        end
+                                    }
+                                }
+                            ))
+                        end
+                    end
+                },
+                {
+                    text = isCH and "返回" or "Back",
+                    cb = function()
+                        KnownModIndex:Disable(menv.modname)
+                        TheGlobalInstance:PushEvent(eventname) -- 取消注册模组动态图标
+                        TheFrontEnd:PopScreen()
+                    end
+                },
+            }
+        ))
     end
 end
