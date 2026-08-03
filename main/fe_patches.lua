@@ -5,6 +5,10 @@ local eventname = "fe_unload_".. menv.modname
 local iconname = menv.modname .. "_dynamic_icon"
 local UIAnim = require("widgets/uianim")
 
+if not rawget(_G, "EventTimerClientFePatches") then
+    _G.EventTimerClientFePatches = {}
+end
+
 menv.FrontEndAssets = {
     Asset("ANIM", "anim/global_events_timer_dynamic_icon.zip"),
 }
@@ -39,6 +43,7 @@ local function AddDynamicIcon(self, root, s, x, y)
 end
 
 local function PatchModDetails(self)
+    if not _G.EventTimerClientFePatches.DynamicIconEnabled then return end
 	if self.currentmodname == menv.modname then
 		AddDynamicIcon(self, "detailimage", 0.55, 3, 2.5)
 	elseif self[iconname] then
@@ -48,6 +53,7 @@ local function PatchModDetails(self)
 end
 
 local function PatchModIcon(widget, data)
+    if not _G.EventTimerClientFePatches.DynamicIconEnabled then return end
 	local opt = widget.moditem
 	local mod_data = (data or widget.data)
 	if mod_data and mod_data.mod and mod_data.mod.modname == menv.modname then
@@ -64,7 +70,7 @@ local function PatchModIcon(widget, data)
 end
 
 
-if not rawget(_G, menv.modname .. "_dynamic_icon_res") then
+if not _G.EventTimerClientFePatches["HookedFrontendUnloadMod_" .. menv.modname] then
     local _FrontendUnloadMod = ModManager.FrontendUnloadMod
     ModManager.FrontendUnloadMod = function(self, unloaded_modname, ...)
         if not unloaded_modname or unloaded_modname == menv.modname then
@@ -72,7 +78,8 @@ if not rawget(_G, menv.modname .. "_dynamic_icon_res") then
         end
         return _FrontendUnloadMod(self, unloaded_modname, ...)
     end
-    rawset(_G, menv.modname .. "_dynamic_icon_res", true)
+
+    _G.EventTimerClientFePatches["HookedFrontendUnloadMod_" .. menv.modname] = true
 end
 
 local function PreLoad(self)
@@ -93,26 +100,32 @@ local function PreLoad(self)
         end
     end
 
-    local _ShowModDetails = mods_page.ShowModDetails
-    mods_page.ShowModDetails = function(self, idx, ...)
-        _ShowModDetails(self, idx, ...)
-        PatchModDetails(self)
-    end
-
-    if mods_page.mods_scroll_list.update_fn and not _update_fn then
-        _update_fn = mods_page.mods_scroll_list.update_fn
-        mods_page.mods_scroll_list.update_fn = function(context, widget, data, index, ...)
-            _update_fn(context, widget, data, index, ...)
-            PatchModIcon(widget, data)
+    if not mods_page[menv.modname .. "_hooked_mods_page"] then
+        local _ShowModDetails = mods_page.ShowModDetails
+        mods_page.ShowModDetails = function(self, idx, ...)
+            _ShowModDetails(self, idx, ...)
+            PatchModDetails(self)
         end
+
+        if mods_page.mods_scroll_list.update_fn and not _update_fn then
+            _update_fn = mods_page.mods_scroll_list.update_fn
+            mods_page.mods_scroll_list.update_fn = function(context, widget, data, index, ...)
+                _update_fn(context, widget, data, index, ...)
+                PatchModIcon(widget, data)
+            end
+        end
+
+        mods_page[menv.modname .. "_hooked_mods_page"] = true
     end
 
     TheGlobalInstance:ListenForEvent(eventname, function()
-        mods_page.mods_scroll_list.update_fn = _update_fn
-        mods_page.ShowModDetails = _ShowModDetails
+        -- mods_page.mods_scroll_list.update_fn = _update_fn
+        -- mods_page.ShowModDetails = _ShowModDetails
+        _G.EventTimerClientFePatches.DynamicIconEnabled = false
         ModUnloadFrontEndAssets(menv.modname)
     end)
 
+    _G.EventTimerClientFePatches.DynamicIconEnabled = true
     PatchModDetails(mods_page)
 end
 

@@ -76,7 +76,7 @@ MOD_util:AddPlayerPostInit(function(world, player)
             return GetTimeThreadList, GetTextThreadList
         end
 
-        player:DoTaskInTime(1, function()
+        local function fn()
             local cmd = [[
                 local code_version = 1
                 if not rawget(_G, "EventTimerClient") or not _G.EventTimerClient.version or _G.EventTimerClient.version < code_version then
@@ -119,7 +119,27 @@ MOD_util:AddPlayerPostInit(function(world, player)
                     print("[全局事件计时器 - 客户端版] 正在初始化远程请求线程")
                 end
             end) -- 初始化工具
-        end)
+        end
+        player:DoTaskInTime(1, fn)
+
+        -- 支持后加载
+        if rawget(_G, "GetedAdminPostInitFns") then
+            table.insert(_G.GetedAdminPostInitFns, function()
+                if MainThread then
+                    GLOBAL.KillThreadsWithID(MainThread.id)
+                    MainThread = nil
+                end
+                for warningevent, thread in pairs(GetTimeThreadList) do
+                    GLOBAL.KillThreadsWithID(thread.id)
+                    GetTimeThreadList[warningevent] = nil
+                end
+                for warningevent, thread in pairs(GetTextThreadList) do
+                    GLOBAL.KillThreadsWithID(thread.id)
+                    GetTextThreadList[warningevent] = nil
+                end
+                fn()
+            end)
+        end
     end
 end, true) -- 换人后不重复执行
 
