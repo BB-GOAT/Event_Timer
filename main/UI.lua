@@ -23,7 +23,7 @@ local function AddWarningEvents(self)
         -- 清理长期未游玩的存档数据
         local current_os_time = os.time()
         for MasterSessionId, world_data in pairs(filedata) do
-            if current_os_time and world_data.save_time and ((current_os_time - world_data.save_time) > ((24 * 60 * 60) * 30)) and MasterSessionId ~= worldid then -- 30天未游玩
+            if current_os_time and world_data.save_time and ((current_os_time - world_data.save_time) > ((24 * 60 * 60) * 30)) and MasterSessionId ~= SessionId then -- 30天未游玩
                 print("[全局事件计时器 - 客户端版] 清理超过30天未游玩的存档事件数据记录：", MasterSessionId)
                 filedata[MasterSessionId] = nil
                 need_save = true
