@@ -108,6 +108,12 @@ if not GLOBAL.rawget(GLOBAL, "BBGOAT_utils") then
     print(zh_str .. "\n\n" .. en_str)
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     print("强制退出游戏！")
+
+    -- Crash the game
+    local inst = CreateEntity()
+	inst.entity:AddTransform()
+	inst.entity:SetParent(inst.entity)
+
     return GLOBAL.TheSim:Quit()
 else
     PersistentData = GLOBAL.BBGOAT_utils.PersistentData
