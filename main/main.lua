@@ -152,7 +152,7 @@ for _ in pairs(GLOBAL.EventTimer.GetTimeFromServerMod) do
 end
 
 if ModLanguage == "zh" then
-    GLOBAL.STRINGS.eventtimer.ui_title = "事件计时器 - 数据来源：" .. (remote_mode and "服务器" or from_server_mod_mode and "服务器模组 + 本地预测" or "本地预测")
+    GLOBAL.STRINGS.eventtimer.ui_title = "事件计时器 (" .. (remote_mode and "服务器数据" or from_server_mod_mode and "服务器模组 + 本地预测" or "本地预测") .. ")"
 elseif ModLanguage == "en" then
-    GLOBAL.STRINGS.eventtimer.ui_title = "Event Timer - Data Source: " .. (remote_mode and "Server" or from_server_mod_mode and "Server Mod + Local Prediction" or "Local Prediction")
+    GLOBAL.STRINGS.eventtimer.ui_title = "Event Timer (" .. (remote_mode and "Server Data" or from_server_mod_mode and "Server Mod + Local Prediction" or "Local Prediction") .. ")"
 end

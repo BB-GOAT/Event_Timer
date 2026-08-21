@@ -129,14 +129,20 @@ local function PreLoad(self)
     PatchModDetails(mods_page)
 end
 
+local function LoadFrontEndAssets()
+    if not _G.EventTimerClientFePatches.DynamicIconEnabled then -- 如果动态图标正在工作 还重载资源 游戏会崩溃
+        ModReloadFrontEndAssets(menv.FrontEndAssets, menv.modname)
+    end
+end
+
 if rawget(_G, "TheFrontEnd") then
-    menv.ReloadFrontEndAssets()
+    LoadFrontEndAssets()
     DoFnForCurrentScreen(PreLoad)
 else -- 由modmain触发
     menv.AddClassPostConstruct("screens/redux/modsscreen", function(self)
         if not self.res_event_timer_client_dynamic_icon then
             self.res_event_timer_client_dynamic_icon = true
-            ModReloadFrontEndAssets(menv.FrontEndAssets, menv.modname)
+            LoadFrontEndAssets()
             PreLoad(self)
         end
     end)
@@ -144,7 +150,7 @@ else -- 由modmain触发
     menv.AddClassPostConstruct("screens/redux/servercreationscreen", function(self)
         if not self.res_event_timer_client_dynamic_icon then
             self.res_event_timer_client_dynamic_icon = true
-            ModReloadFrontEndAssets(menv.FrontEndAssets, menv.modname)
+            LoadFrontEndAssets()
             PreLoad(self)
         end
     end)

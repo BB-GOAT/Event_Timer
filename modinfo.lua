@@ -17,7 +17,7 @@ You can tick the checkbox on the right side of the panel to keep the timer alway
 点击事件可宣告其信息
 ]])
 author = "冰冰羊"
-version = "0.2.02" -- 模组版本
+version = "0.2.03" -- 模组版本
 api_version = 10
 
 --[[
@@ -96,8 +96,8 @@ configuration_options = {
     },
     {
         name = "GetTimeFromRemoteCommand",
-        label = en_zh("Use Remote Command to Get Time", "使用远程命令从服务器获取数据"),
-        hover = en_zh("It only works when you are server admin", "只有你是管理员的时候才有效果"),
+        label = en_zh("Get Time from Server", "从服务器获取数据"),
+        hover = en_zh("Get event time from server via remote command, It only works when you are server admin", "通过远程命令从服务器获取事件时间，只有你是管理员的时候才有效果"),
         options = toggle,
         default = true,
     },
@@ -113,7 +113,7 @@ configuration_options = {
     },
     {
         name = "UIButton",
-        label = en_zh("Panel Toggle Button Visibility", "面板开关按钮何时显示"),
+        label = en_zh("Button Visibility", "按钮显示"),
         hover = en_zh("Choose when the event timer panel toggle button appears", "选择事件计时器面板的开关在什么情况下显示"),
         options = {
             {description = en_zh("Always Visible", "始终显示"), data = "always"},
