@@ -17,7 +17,7 @@ You can tick the checkbox on the right side of the panel to keep the timer alway
 点击事件可宣告其信息
 ]])
 author = "冰冰羊，Jerry"
-version = "0.2.08" -- 模组版本
+version = "0.2.09" -- 模组版本
 version_compatible = "0.2.07" -- 最低兼容版本
 api_version = 10
 
@@ -142,7 +142,7 @@ configuration_options = {
     SkipSpace(en_zh("Client Settings", "客户端设置"), true),
     {
         name = "UIButton",
-        label = en_zh("Panel Toggle Button Visibility", "面板开关按钮何时显示"),
+        label = en_zh("Button Visibility", "按钮显示"),
         hover = en_zh("Choose when the event timer panel toggle button appears", "选择事件计时器面板的开关在什么情况下显示"),
         options = {
             {description = en_zh("Always Visible", "始终显示"), data = "always"},
