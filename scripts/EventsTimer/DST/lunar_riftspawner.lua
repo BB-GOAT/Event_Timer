@@ -1,9 +1,14 @@
 -- 月亮裂隙生成倒计时（为了跨世界同步数据修改了事件名。原事件名 riftspawner）
 
+local allow_worlds = {
+    forest = true,
+    island = true,
+}
+
 local info
 info = {
     gettimefn = function() -- 当裂隙出现时，不显示
-        if TheWorld and TheWorld:HasTag("forest") and TheWorld.net.components.warningtimer.inst.replica.warningtimer.rift_portal_text:value() == "" then
+        if allow_worlds[GetWorldtypeStr()] and TheWorld.net.components.warningtimer.inst.replica.warningtimer.rift_portal_text:value() == "" then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")()
         end
     end,
