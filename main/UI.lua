@@ -6,6 +6,7 @@ GLOBAL.setfenv(1, GLOBAL)
 
 local WarningEvent = require("widgets/warningevent")
 local WarningTips = require("widgets/warningtips")
+local Widget = require("widgets/widget")
 local game_ready = false
 local last_tips_cache = {} -- 记录事件是否提示过（如果保存在ThePlayer.HUD里 换人时会丢数据）
 
@@ -13,6 +14,16 @@ local function AddWarningEvents(self)
     self.inst:DoTaskInTime(2,function()
         game_ready = true
     end)
+
+    local warningtips_root = self:AddChild(Widget("WarningTipsResolutionRoot"))
+    warningtips_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
+    warningtips_root:SetHAnchor(ANCHOR_LEFT)
+    warningtips_root:SetVAnchor(ANCHOR_TOP)
+    warningtips_root:SetClickable(false)
+
+    local warningtips_design_root = warningtips_root:AddChild(Widget("WarningTipsDesignRoot"))
+    warningtips_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
+    warningtips_design_root:SetClickable(false)
 
     local warningtips_messages = {}
     local function sort_message()
@@ -67,7 +78,8 @@ local function AddWarningEvents(self)
         local text = timefn()
         if type(text) ~= "string" or text == "" then return end
 
-        local message = self:AddChild(WarningTips(text, level)) -- 创建新的提示控件
+        warningtips_root:MoveToFront()
+        local message = warningtips_design_root:AddChild(WarningTips(text, level)) -- 创建新的提示控件
 
         -- 新消息置顶，旧消息由 sort_message 重排到下方
         table.insert(warningtips_messages, 1, message)
@@ -93,9 +105,19 @@ local function AddWarningEvents(self)
     ---------------------------------------------------------------------------------------------------------------
 
     -- 屏幕左上角倒计时
+    local warningevents_root = self:AddChild(Widget("WarningEventsResolutionRoot"))
+    warningevents_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
+    warningevents_root:SetHAnchor(ANCHOR_LEFT)
+    warningevents_root:SetVAnchor(ANCHOR_TOP)
+    warningevents_root:SetClickable(false)
+
+    local warningevents_design_root = warningevents_root:AddChild(Widget("WarningEventsDesignRoot"))
+    warningevents_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
+    warningevents_design_root:SetClickable(false)
+
     self.WarningEventTimeData = {}
     for warningevent, data in pairs(WarningEvents) do
-        self[warningevent] = self:AddChild(WarningEvent(data.anim, data.image))
+        self[warningevent] = warningevents_design_root:AddChild(WarningEvent(data.anim, data.image))
         self[warningevent]:Hide()
         self[warningevent].force = RW_Data:GetValue(warningevent) -- 读取存储的数据来决定是否显示计时器在屏幕左上角
     end
@@ -104,13 +126,14 @@ local function AddWarningEvents(self)
         local eventsdata = self.WarningEventTimeData
         local i = 0
         local line_num = 2
-        local scale = TheFrontEnd:GetHUDScale()
+        local scale = TheFrontEnd:GetProportionalHUDScale()
         for warningevent, data in pairs(WarningEvents) do
             local row = math.floor(i/line_num)
             local line = i - row * line_num
             local x = (row * 150 + 80) * scale
             local y = (-line * 70 - 30) * scale
 
+            self[warningevent]:SetScale(scale)
             self[warningevent]:SetPosition(x, y, 0)
             local time = eventsdata[warningevent .. "_time"] or 0 -- 屏幕左上角倒计时只显示time，不显示text，因为text内容太多
 

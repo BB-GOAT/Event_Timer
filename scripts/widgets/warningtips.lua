@@ -85,9 +85,6 @@ local WarningTips = Class(Widget, function(self, text, level)
     self.start_y = h / 2 - 160 -- 起始Y轴位置
     self.target_y = self.start_y -- 目标Y轴位置
 
-    -- 设置锚点
-    self:SetHAnchor(1) -- 设置原点x坐标位置，0、1、2分别对应屏幕中、左、右
-    self:SetVAnchor(1) -- 设置原点y坐标位置，0、1、2分别对应屏幕中、上、下
     self.text:SetRegionSize(w, h)
     self.text:SetHAlign(1) -- 设置左对齐
 
