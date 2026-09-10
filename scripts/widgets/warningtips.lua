@@ -5,7 +5,7 @@ local Text = require("widgets/text")
 local TypewriterText = Class(Text, function(self, font, size, text, color)
     Text._ctor(self, font, size, text, color)
     self.textString = self.string or ""
-    self.animSpeed = 60
+    self.animSpeed = 30
     self.animIndex = 0
     self.animTimer = 0
 end)
@@ -79,7 +79,7 @@ local WarningTips = Class(Widget, function(self, text, level)
 
     self.text:MoveToFront() -- 将文字移动到前面
 
-    self.start_x = w + 340 -- 起始X轴位置
+    self.start_x = w + 450 -- 起始X轴位置
     self.target_x = w + 40 -- 目标X轴位置
     self.base_y = (h / 2 - 160) -- 原始Y轴位置
     self.start_y = h / 2 - 160 -- 起始Y轴位置
@@ -88,6 +88,7 @@ local WarningTips = Class(Widget, function(self, text, level)
     -- 设置锚点
     self:SetHAnchor(1) -- 设置原点x坐标位置，0、1、2分别对应屏幕中、左、右
     self:SetVAnchor(1) -- 设置原点y坐标位置，0、1、2分别对应屏幕中、上、下
+    self.text:SetRegionSize(w, h)
     self.text:SetHAlign(1) -- 设置左对齐
 
     -- 调整透明度
@@ -98,17 +99,41 @@ local WarningTips = Class(Widget, function(self, text, level)
     self.AlphaMode = true
     self.text:AnimateIn()
 
-    -- 开始显示，以移动动画形式出现
-    self:MoveTo(
-        { x = self.start_x, y = self.start_y, z = 0 }, -- 开始位置 from
-        { x = self.target_x, y = self.start_y, z = 0}, -- 结束位置 to
-        1, -- 移动时长 time
-        nil -- 移动完成后执行的函数 fn
-    )
+    -- 从右侧起点开始，以固定比例逼近目标位置。
+    self:SetPosition(self.start_x, self.start_y, 0)
+    self:SetMoveTarget(self.target_x, self.target_y)
     if level > 1 then
         TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/XP_bar_fill_unlock") -- 播放提示音
     end
 end)
+
+function WarningTips:SetMoveTarget(x, y)
+    self.target_x = x or self.target_x
+    self.target_y = y or self.target_y
+    self.moving_to_target = true
+    self.inst:StartWallUpdatingComponent(self)
+end
+
+function WarningTips:UpdateMoveTowardTarget(dt)
+    if not self.moving_to_target then
+        return
+    end
+
+    -- 将30Hz 15%的步长转换为等效的每帧比率。
+    local move_ratio = 1 - 0.85 ^ (dt * 30)
+
+    local pos = self:GetPosition()
+    local x = pos.x + (self.target_x - pos.x) * move_ratio
+    local y = pos.y + (self.target_y - pos.y) * move_ratio
+
+    if math.abs(self.target_x - x) <= 0.1
+        and math.abs(self.target_y - y) <= 0.1 then
+        self:SetPosition(self.target_x, self.target_y, 0)
+        self.moving_to_target = false
+    else
+        self:SetPosition(x, y, 0)
+    end
+end
 
 function WarningTips:GetTextSize()
     return self.text_width, self.text_height
@@ -140,6 +165,8 @@ function WarningTips:FadeOut()
 end
 
 function WarningTips:OnWallUpdate(dt) -- 每秒执行【游戏刷新率】次
+    self:UpdateMoveTowardTarget(dt)
+
     if self.AlphaMode then -- 淡入
         self.Alpha = math.min(1, self.Alpha + dt * 3)
     else -- 淡出
@@ -149,7 +176,8 @@ function WarningTips:OnWallUpdate(dt) -- 每秒执行【游戏刷新率】次
     self.text:UpdateAlpha(self.Alpha)
     self.bg:SetTint(1,1,1,self.Alpha)
 
-    if (self.AlphaMode and self.Alpha >= 1) or (not self.AlphaMode and self.Alpha <= 0) then
+    if not self.moving_to_target
+        and ((self.AlphaMode and self.Alpha >= 1) or (not self.AlphaMode and self.Alpha <= 0)) then
         self.inst:StopWallUpdatingComponent(self)
     end
 end

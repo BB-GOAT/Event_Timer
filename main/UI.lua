@@ -29,13 +29,7 @@ local function AddWarningEvents(self)
                     msg.target_y = msg.base_y -- 第一条消息，Y轴设为基础坐标
                 end
 
-                local pos = msg:GetPosition()
-                msg:MoveTo(
-                    { x = pos.x, y = pos.y, z = 0 },
-                    { x = msg.target_x, y = msg.target_y, z = 0},
-                    1,
-                    nil
-                )
+                msg:SetMoveTarget(msg.target_x, msg.target_y)
             end
         end
     end
