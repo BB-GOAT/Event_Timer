@@ -7,7 +7,7 @@ GLOBAL.WarningEvents = GLOBAL.rawget(GLOBAL, "WarningEvents") or {}
 -- 具体参考下面的代码
 
 local TimeToString = GLOBAL.EventTimer.env.TimeToString -- 获取全局事件计时器模组的格式化时间函数(将纯数字转换为X天X分X秒)
-local Upvaluehelper = GLOBAL.EventTimer.env.Upvaluehelper -- 全局事件计时器模组的getupvalue工具，文件位于 当前目录\scripts\bbgoat_utils\bbgoat_upvaluehelper.lua
+local Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper -- 获取getupvalue工具，文件位于【冰冰羊的模组运行库】mod内 ..\322330\3750536829\bbgoat_utils\bbgoat_upvaluehelper.lua
 GLOBAL.WarningEvents.hounded = { -- 这个事件名称为 hounded，注意你的事件名不要和原模组的冲突，否则会覆盖原模组的事件倒计时
     gettimefn = function() -- gettimefn：服务器执行的函数，返回一个数字表示倒计时还有多少秒。屏幕左上角的常驻倒计时显示的数字来自于此，若没有此项则事件不能被勾选并常驻屏幕左上角
         if GLOBAL.TheWorld.components.hounded then

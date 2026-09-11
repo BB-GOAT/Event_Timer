@@ -58,10 +58,16 @@ end)
 local info
 info = {
     gettimefn = function()
-        if TheWorld.components.hounded then
-            local data = TheWorld.components.hounded:OnSave()
-            return data and data.timetoattack
+        local self = TheWorld.components.hounded
+        if not self then return end
+
+        local _spawnmode = Upvaluehelper.GetUpvalue(self.OnUpdate, "_spawnmode")
+        if _spawnmode == "never" then
+            return DataDumper({ not_found = true })
         end
+
+        local data = self:OnSave()
+        return data and data.timetoattack
     end,
     gettextfn = function(time)
         if not TheWorld:HasTag("cave") or not time then return end

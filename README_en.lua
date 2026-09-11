@@ -10,7 +10,7 @@ GLOBAL.WarningEvents = GLOBAL.rawget(GLOBAL, "WarningEvents") or {}
 -- Example and field explanations are below.
 
 local TimeToString = GLOBAL.EventTimer.env.TimeToString -- Get the global events timer mod's time formatting function (converts a raw number into "X day X min X sec")
-local Upvaluehelper = GLOBAL.EventTimer.env.Upvaluehelper -- Global events timer mod's get-upvalue helper. File located at ./scripts/bbgoat_utils/bbgoat_upvaluehelper.lua
+local Upvaluehelper = GLOBAL.BBGOAT_utils.Upvaluehelper -- Get the debug.getupvalue tools from the BBGOAT_utils mod
 GLOBAL.WarningEvents.hounded = { -- This event is named "hounded". avoid conflicts with the base mod.
     gettimefn = function() -- gettimefn: runs on the server. Returns a number representing how many seconds remain on the countdown.
         -- The persistent countdown in the top-left of the screen uses this value.
