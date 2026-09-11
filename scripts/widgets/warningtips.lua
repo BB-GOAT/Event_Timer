@@ -137,9 +137,12 @@ function WarningTips:GetTextSize()
 end
 
 function WarningTips:RefreshTextSize()
+    self.text:ResetRegionSize()
     local w, h = self.text:GetRegionSize()
     self.text_width = w
     self.text_height = h
+    self.text:SetRegionSize(w, h)
+    self.text:SetHAlign(ANCHOR_LEFT)
     self.bg:SetSize(w + 5, h)
 end
 
@@ -148,11 +151,16 @@ function WarningTips:SetText(text)
         return false
     end
 
+    local is_animating = self.text.animIndex ~= nil
+    local displayed_text = is_animating and self.text:GetString() or nil
     self.text.textString = text
-    if not self.text.animIndex then
-        self.text:SetString(self.text.textString)
-        self:RefreshTextSize()
+    self.text:SetString(text)
+    self:RefreshTextSize()
+
+    if is_animating then
+        self.text:SetString(displayed_text)
     end
+
     return true
 end
 
