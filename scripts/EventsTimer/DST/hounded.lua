@@ -56,21 +56,29 @@ MOD_util:AddPlayerPostInit(function(world, player)
 end)
 
 local info
+local is_cave_world
 info = {
+    postinitfn = function()
+        if not TheNet:GetIsServer() then return end
+        AddComponentPostInit("hounded", function(self)
+            self.inst:DoTaskInTime(0.1, function()
+                local _spawnmode = Upvaluehelper.GetUpvalue(self.OnUpdate, "_spawnmode")
+                if _spawnmode == "never" then
+                    info.gettimefn = function() end
+                end
+            end)
+            is_cave_world = TheWorld:HasTag("cave") -- 为了兼容深埋之下，不能直接清空gettextfn，否则对方给森林世界弄的gettextfn会被删除
+        end)
+    end,
     gettimefn = function()
         local self = TheWorld.components.hounded
         if not self then return end
-
-        local _spawnmode = Upvaluehelper.GetUpvalue(self.OnUpdate, "_spawnmode")
-        if _spawnmode == "never" then
-            return DataDumper({ not_found = true })
-        end
 
         local data = self:OnSave()
         return data and data.timetoattack
     end,
     gettextfn = function(time)
-        if not TheWorld:HasTag("cave") or not time then return end
+        if not is_cave_world or not time then return end
         local self = TheWorld.components.hounded
         if not self then return end
 
