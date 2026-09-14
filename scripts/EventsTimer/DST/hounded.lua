@@ -11,7 +11,7 @@ local function HoundedAnimChange(self)
             local text = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.hounded_text
             local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
             local worldtype = GetWorldtypeStr()
-            if worldtype == "shipwrecked" then
+            if worldtype == "shipwrecked" or worldtype == "volcano" then
                 self.anim = self.islandanim
             elseif is_worm_boss then
                 self.anim = self.wormbossanim
@@ -173,7 +173,7 @@ info = {
         local worldtype = GetWorldtypeStr()
         if worldtype == "porkland" then
             self.image = nil
-        elseif worldtype == "shipwrecked" then
+        elseif worldtype == "shipwrecked" or worldtype == "volcano" then
             self.image = self.islandimage
         elseif is_worm_boss then
             self.image = self.wormbossimage

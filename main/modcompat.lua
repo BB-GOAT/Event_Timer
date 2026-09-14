@@ -184,7 +184,7 @@ if Ismodloaded("workshop-3511498282") then
     local rift_type
     local function get_rift_type()
         if TheWorld then
-            rift_type = GetWorldtypeStr() == "cave" and "shadow_riftspawner" or "lunar_riftspawner"
+            rift_type = (GetWorldtypeStr() == "cave" or GetWorldtypeStr() == "volcano" and "shadow_riftspawner") or "lunar_riftspawner"
         end
         return rift_type
     end
@@ -317,7 +317,7 @@ if Ismodloaded("workshop-2510473186") then
     -- 获取裂隙类型
     local riftspawner_type, rift_portal_type
     local function get_rift_type()
-        local is_cave = GetWorldtypeStr() == "cave"
+        local is_cave = GetWorldtypeStr() == "cave" or GetWorldtypeStr() == "volcano"
         riftspawner_type = is_cave and "shadow_riftspawner" or "lunar_riftspawner"
         rift_portal_type = is_cave and "shadowrift_portal" or "rift_portal"
     end
