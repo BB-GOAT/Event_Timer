@@ -133,12 +133,21 @@ info = {
     localgettimefn = localgettimefn,
     remotegettimefn = function(Thread)
         local cmd = [[
-            if TheWorld.components.hounded then
-                local data = TheWorld.components.hounded:OnSave()
-                local time = data and data.timetoattack
-                return DataDumper({ time = time })
+            local self = TheWorld.components.hounded
+            if not self then return DataDumper({ not_found = true }) end
+
+            local _spawnmode = BBGOAT_FN.getval(self.OnUpdate, "_spawnmode")
+            if _spawnmode == "never" then
+                return DataDumper({ not_found = true })
             end
-            return DataDumper({ not_found = true })
+        
+            local data = self:OnSave()
+            local time = data and data.timetoattack
+            if time then
+                return DataDumper({ time = time })
+            else
+                return DataDumper({ not_found = true })
+            end
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.err then
