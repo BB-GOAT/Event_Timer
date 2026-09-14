@@ -3,7 +3,7 @@ local function GetWorldSettingsTimeLeft(name, ent)
     if ent and ent.components.worldsettingstimer then
         if not ent.components.worldsettingstimer:IsPaused(name) then
             local time = ent.components.worldsettingstimer:GetTimeLeft(name)
-            return time and time < 65535 and time
+            return time
         end
     end
 end

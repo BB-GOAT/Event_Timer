@@ -205,8 +205,10 @@ function GetWorldtypeStr()
 
         if TheWorld:HasTag("porkland") then
             cache_world_type = "porkland"
-        elseif TheWorld:HasTag("island") or TheWorld:HasTag("volcano") then
+        elseif TheWorld:HasTag("island") then
             cache_world_type = "shipwrecked"
+        elseif TheWorld:HasTag("volcano") then
+            cache_world_type = "volcano"
         elseif TheWorld:HasTag("cave") then
             cache_world_type = "cave"
         else
@@ -228,7 +230,7 @@ local function GetWorldSettingsTimeLeft(name, prefab)
         if ent and ent.components.worldsettingstimer then
             if not ent.components.worldsettingstimer:IsPaused(name) then
                 local time = ent.components.worldsettingstimer:GetTimeLeft(name)
-                return time and time < 65535 and time
+                return time
             end
         end
     end
@@ -381,8 +383,7 @@ modimport("main/UI") -- 屏幕左上角倒计时/面板开关按钮/醒目提示
 modimport("main/warningevents") -- 事件列表
 modimport("main/modcompat") -- 检测其它模组
 modimport("keybind") -- 键位绑定优化
-
-AddReplicableComponent("warningtimer") -- 事件计时组件
+modimport("main/RPC") -- 数据同步
 
 ----------------------------------------鼠标跟随---------------------------------------
 

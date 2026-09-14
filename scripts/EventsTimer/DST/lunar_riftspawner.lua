@@ -2,13 +2,13 @@
 
 local allow_worlds = {
     forest = true,
-    island = true,
+    shipwrecked = true,
 }
 
 local info
 info = {
     gettimefn = function() -- 当裂隙出现时，不显示
-        if allow_worlds[GetWorldtypeStr()] and TheWorld.net.components.warningtimer.inst.replica.warningtimer.rift_portal_text:value() == "" then
+        if allow_worlds[GetWorldtypeStr()] and EventTimer.EventTimerData.rift_portal_text == "" then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")()
         end
     end,

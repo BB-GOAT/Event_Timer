@@ -8,7 +8,7 @@ local allow_worlds = {
 local info
 info = {
     gettimefn = function() -- 当裂隙出现时，不显示
-        if allow_worlds[GetWorldtypeStr()] and TheWorld.net.components.warningtimer.inst.replica.warningtimer.shadowrift_portal_text:value() == "" then
+        if allow_worlds[GetWorldtypeStr()] and EventTimer.EventTimerData.shadowrift_portal_text == "" then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")()
         end
     end,

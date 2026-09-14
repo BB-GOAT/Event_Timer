@@ -115,7 +115,6 @@ local function AddWarningEvents(self)
     warningevents_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
     warningevents_design_root:SetClickable(false)
 
-    self.WarningEventTimeData = {}
     for warningevent, data in pairs(WarningEvents) do
         self[warningevent] = warningevents_design_root:AddChild(WarningEvent(data.anim, data.image))
         self[warningevent]:Hide()
@@ -123,7 +122,7 @@ local function AddWarningEvents(self)
     end
 
     function self:UpdateWarningEvents()
-        local eventsdata = self.WarningEventTimeData
+        local eventsdata = self.WarningEventTimeData -- 由RPC.lua提供
         local i = 0
         local line_num = 2
         local scale = TheFrontEnd:GetProportionalHUDScale()
@@ -188,24 +187,6 @@ local function AddWarningEvents(self)
 end
 
 AddClassPostConstruct("screens/playerhud", AddWarningEvents)
-
-local network_worlds = {
-    "forest",
-    "cave",
-    "shipwrecked",
-    "volcanoworld",
-    "porkland"
-}
-
-for i, world in ipairs(network_worlds) do
-    AddPrefabPostInit(world .. "_network", function(inst)
-        if not TheWorld.ismastersim then
-            return
-        end
-
-        inst:AddComponent("warningtimer")
-    end)
-end
 
 ---------------------------------------------------------------------------------------------------------------
 

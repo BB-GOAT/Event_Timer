@@ -9,6 +9,7 @@ STRINGS.eventtimer = {
         shipwrecked = "Shipwrecked",
         volcano = "Volcano",
         porkland = "Hamlet",
+        unknown = "Unknown",
     },
     time = {
         hour = " hour ",

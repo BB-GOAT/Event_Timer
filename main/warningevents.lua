@@ -1,5 +1,3 @@
-local TimeToString = TimeToString
-local SyncTimer = GetModConfigData("SyncTimer")
 local RequireEvent = RequireEvent
 
 -- 判断某个模组是否加载
@@ -109,44 +107,3 @@ for k, v in pairs(WarningEvents) do
         v.postinitfn()
     end
 end
-
-AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, event, timedata, worldtype)
-    if TheShard:GetShardId() == tostring(shardid) then return end
-    if not SyncTimer then return end -- 未开启同步功能，取消同步
-    if not rawget(_G, "TheWorld") then return end
-
-    local event_time_shardrpc = event .. "_time_shardrpc"
-    local event_text_shardrpc = event .. "_text_shardrpc"
-
-    local warningtimer = TheWorld.net.components.warningtimer
-    if timedata then
-        if warningtimer.inst.replica.warningtimer[event_time_shardrpc] then
-            warningtimer.inst.replica.warningtimer[event_time_shardrpc]:set(timedata or 0)
-        end
-
-        local textdata
-        if timedata > 0 then
-            textdata = TimeToString(timedata) -- 同时设置text，以显示来自哪个世界
-            textdata = string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. worldtype .. ")\n" .. textdata
-        end
-
-        if warningtimer.inst.replica.warningtimer[event_text_shardrpc] then
-            warningtimer.inst.replica.warningtimer[event_text_shardrpc]:set(textdata or "")
-        end
-    end
-end)
-
-AddShardModRPCHandler("EventTimer", "event_text_shardrpc", function(shardid, event, textdata, worldtype)
-    if not rawget(_G, "TheWorld") then return end
-    if TheShard:GetShardId() == tostring(shardid) then return end
-    if not SyncTimer then return end -- 未开启同步功能，取消同步
-    local event_text_shardrpc = event .. "_text_shardrpc"
-
-    local warningtimer = TheWorld.net.components.warningtimer
-    if textdata then
-        textdata = textdata ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. worldtype .. ")\n" .. textdata)
-        if warningtimer.inst.replica.warningtimer[event_text_shardrpc] then
-            warningtimer.inst.replica.warningtimer[event_text_shardrpc]:set(textdata or "")
-        end
-    end
-end)

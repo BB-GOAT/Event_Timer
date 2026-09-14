@@ -21,7 +21,7 @@ info = {
             end
         else
             AddPrefabPostInit("world", function()
-                if GetWorldtypeStr() ~= "shipwrecked" then
+                if GetWorldtypeStr() ~= "shipwrecked" and GetWorldtypeStr() ~= "volcano" then
                     info.tipsfn = nil -- 非海难火山世界不提示火山爆发
                 end
             end)

@@ -9,6 +9,7 @@ STRINGS.eventtimer = {
         shipwrecked = "海难",
         volcano = "火山",
         porkland = "猪镇",
+        unknown = "未知世界类型",
     },
     time = {
         hour = "小时",
