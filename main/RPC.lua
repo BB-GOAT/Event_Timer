@@ -1,6 +1,9 @@
 local SyncTimer = GetModConfigData("SyncTimer")
 local UpdateTime = GetModConfigData("UpdateTime")
 local tostring = GLOBAL.tostring
+local unpack = GLOBAL.unpack
+local STRINGS = GLOBAL.STRINGS
+
 -- local checknumber = GLOBAL.checknumber
 -- local checkstring = GLOBAL.checkstring
 
@@ -190,128 +193,130 @@ end
 
 ---------------------------------------客户端更新逻辑---------------------------------------
 
-local Extract_by_format = Extract_by_format
-local ReplacePrefabName = ReplacePrefabName
-local TimeToString = TimeToString
-local StringToTime = StringToTime
-local TimerMode = GetModConfigData("BossTimer")
+local function Client_Init()
+    local Extract_by_format = Extract_by_format
+    local ReplacePrefabName = ReplacePrefabName
+    local TimeToString = TimeToString
+    local StringToTime = StringToTime
+    local TimerMode = GetModConfigData("BossTimer")
 
-local day_str = STRINGS.eventtimer.time.day
-local hour_str = STRINGS.eventtimer.time.hour
-local min_str = STRINGS.eventtimer.time.minutes
-local sec_str = STRINGS.eventtimer.time.seconds
+    local day_str = STRINGS.eventtimer.time.day
+    local hour_str = STRINGS.eventtimer.time.hour
+    local min_str = STRINGS.eventtimer.time.minutes
+    local sec_str = STRINGS.eventtimer.time.seconds
 
-local Getformat_format_1 = "(%d+)".. day_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
-local Getformat_format_2 = "(%d+)" .. hour_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
+    local Getformat_format_1 = "(%d+)".. day_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
+    local Getformat_format_2 = "(%d+)" .. hour_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
 
-local function Getformat(text)
-    local format = TimerMode == 2 and Getformat_format_2 or Getformat_format_1
-    return string.gsub(text, format, "%%s")
-end
+    local function Getformat(text)
+        local format = TimerMode == 2 and Getformat_format_2 or Getformat_format_1
+        return string.gsub(text, format, "%%s")
+    end
 
-local function get_new_text(v, datatext)
-    local results = { Extract_by_format(datatext, v) }
-    if results[1] then
-        for k1, v1 in pairs(results) do
-            if string.find(v1, min_str .. "(.*)" .. sec_str) then
-                v1 = StringToTime(v1) -- 尝试将字符串转为数字
-                if type(v1) == "number" then
-                    v1 = v1 - 1
-                    if v1 < 0 then
-                        results[k1] = TimeToString(0) -- 小于0时停止计算
-                    else
-                        results[k1] = TimeToString(v1) -- 减一后转换为字符串保存到results对应的值里
+    local function get_new_text(v, datatext)
+        local results = { Extract_by_format(datatext, v) }
+        if results[1] then
+            for k1, v1 in pairs(results) do
+                if string.find(v1, min_str .. "(.*)" .. sec_str) then
+                    v1 = StringToTime(v1) -- 尝试将字符串转为数字
+                    if type(v1) == "number" then
+                        v1 = v1 - 1
+                        if v1 < 0 then
+                            results[k1] = TimeToString(0) -- 小于0时停止计算
+                        else
+                            results[k1] = TimeToString(v1) -- 减一后转换为字符串保存到results对应的值里
+                        end
                     end
                 end
             end
+            v = v:gsub("%%([^sd%%])", "%%%%%1")
+            v = v:gsub("%%$", "%%%%")
+            local new_text = string.format(ReplacePrefabName(v), unpack(results))
+            return new_text
+        else
+            return
         end
-        v = v:gsub("%%([^sd%%])", "%%%%%1")
-        v = v:gsub("%%$", "%%%%")
-        local new_text = string.format(ReplacePrefabName(v), unpack(results))
-        return new_text
-    else
-        return
-    end
-end
-
-local eventstime = {} -- ThePlayer.HUD.WarningEventTimeData
-for warningevent in pairs(GLOBAL.WarningEvents) do
-    -- 初始化eventstime表，防止数据为nil
-    eventstime[warningevent .. "_text"] = ""
-    eventstime[warningevent .. "_time"] = 0
-end
-
-local client_prediction_tasks = {} -- 客户端预测倒计时任务
-function ClientWarningTimer:OnWarningEventDirty(warningevent, type, fromserver)
-    if type == "text" then
-        eventstime[warningevent .. "_text"] = warningtimer[warningevent .. "_text"] or ""
-    else
-        eventstime[warningevent .. "_time"] = warningtimer[warningevent .. "_time"] or 0
     end
 
-    if GLOBAL.EventTimer.ClientPrediction then
-        if fromserver and client_prediction_tasks[warningevent] then
+    local eventstime = {} -- ThePlayer.HUD.WarningEventTimeData
+    for warningevent in pairs(GLOBAL.WarningEvents) do
+        -- 初始化eventstime表，防止数据为nil
+        eventstime[warningevent .. "_text"] = ""
+        eventstime[warningevent .. "_time"] = 0
+    end
+
+    local client_prediction_tasks = {} -- 客户端预测倒计时任务
+    function ClientWarningTimer:OnWarningEventDirty(warningevent, type, fromserver)
+        if type == "text" then
+            eventstime[warningevent .. "_text"] = warningtimer[warningevent .. "_text"] or ""
+        else
+            eventstime[warningevent .. "_time"] = warningtimer[warningevent .. "_time"] or 0
+        end
+
+        if GLOBAL.EventTimer.ClientPrediction then
+            if fromserver and client_prediction_tasks[warningevent] then
+                client_prediction_tasks[warningevent]:Cancel()
+                client_prediction_tasks[warningevent] = nil
+            end
+
+            if not client_prediction_tasks[warningevent] and UpdateTime > 1 then
+                client_prediction_tasks[warningevent] = GLOBAL.TheWorld:DoPeriodicTask(1, function() self:UpdateClientPrediction(warningevent) end)
+            end
+        elseif client_prediction_tasks[warningevent] then
             client_prediction_tasks[warningevent]:Cancel()
             client_prediction_tasks[warningevent] = nil
         end
+    end
 
-        if not client_prediction_tasks[warningevent] and UpdateTime > 1 then
-            client_prediction_tasks[warningevent] = GLOBAL.TheWorld:DoPeriodicTask(1, function() self:UpdateClientPrediction(warningevent) end)
+    function ClientWarningTimer:OnUpdate()
+        if not GLOBAL.ThePlayer or not GLOBAL.ThePlayer.HUD then
+            return
         end
-    elseif client_prediction_tasks[warningevent] then
-        client_prediction_tasks[warningevent]:Cancel()
-        client_prediction_tasks[warningevent] = nil
-    end
-end
-
-function ClientWarningTimer:OnUpdate()
-    if not GLOBAL.ThePlayer or not GLOBAL.ThePlayer.HUD then
-        return
-    end
-    if not GLOBAL.ThePlayer.HUD.WarningEventTimeData then
-        GLOBAL.ThePlayer.HUD.WarningEventTimeData = eventstime
-    end
-    GLOBAL.ThePlayer.HUD:UpdateWarningEvents()
-end
-
-function ClientWarningTimer:UpdateClientPrediction(warningevent) -- 每个事件单独每秒运行一次
-    local Dirty = false
-
-    ----------------------------------------time---------------------------------------
-
-    local time = warningtimer[warningevent .. "_time"] or 0 -- 本世界time
-    time = time - 1
-    if time >= 0 then
-        warningtimer[warningevent .. "_time"] = time
-        Dirty = true
+        if not GLOBAL.ThePlayer.HUD.WarningEventTimeData then
+            GLOBAL.ThePlayer.HUD.WarningEventTimeData = eventstime
+        end
+        GLOBAL.ThePlayer.HUD:UpdateWarningEvents()
     end
 
-    ----------------------------------------text---------------------------------------
+    function ClientWarningTimer:UpdateClientPrediction(warningevent) -- 每个事件单独每秒运行一次
+        local Dirty = false
 
-    local new_text
+        ----------------------------------------time---------------------------------------
 
-    local datatext = warningtimer[warningevent .. "_text"] or "" -- 本世界text
+        local time = warningtimer[warningevent .. "_time"] or 0 -- 本世界time
+        time = time - 1
+        if time >= 0 then
+            warningtimer[warningevent .. "_time"] = time
+            Dirty = true
+        end
 
-    if datatext ~= "" then
-        new_text = get_new_text(Getformat(datatext), datatext)
+        ----------------------------------------text---------------------------------------
 
-        -- 如果上方的匹配失败了，直接使用上上方的time
-        if not new_text then
-            if time >= 0 then
-                new_text = TimeToString(time)
+        local new_text
+
+        local datatext = warningtimer[warningevent .. "_text"] or "" -- 本世界text
+
+        if datatext ~= "" then
+            new_text = get_new_text(Getformat(datatext), datatext)
+
+            -- 如果上方的匹配失败了，直接使用上上方的time
+            if not new_text then
+                if time >= 0 then
+                    new_text = TimeToString(time)
+                end
             end
         end
-    end
 
-    if new_text then
-        warningtimer[warningevent .. "_text"] = new_text -- 更新text
-        Dirty = true
-    end
+        if new_text then
+            warningtimer[warningevent .. "_text"] = new_text -- 更新text
+            Dirty = true
+        end
 
-    if Dirty then
-        -- 更新数据
-        self:OnWarningEventDirty(warningevent, "text")
-        self:OnWarningEventDirty(warningevent, "time")
+        if Dirty then
+            -- 更新数据
+            self:OnWarningEventDirty(warningevent, "text")
+            self:OnWarningEventDirty(warningevent, "time")
+        end
     end
 end
 
@@ -319,10 +324,11 @@ end
 
 AddPrefabPostInit("world", function(self)
     if not GLOBAL.TheNet:IsDedicated() then
+        Client_Init()
         self:DoPeriodicTask(0.5, function() ClientWarningTimer:OnUpdate() end)
     end
 
-    if not TheWorld.ismastersim then return end
+    if not GLOBAL.TheWorld.ismastersim then return end
 
     GLOBAL.EventTimer.EventTimerData = warningtimer -- 方便从其它地方获取事件数据
     self:DoPeriodicTask(UpdateTime, UpdateEventData)

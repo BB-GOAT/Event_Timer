@@ -68,9 +68,9 @@ function DefaultEvent()
     for warningevent in pairs(WarningEvents) do
         local event_time = warningevent .. "_time"
         local event_text = warningevent .. "_text"
-        local warningtimer = TheWorld.net.components.warningtimer
-        warningtimer.inst.replica.warningtimer[event_time]:set(0)
-        warningtimer.inst.replica.warningtimer[event_text]:set("")
+        local warningtimer = GLOBAL.EventTimer.EventTimerData
+        warningtimer[event_time] = 0
+        warningtimer[event_text] = ""
     end
 end
 
