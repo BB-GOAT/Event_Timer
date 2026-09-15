@@ -191,7 +191,7 @@ local function AddWarningEvents(self)
                 --     self[warningevent_child].sametick = 0
                 -- end
 
-                if data.gettimefn then
+                if data.gettimefn or data.playerly then
                     if not self[warningevent_child].force or ((time and time <= 0) --[[or self[warningevent_child].sametick >= 100]]) then
                         if self[warningevent_child].shown then
                             self[warningevent_child]:Hide()

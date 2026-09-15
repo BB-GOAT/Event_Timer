@@ -156,7 +156,7 @@ local WarningEventHUD = Class(Widget, function(self, owner)
                 widget.destitem.anim:GetAnimState():Pause()
             end
 
-            if data.gettimefn then
+            if data.time and data.time > 0 then
                 local warningevent_child = data.name .. "_" .. data.shard_id
                 if not ThePlayer.HUD[warningevent_child] then
                     return

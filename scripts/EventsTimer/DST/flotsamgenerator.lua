@@ -35,6 +35,10 @@ info = {
         atlas = "images/inventoryimages2.xml",
         tex = "messagebottle.tex",
         scale = 0.9,
+        offset = {
+           x = 0,
+           y = 8,
+        },
     },
     playerly = true, -- 指明是针对单个玩家的事件
     announcefn = function(context)
