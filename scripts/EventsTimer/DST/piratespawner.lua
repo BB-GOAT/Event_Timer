@@ -56,7 +56,8 @@ info = {
         }
     },
     DisableShardRPC = true,
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         text = string.gsub(text, "\n", ", ")
         return text
     end,

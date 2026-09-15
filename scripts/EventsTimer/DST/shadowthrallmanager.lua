@@ -79,7 +79,8 @@ info = {
             y = -2,
         },
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         text = string.gsub(text,"\n",", ")
         return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. text
     end,

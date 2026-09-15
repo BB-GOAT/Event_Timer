@@ -37,21 +37,34 @@ info = {
             y = -8,
         },
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
+        local desc
         local target, _ = Extract_by_format(text, STRINGS.eventtimer.deerclopsspawner.targeted)
         if target and time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.target), target, TimeToString(time))
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.target), target, TimeToString(time))
         elseif time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.cooldown), TimeToString(time))
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.cooldown), TimeToString(time))
         end
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
-        if time > 2 and time <= 60 and GetWorldtypeStr() == "forest" then
-            return true, info.announcefn, time, nil, 2
+    tipsfn = function(context)
+        local time = context.time
+        if time > 2 and time < 60 then
+            local tips_level_2 = context.shard_id == EventTimer.CurrentShardId
+            return true, info.announcefn, time, nil, tips_level_2 and 2 or 1
         elseif time == 480 or JustEntered(time) then
             return true, info.announcefn, 10, nil, 2
         elseif ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.attack)), 10, time, 3
+            local desc = ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.attack)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, StringToFunction(desc), 10, time, 3
         end
         return false
     end

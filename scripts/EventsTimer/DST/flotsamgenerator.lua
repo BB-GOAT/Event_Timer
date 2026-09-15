@@ -37,8 +37,8 @@ info = {
         scale = 0.9,
     },
     playerly = true, -- 指明是针对单个玩家的事件
-    announcefn = function(time, text)
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), text)
+    announcefn = function(context)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), context.text)
     end
 }
 

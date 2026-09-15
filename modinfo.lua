@@ -169,7 +169,10 @@ configuration_options = {
     {
         name = "ClientPrediction",
         label = en_zh("Client Predicted Countdown", "客户端预测倒计时"),
-        hover = en_zh("If the server update interval is longer than 1 second, use client prediction to fill the gaps","如果服务器的数据更新频率在1秒以上，则使用客户端预测填补空缺的刷新周期"),
+        hover = en_zh(
+            "If the server update interval is longer than 1 second, use client prediction to fill the gaps",
+            "如果服务器的数据更新频率在1秒以上，则使用客户端预测填补空缺的刷新周期"
+        ),
         options = toggle,
         default = true,
         client = true,
@@ -177,7 +180,10 @@ configuration_options = {
     {
         name = "MarkDataSource",
         label = en_zh("Mark Data Source", "标记数据来源"),
-        hover = en_zh("", "开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新"),
+        hover = en_zh(
+            "游玩多层世界服务器时不建议关闭此功能，开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新", -- TODO 英文翻译
+            "游玩多层世界服务器时不建议关闭此功能，开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新"
+        ),
         options = toggle,
         default = true,
         client = true,

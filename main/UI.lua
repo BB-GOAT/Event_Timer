@@ -1,14 +1,32 @@
 local AddClassPostConstruct = AddClassPostConstruct
-local AddPrefabPostInit = AddPrefabPostInit
+local TimeToString = TimeToString
 local RW_Data = RW_Data
 local env = env
 GLOBAL.setfenv(1, GLOBAL)
 
 local WarningEvent = require("widgets/warningevent")
 local WarningTips = require("widgets/warningtips")
+local TarnsferPanel = require("widgets/WarningEventPanel")
 local Widget = require("widgets/widget")
 local game_ready = false
 local last_tips_cache = {} -- 记录事件是否提示过（如果保存在ThePlayer.HUD里 换人时会丢数据）
+
+
+local world_type_list = {
+    [STRINGS.eventtimer.worldtype.forest] = "forest",
+    [STRINGS.eventtimer.worldtype.cave] = "cave",
+    [STRINGS.eventtimer.worldtype.shipwrecked] = "shipwrecked",
+    [STRINGS.eventtimer.worldtype.volcano] = "volcano",
+    [STRINGS.eventtimer.worldtype.porkland] = "porkland",
+    [STRINGS.eventtimer.worldtype.unknown] = "unknown",
+}
+
+local function GetShardInfo(shardid) -- 根据世界ID获取世界类型和名称
+    local world_list = EventTimer.WorldList or {}
+    local world_str = world_list[shardid] or STRINGS.eventtimer.worldtype.unknown
+    local world_type = world_type_list[world_str] or "unknown"
+    return world_type, world_str
+end
 
 local function AddWarningEvents(self)
     self.inst:DoTaskInTime(2,function()
@@ -75,7 +93,7 @@ local function AddWarningEvents(self)
         if not EventTimer.TimerTips then return end -- 判断模组设置是否开启了醒目提示功能
         if type(timefn) ~= "function" then return end
 
-        local text = timefn(context.time or 0, context.text or "")
+        local text = timefn(context)
         if type(text) ~= "string" or text == "" then return end
 
         warningtips_root:MoveToFront()
@@ -87,7 +105,7 @@ local function AddWarningEvents(self)
 
         -- 启动定时器
         message.inst:DoPeriodicTask(0.5, function() -- 更新倒计时时间
-            if not message:SetText(timefn(context.time or 0, context.text or "")) then
+            if not message:SetText(timefn(context)) then
                 remove_message(message)
                 return
             end
@@ -105,6 +123,7 @@ local function AddWarningEvents(self)
     ---------------------------------------------------------------------------------------------------------------
 
     -- 屏幕左上角倒计时
+    local eventsdata
     local warningevents_root = self:AddChild(Widget("WarningEventsResolutionRoot"))
     warningevents_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     warningevents_root:SetHAnchor(ANCHOR_LEFT)
@@ -115,8 +134,19 @@ local function AddWarningEvents(self)
     warningevents_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
     warningevents_design_root:SetClickable(false)
 
+    -- 面板数据
+    local Panel_data_list = {}
+    TarnsferPanel.UpdateDestItem = function(self)
+        self.scrollpanel:SetItemsData(Panel_data_list)
+    end
+
     function self:UpdateWarningEvents()
-        local eventsdata = self.WarningEventTimeData or {} -- 由RPC.lua提供
+        Panel_data_list = {}
+        if not eventsdata then
+            eventsdata = self.WarningEventTimeData -- 由RPC.lua提供
+            if not eventsdata then return end
+        end
+
         local i = 0
         local line_num = 2
         local scale = TheFrontEnd:GetProportionalHUDScale()
@@ -138,7 +168,22 @@ local function AddWarningEvents(self)
                 self[warningevent_child]:SetScale(scale)
                 self[warningevent_child]:SetPosition(x, y, 0)
                 local time = eventsdata[warningevent][shard_id].time or 0
-                local text = eventsdata[warningevent][shard_id].text or "" -- 屏幕左上角倒计时只显示time，不显示text，因为text内容太多
+
+                local world_type, world_str = GetShardInfo(shard_id)
+                -- TODO: 也许可以优化性能
+                local context = setmetatable( -- 传入给事件模块的信息
+                    {
+                        shard_id = shard_id, -- 事件所处世界ID
+                        world_type = world_type, -- 事件所处世界类型
+                        world_str = world_str, -- 事件所处世界中文名称
+                        warningevent_child = self[warningevent_child],
+                    },
+                    {
+                        __index = function(t, key)
+                            return eventsdata[warningevent][shard_id][key] -- time 或 text 从这里获取
+                        end
+                    }
+                )
 
                 -- if self[warningevent_child].last_time == time then
                 --     self[warningevent_child].sametick = (self[warningevent_child].sametick or 0) + 1
@@ -161,10 +206,10 @@ local function AddWarningEvents(self)
                     else
                         if not self[warningevent_child].shown then
                             if data.animchangefn then
-                                data:animchangefn(time, text)
+                                data:animchangefn(context)
                                 self[warningevent_child]:SetEventAnim(data.anim)
                             elseif data.imagechangefn then
-                                data:imagechangefn(time, text)
+                                data:imagechangefn(context)
                                 self[warningevent_child]:SetEventImage(data.image)
                             end
 
@@ -172,12 +217,18 @@ local function AddWarningEvents(self)
                             if data.animchangetaskfn and not data.animchangetask then
                                 local interval, fn = data.animchangetaskfn()
                                 if TheWorld then
-                                    data.animchangetask = TheWorld:DoTaskInTime(interval, fn(data, self[warningevent_child], time, text))
+                                    data.animchangetask = TheWorld:DoTaskInTime(interval, function()
+                                        fn(data, context)
+                                        self[warningevent_child]:SetEventAnim(data.anim)
+                                    end)
                                 end
                             elseif data.imagechangetaskfn and not data.imagechangetask then
                                 local interval, fn = data.imagechangetaskfn()
                                 if TheWorld then
-                                    data.imagechangetask = TheWorld:DoTaskInTime(interval, fn)
+                                    data.imagechangetask = TheWorld:DoTaskInTime(interval, function()
+                                        fn(data, context)
+                                        self[warningevent_child]:SetEventImage(data.image)
+                                    end)
                                 end
                             end
 
@@ -192,21 +243,52 @@ local function AddWarningEvents(self)
                 end
 
                 if data.tipsfn and game_ready then
-                    local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(time, text) -- 加载事件列表的tips函数
+                    local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(context) -- 加载事件列表的tips函数
                     last_tips_cache[warningevent_child] = last_tips_cache[warningevent_child] or false
                     if need_tips and not last_tips_cache[warningevent_child] then
                         last_tips_cache[warningevent_child] = true
                         if delay and TheWorld then
                             TheWorld:DoTaskInTime(delay, function() -- 延迟提示
-                                self:ShowTips(tipstextfn, tipstime, level, eventsdata[warningevent][shard_id])
+                                self:ShowTips(tipstextfn, tipstime, level, context)
                             end)
                         elseif TheWorld then
-                            self:ShowTips(tipstextfn, tipstime, level, eventsdata[warningevent][shard_id])
+                            self:ShowTips(tipstextfn, tipstime, level, context)
                         end
                     elseif not need_tips then
                         last_tips_cache[warningevent_child] = false
                     end
                 end
+
+                -- 更新面板数据
+                -- TODO: 优化性能
+                local datatext = eventsdata[warningevent][shard_id].text or ""
+                local datatime = eventsdata[warningevent][shard_id].time or 0
+                local tmp_data = setmetatable(
+                    {
+                        name = warningevent, -- 事件名称
+                        context = context
+                    },
+                    {
+                        __index = function(t, k)
+                            return context[k] or WarningEvents[warningevent][k]
+                        end,
+                        __newindex = function(t, k, v)
+                            if k == "text" then
+                                rawset(t, k, v)
+                            else
+                                rawset(WarningEvents[warningevent], k, v)
+                            end
+                        end
+                    }
+                )
+                if type(datatext) == "string" and datatext ~= "" then
+                    tmp_data.text = datatext
+                    Panel_data_list[#Panel_data_list + 1] = tmp_data
+                elseif type(datatime) == "number" and datatime > 0 then
+                    tmp_data.text = TimeToString(datatime)
+                    Panel_data_list[#Panel_data_list + 1] = tmp_data
+                end
+
             end
         end
     end
@@ -216,7 +298,6 @@ AddClassPostConstruct("screens/playerhud", AddWarningEvents)
 
 ---------------------------------------------------------------------------------------------------------------
 
-local TarnsferPanel = require("widgets/WarningEventPanel")
 local UIAnimButton = require("widgets/uianimbutton")
 local Button = require("widgets/button")
 local EventUIButton = Class(Button, function(self, owner)

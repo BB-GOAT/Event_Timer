@@ -1,18 +1,3 @@
-local function NightmareWild()
-    local nightmareclock = TheWorld.net.components.nightmareclock
-    if not nightmareclock then
-        return
-    end
-
-    local data = nightmareclock:OnSave()
-    local locked = data.lockedphase
-    local remainingtimeinphase = data.remainingtimeinphase
-
-    if locked then return end
-
-    return remainingtimeinphase
-end
-
 local STATES = {
     none = "calm_loop", -- 默认
     calm = "calm_loop", -- 平静
@@ -23,17 +8,12 @@ local STATES = {
 }
 
 local function NightmareWildAnimChange()
-    local last_anim
-    local fn = function(self, warningevent_child, time, text)
+    local fn = function(self, context)
+        local text = context.text
         if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
             self.anim.animation = STATES.wild -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
         else
             self.anim.animation = STATES[TheWorld.state.nightmarephase]
-        end
-
-        if self.anim.animation ~= last_anim then
-            last_anim = self.anim.animation
-            warningevent_child:SetEventAnim(self.anim) -- 屏幕左上角的倒计时不会自动刷新Anim，需要手动刷新
         end
     end
     return 1, fn
@@ -41,7 +21,20 @@ end
 
 local info
 info = {
-    gettimefn = NightmareWild, -- 仅返回倒计时
+    gettimefn = function() -- 仅返回倒计时
+        local nightmareclock = TheWorld.net.components.nightmareclock
+        if not nightmareclock then
+            return
+        end
+
+        local data = nightmareclock:OnSave()
+        local locked = data.lockedphase
+        local remainingtimeinphase = data.remainingtimeinphase
+
+        if locked then return end
+
+        return remainingtimeinphase
+    end,
     gettextfn = function() -- 仅锁定阶段返回
         local nightmareclock = TheWorld.net.components.nightmareclock
         if not nightmareclock then
@@ -67,7 +60,9 @@ info = {
     },
     animchangetaskfn = NightmareWildAnimChange,
     DisableShardRPC = true,
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
         if string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
             return STRINGS.eventtimer.nightmareclock.phase_locked
         end

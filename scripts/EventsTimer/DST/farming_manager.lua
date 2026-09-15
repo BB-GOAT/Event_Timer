@@ -35,14 +35,15 @@ info = {
         loop = true,
     },
     DisableShardRPC = true,
-    announcefn = function(time, text)
-        if time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(time))
+    announcefn = function(context)
+        local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(context.time))
+        if context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
         end
+        return desc
     end,
-    tipsfn = function(time, text)
-        local ready = text == ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
-        if ready then
+    tipsfn = function(context)
+        if context.text == ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready) and context.shard_id == EventTimer.CurrentShardId then -- 其它世界的text的前缀可能会被玩家关掉，仍需检查shard_id
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.farming_manager.tips)), 5, nil, 3
         end
         return false

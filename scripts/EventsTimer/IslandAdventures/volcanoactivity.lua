@@ -53,13 +53,19 @@ info = {
         tex = "Volcano_Active.tex",
         scale = 0.8,
     },
-    announcefn = function(time, text)
-        return time > 0 and string.format(STRINGS.eventtimer.volcanoactivity.eruption, TimeToString(time))
+    announcefn = function(context)
+        local desc = string.format(STRINGS.eventtimer.volcanoactivity.eruption, TimeToString(context.time))
+        if context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context) -- 非海难火山世界不提示
+        local time = context.time
         if time > 0 then
             return true, info.announcefn, time, nil, 1 -- 无声音 常驻显示爆发剩余时间
         end
+        return false
     end
 }
 

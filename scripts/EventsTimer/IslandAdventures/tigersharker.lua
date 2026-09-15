@@ -32,22 +32,34 @@ info = {
             y = -6,
         },
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
         local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
         local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
+        local desc
         if exists then
-            return ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
+            desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
         elseif nospawn then
-            return ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn)
+            desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn)
         elseif time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time))
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time))
         else
-            return ReplacePrefabName(STRINGS.eventtimer.tigersharker.ready)
+            desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.ready)
         end
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local time = context.time
         if ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.tigersharker.tips)), 10, time, 2
+            local desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.tips)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, StringToFunction(desc), 10, time, 2
         end
         return false
     end

@@ -1,20 +1,27 @@
 local SyncTimer = GetModConfigData("SyncTimer")
 local UpdateTime = GetModConfigData("UpdateTime")
-local tostring = GLOBAL.tostring
 local unpack = GLOBAL.unpack
 local STRINGS = GLOBAL.STRINGS
 
 -- local checknumber = GLOBAL.checknumber
 -- local checkstring = GLOBAL.checkstring
 
-local geted_world_type_data -- 是否已获取所有世界类型
 local current_shardid -- 当前世界ID
 local world_list = {}
 local warningtimer = {} -- 所有事件的time、text、time_shardrpc、text_shardrpc数据，包含nil数据 注意判空
 local ClientWarningTimer = {}
 
+local function userid_to_player(userid)
+    for _, v in ipairs(GLOBAL.AllPlayers) do
+        if v.userid == userid then
+            return v
+        end
+    end
+end
+
 -- 检查数据是否变化
 local function need_sync(player, event, data, type, shardid)
+    if not player.event_timer_geted_shard_data then return false end
     if not player.event_timer_last_sync_data then player.event_timer_last_sync_data = {} end
 
     if not player.event_timer_last_sync_data[event .. "_" .. type .. "_" .. shardid] or
@@ -30,18 +37,32 @@ end
 ---@param type "event_timerpc"|"event_textrpc"
 ---@param data number|string 数据
 ---@param shardid number 世界ID
-local function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
-    for k,v in ipairs(GLOBAL.AllPlayers) do
-        if need_sync(v, event, data, type, shardid) then
-            SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][type], v.userid, event, data, shardid)
+function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
+    if WarningEvents[event].playerly then -- 单独处理playerly数据
+        if GLOBAL.type(data) == "string" and data ~= "" then
+            local textdata = GLOBAL.json.decode(data)
+            if GLOBAL.type(textdata) == "table" then
+                for userid, text in pairs(textdata) do
+                    if need_sync(userid_to_player(userid), event, text, type, shardid) then
+                        SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][type], userid, event, text, shardid)
+                    end
+                end
+            end
+        end
+    else
+        for k,v in ipairs(GLOBAL.AllPlayers) do
+            if need_sync(v, event, data, type, shardid) then
+                SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][type], v.userid, event, data, shardid)
+            end
         end
     end
 end
+local SyncEventData = SyncEventData
 
 ----------------------------------------多层世界同步---------------------------------------
 
 local ShardId
-AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, event, timedata, worldtype)
+AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, event, timedata)
     if ShardId == shardid then return end
     if not SyncTimer then return end -- 未开启同步功能，取消同步
     if not warningtimer[event] then return end
@@ -58,7 +79,7 @@ AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, eve
     SyncEventData(event, warningtimer[event][shardid].text, "event_textrpc", shardid)
 end)
 
-AddShardModRPCHandler("EventTimer", "event_text_shardrpc", function(shardid, event, textdata, worldtype)
+AddShardModRPCHandler("EventTimer", "event_text_shardrpc", function(shardid, event, textdata)
     if ShardId == shardid then return end
     if not SyncTimer then return end -- 未开启同步功能，取消同步
     if not warningtimer[event] then return end
@@ -75,17 +96,21 @@ end)
 AddShardModRPCHandler("EventTimer", "sync_world_type", function(shardid, worldtype) -- 同步所有世界类型，然后发给客户端
     if ShardId == shardid then return end
     world_list[shardid] = worldtype
-    SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["sync_world_type"], nil, shardid, worldtype)
+    SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["sync_world_data"], nil, 'world_list', shardid, worldtype)
 end)
 
 ---------------------------------------服务器RPC---------------------------------------
 
-AddModRPCHandler("EventTimer", "get_world_type", function(player)
-    if player and not player.event_timer_geted_world_type_data then
+AddModRPCHandler("EventTimer", "get_shard_data", function(player)
+    if player and not player.event_timer_geted_shard_data then
         for shardid, worldtype in pairs(world_list) do
-            SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["sync_world_type"], player.userid, shardid, worldtype)
+            SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["sync_world_data"], player.userid, 'world_list', shardid, worldtype)
         end
-        player.event_timer_geted_world_type_data = true
+        SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["sync_world_data"], player.userid, 'current_shardid', ShardId)
+
+        player:DoTaskInTime(1, function ()
+            player.event_timer_geted_shard_data = true
+        end)
     end
 end)
 
@@ -102,8 +127,13 @@ AddClientModRPCHandler("EventTimer", "event_textrpc", function(event, text, shar
     ClientWarningTimer:OnWarningEventDirty(event, "text", shardid, text)
 end)
 
-AddClientModRPCHandler("EventTimer", "sync_world_type", function(shard_id, worldtype)
-    world_list[shard_id] = worldtype
+AddClientModRPCHandler("EventTimer", "sync_world_data", function(data_type, data_1, data_2)
+    if data_type == 'world_list' then
+        world_list[data_1] = data_2
+    elseif data_type == 'current_shardid' then
+        current_shardid = data_1
+        GLOBAL.EventTimer.CurrentShardId = current_shardid -- 方便从其它地方获取当前所处世界ID
+    end
 end)
 
 ---------------------------------------服务器更新逻辑---------------------------------------
@@ -124,6 +154,7 @@ local function UpdateEventData()
                 text_valid = false,
             }
 
+            -- 同时在warningtimer表中初始化数据
             warningtimer[warningevent] = {
                 [ShardId] = {}
             }
@@ -131,7 +162,7 @@ local function UpdateEventData()
 
         local time
         if data.gettimefn then
-            time = data.gettimefn()
+            time = data.gettimefn() -- TODO: 把对应世界组件传进去？ TheWorld.components[warningevent] or TheWorld.net.components[warningevent]
             if time and time < 0 then time = 0 end -- 避免被负数影响
 
             -- 判断时间是否有变化
@@ -150,7 +181,7 @@ local function UpdateEventData()
                     SyncEventData(warningevent, 0, "event_timerpc", ShardId)
 
                     if SyncTimer and not data.DisableShardRPC then -- 更新其它世界数据
-                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0, cache_world_type)
+                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
                     end
                 end
             elseif time and time > 0  then -- 时间有效
@@ -159,7 +190,7 @@ local function UpdateEventData()
                 SyncEventData(warningevent, time, "event_timerpc", ShardId)
 
                 if SyncTimer and not data.DisableShardRPC then -- 更新其它世界数据
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, time, cache_world_type)
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, time)
                 end
             else -- 无效数据
                 warningtimer[warningevent][ShardId].time = 0
@@ -167,7 +198,7 @@ local function UpdateEventData()
             end
         end
         if data.gettextfn then
-            local text = data.gettextfn(time)
+            local text = data.gettextfn(time) -- TODO: 把对应世界组件传进去？
 
             -- 更新本世界数据
             warningtimer[warningevent][ShardId].text = text or ""
@@ -185,11 +216,11 @@ local function UpdateEventData()
                 if valid_data[warningevent].text_sametick > math.ceil(2 / UpdateTime) then -- 数据多次不变，删除其它世界的数据
                     if valid_data[warningevent].text_valid then
                         valid_data[warningevent].text_valid = false -- 标记数据无效
-                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "", "")
+                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
                     end
                 elseif text and text ~= "" then
                     valid_data[warningevent].text_valid = true -- 标记数据有效
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, text, cache_world_type)
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, text)
                 end
             end
         end
@@ -207,8 +238,10 @@ local function GetWorldType()
         return STRINGS.eventtimer.worldtype.volcano
     elseif TheWorld:HasTag("cave") then
         return STRINGS.eventtimer.worldtype.cave
-    else
+    elseif TheWorld:HasTag("forest") then
         return STRINGS.eventtimer.worldtype.forest
+    else
+        return STRINGS.eventtimer.worldtype.unknown
     end
 end
 
@@ -278,7 +311,7 @@ local function Client_Init()
 
     local client_prediction_tasks = {} -- 客户端预测倒计时任务
     function ClientWarningTimer:OnWarningEventDirty(warningevent, type, shardid, data)
-        if not (geted_world_type_data and current_shardid) then return end
+        if not data then return end
         -- 初始化
         if not eventstime[warningevent][shardid] then
             eventstime[warningevent][shardid] = {
@@ -355,13 +388,20 @@ AddPrefabPostInit("world", function(self)
         Client_Init()
         self:DoPeriodicTask(0.5, function() ClientWarningTimer:OnUpdate() end)
     end
+    GLOBAL.EventTimer.WorldList = world_list -- 方便从其它地方获取世界列表
 
+    --------------------------------------------------
     if not GLOBAL.TheWorld.ismastersim then return end
+    --------------------------------------------------
+
+    ShardId = GLOBAL.tonumber(GLOBAL.TheShard:GetShardId())
+    GLOBAL.EventTimer.CurrentShardId = ShardId -- 方便从其它地方获取当前所处世界ID
+
+    cache_world_type = GetWorldType() -- 当前世界类型，用于同步给玩家
+    world_list[ShardId] = cache_world_type
 
     GLOBAL.EventTimer.EventTimerData = warningtimer -- 方便从其它地方获取事件数据
-    self:DoPeriodicTask(UpdateTime, UpdateEventData)
-    cache_world_type = GetWorldType()
-    ShardId = GLOBAL.tonumber(GLOBAL.TheShard:GetShardId())
+    self:DoPeriodicTask(UpdateTime, UpdateEventData) -- 更新各事件数据
 end)
 
 -- 服务器世界互联时同步世界类型
@@ -372,21 +412,9 @@ GLOBAL.Shard_UpdateWorldState = function(...)
 end
 
 -- 玩家进入游戏后同步世界类型数据
-if GLOBAL.TheNet:GetIsClient() then
+if not GLOBAL.TheNet:IsDedicated() then
     MOD_util:AddPlayerPostInit(function(world, player)
-        SendModRPCToServer(MOD_RPC["EventTimer"]["get_world_type"])
-        player:DoTaskInTime(0.5, function() geted_world_type_data = true end)
+        if player ~= GLOBAL.ThePlayer then return end
+        SendModRPCToServer(MOD_RPC["EventTimer"]["get_shard_data"])
     end, true)
 end
-
-AddPrefabPostInit("player_classified",function(inst)
-    inst.net_eventtimer_current_shardid = GLOBAL.net_smallbyte(inst.GUID, "eventtimer_current_shardid", "eventtimer_current_shardid_dirty")
-    if GLOBAL.TheNet:GetIsServer() then
-        inst.net_eventtimer_current_shardid:set(ShardId)
-    end
-    if not GLOBAL.TheNet:IsDedicated() then
-        inst:ListenForEvent("eventtimer_current_shardid_dirty",function(inst)
-            current_shardid = inst.net_eventtimer_current_shardid:value() -- 用于客户端读取当前所处世界ID
-        end)
-    end
-end)

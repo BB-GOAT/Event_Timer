@@ -40,7 +40,7 @@ info = {
         end)
     end,
     gettextfn = function()
-        if not (TheWorld and TheWorld.state.iswinter) then return end
+        if not (TheWorld and TheWorld.state.iswinter) then return end -- TODO: 也许可以监听季节变化，非冬季的时候直接把gettextfn改为nil
         local lines = {}
         for i, info in ipairs(walrus_house_list) do
             local inst = info.ent
@@ -53,7 +53,7 @@ info = {
         end
         return description
     end,
-    DisableShardRPC = true,
+    DisableShardRPC = true, -- TODO：取消禁用，记得检查数据是否会被正常删除（上面的监听会把gettextfn改为nil）
     anim = {
         scale = 0.05,
         bank = "walrus_house",
@@ -61,7 +61,8 @@ info = {
         animation = "idle",
         loop = true,
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         text = string.gsub(text, "\n", " ")
         return ReplacePrefabName("<prefab=walrus_camp>") .. " : " .. text
     end

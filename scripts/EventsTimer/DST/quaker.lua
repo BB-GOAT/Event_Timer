@@ -16,10 +16,9 @@ info = {
         scale = 0.8,
     },
     DisableShardRPC = true, -- 我觉得同步这个意义不大
-    announcefn = function(time, text)
-        if time > 0 then
-            return string.format(STRINGS.eventtimer.quaker.cooldown, TimeToString(time))
-        end
+    announcefn = function(context)
+        local time = context.time
+        return string.format(STRINGS.eventtimer.quaker.cooldown, TimeToString(time))
     end,
 }
 

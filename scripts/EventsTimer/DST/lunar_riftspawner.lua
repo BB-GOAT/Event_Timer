@@ -8,7 +8,11 @@ local allow_worlds = {
 local info
 info = {
     gettimefn = function() -- 当裂隙出现时，不显示
-        if allow_worlds[GetWorldtypeStr()] and EventTimer.EventTimerData.rift_portal_text == "" then
+        if allow_worlds[GetWorldtypeStr()] and
+            EventTimer.EventTimerData and
+            EventTimer.EventTimerData.rift_portal and
+            EventTimer.EventTimerData.rift_portal[EventTimer.CurrentShardId].text == ""
+        then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")()
         end
     end,
@@ -32,8 +36,13 @@ info = {
         },
         loop = true,
     },
-    announcefn = function(time, text)
-        return time > 0 and string.format(STRINGS.eventtimer.riftspawner.lunar_cooldown, TimeToString(time))
+    announcefn = function(context)
+        local time = context.time
+        local desc = string.format(STRINGS.eventtimer.riftspawner.lunar_cooldown, TimeToString(time))
+        if context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
 }
 

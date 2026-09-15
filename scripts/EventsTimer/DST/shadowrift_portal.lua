@@ -31,7 +31,8 @@ info = {
         tex = "shadowrift_portal.png",
         scale = 0.8,
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         text = string.gsub(text,"\n",", ")
         return STRINGS.eventtimer.shadowrift_portal.name .. ": " .. text
     end,

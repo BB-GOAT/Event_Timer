@@ -25,17 +25,29 @@ info = {
         build = "klaus_bag_tropical",
         animation = "idle",
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
+        local desc
         local despawnday = Extract_by_format(text, STRINGS.eventtimer.islandsklaussackspawner.despawntext)
         if despawnday then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.despawn), despawnday)
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.despawn), despawnday)
         elseif time then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.cooldown), TimeToString(time))
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.cooldown), TimeToString(time))
         end
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local time = context.time
         if ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.tips)), 10, time, 2
+            local desc = ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.tips)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, StringToFunction(desc), 10, time, 2
         end
         return false
     end

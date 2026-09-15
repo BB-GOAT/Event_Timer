@@ -17,8 +17,13 @@ info = {
             y = -6,
         },
     },
-    announcefn = function(time, text)
-        return time and string.format(ReplacePrefabName(STRINGS.eventtimer.deerherdspawner.cooldown), TimeToString(time))
+    announcefn = function(context)
+        local time = context.time
+        local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.deerherdspawner.cooldown), TimeToString(time))
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc
+        end
+        return desc
     end
 }
 

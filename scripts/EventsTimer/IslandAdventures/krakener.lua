@@ -23,15 +23,27 @@ info = {
             y = -6,
         },
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local desc
         if time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
+        else
+            desc = ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
         end
-        return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local time = context.time
         if ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.krakener.tips)), 10, time, 2
+            local desc = ReplacePrefabName(STRINGS.eventtimer.krakener.tips)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, StringToFunction(desc), 10, time, 2
         end
         return false
     end

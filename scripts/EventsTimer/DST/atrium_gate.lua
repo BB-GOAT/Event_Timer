@@ -25,12 +25,10 @@ info = {
             y = -5,
         },
     },
-    announcefn = function(time, text)
-        if string.find(text, ReplacePrefabName("<prefab=atrium_gate>")) then
-            return time and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(time))
-        else
-            return time and string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(time))
-        end
+    announcefn = function(context)
+        local text = context.text
+        text = string.gsub(text,"\n",": ")
+        return text
     end,
 }
 

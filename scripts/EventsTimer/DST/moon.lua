@@ -66,7 +66,8 @@ info = {
             end
         end
     end,
-    imagechangefn = function(self, time, text)
+    imagechangefn = function(self, context)
+        local text = context.text
         if not text or text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             self.image = self.fullimage
@@ -85,7 +86,8 @@ info = {
         tex = "moon_new.tex",
     },
     DisableShardRPC = true,
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         if text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             local day = Extract_by_format(text, STRINGS.eventtimer.moon.moon_full)
@@ -101,7 +103,8 @@ info = {
             return text
         end
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local text = context.text
         if text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             local day = Extract_by_format(text, STRINGS.eventtimer.moon.moon_full)

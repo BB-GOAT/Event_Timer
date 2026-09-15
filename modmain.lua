@@ -191,7 +191,7 @@ function GetWorldtypeStr()
     local ThePlayer = GLOBAL.ThePlayer
     if TUNING.TROPICAL_ADVENTURE_ACTIVATED and ThePlayer then
         if ThePlayer.AwareInVolcanoArea and ThePlayer:AwareInVolcanoArea() then
-            return "shipwrecked"
+            return "volcano"
         elseif ThePlayer.AwareInShipwreckedArea and ThePlayer:AwareInShipwreckedArea() then
             return "shipwrecked"
         elseif ThePlayer.AwareInHamletArea and ThePlayer:AwareInHamletArea() then
@@ -211,8 +211,10 @@ function GetWorldtypeStr()
             cache_world_type = "volcano"
         elseif TheWorld:HasTag("cave") then
             cache_world_type = "cave"
-        else
+        elseif TheWorld:HasTag("forest") then
             cache_world_type = "forest"
+        else
+            cache_world_type = "unknown"
         end
     end
     return cache_world_type

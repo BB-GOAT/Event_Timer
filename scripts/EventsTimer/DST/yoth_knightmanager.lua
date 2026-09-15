@@ -28,11 +28,11 @@ info = {
         },
     },
     playerly = true, -- 指明是针对单个玩家的事件
-    announcefn = function(time, text)
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), text)
+    announcefn = function(context)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), context.text)
     end,
-    tipsfn = function(time, text)
-        local time = StringToTime(text)
+    tipsfn = function(context)
+        local time = StringToTime(context.text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.tips)), 10, time, 2
         end

@@ -40,7 +40,9 @@ info = {
         },
         loop = true,
     },
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
         else
@@ -48,9 +50,14 @@ info = {
             return text
         end
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local text = context.text
         if string.find(text, ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)) then
-            return true, not (GetTime() < 10) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.tips)), 10, nil, 2
+            local desc = ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.tips)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, (GetTime() > 10) and StringToFunction(desc), 10, nil, 2
         end
         return false
     end

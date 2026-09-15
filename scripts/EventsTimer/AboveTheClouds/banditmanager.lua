@@ -7,7 +7,8 @@ info = {
         local str = self:GetDebugString()
         local stolen_oincs, active_bandit = string.match(str, "Stolen Oincs: (%d+) Active Bandit: (%a+) Respawns In")
         if not (stolen_oincs and active_bandit) then return end
-        if active_bandit == "true" then
+        active_bandit = active_bandit == "true" and STRINGS.UI.CONTROLSSCREEN.YES or active_bandit == "false" and STRINGS.UI.CONTROLSSCREEN.NO or active_bandit
+        if active_bandit == STRINGS.UI.CONTROLSSCREEN.YES then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext), stolen_oincs)
         elseif time then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown), TimeToString(time), stolen_oincs, active_bandit)
@@ -30,19 +31,31 @@ info = {
         }
     },
     DisableShardRPC = true,
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
         local _time, stolen_oincs = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown))
+        local desc
         if stolen_oincs then
-            return time and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.announce_cooldown), TimeToString(time), stolen_oincs)
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.announce_cooldown), TimeToString(time), stolen_oincs)
         else
             stolen_oincs = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext))
-            return stolen_oincs and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.ready), stolen_oincs)
+            desc = stolen_oincs and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.ready), stolen_oincs)
         end
+        if desc and context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        local text = context.text
         local ready = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext))
         if ready then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.banditmanager.tips)), 5, nil, 3
+            local desc = ReplacePrefabName(STRINGS.eventtimer.banditmanager.tips)
+            if context.shard_id ~= EventTimer.CurrentShardId then
+                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+            end
+            return true, StringToFunction(desc), 5, nil, 3
         end
         return false
     end

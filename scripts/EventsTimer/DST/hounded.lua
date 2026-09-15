@@ -1,22 +1,19 @@
 -- 猎犬/洞穴蠕虫/鳄狗/巨大洞穴蠕虫 Anim刷新
-local last_anim
-local function HoundedAnimChangeFn(self, time, text)
-    if not self then
-        self = WarningEvents['hounded']
-    end
+local function HoundedAnimChangeFn(self, context)
+    local text = context.text
+    local worldtype = context.world_type
     local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
-    local worldtype = GetWorldtypeStr()
-    if worldtype == "shipwrecked" or worldtype == "volcano" then
-        self.anim = self.islandanim
-    elseif is_worm_boss then
+    if is_worm_boss then
         self.anim = self.wormbossanim
+    elseif worldtype == "shipwrecked" or worldtype == "volcano" then
+        self.anim = self.islandanim
     elseif worldtype == "cave" then
         self.anim = self.caveanim
     elseif worldtype == "porkland" then
         self.anim = {
             scale = 0.08,
             build = "bat_vamp_build",
-            bank = "bat", -- 云霄国度是 bat_vamp
+            bank = "bat", -- 岛屿冒险猪镇是 bat | 云霄国度是 bat_vamp
             animation = "fly_loop",
             loop = true,
             uioffset = {
@@ -31,24 +28,17 @@ local function HoundedAnimChangeFn(self, time, text)
     else
         self.anim = self.forestanim
     end
-
-    local current_shardid = ThePlayer and ThePlayer.eventtimer_current_shardid
-    if current_shardid then
-        local warningevent_child = "hounded_" .. current_shardid
-        if warningevent_child then
-            if (self.anim and self.anim.bank ~= last_anim) and ThePlayer and ThePlayer.HUD and ThePlayer.HUD[warningevent_child] then
-                last_anim = self.anim.bank
-                ThePlayer.HUD[warningevent_child]:SetEventAnim(self.anim)
-            end
-        end
-    end
 end
 
 -- 监听热带冒险的区域变化事件
 MOD_util:AddPlayerPostInit(function(world, player)
     player:ListenForEvent("regionchange_client", function(inst, data)
-        if HoundedAnimChangeFn then
-            HoundedAnimChangeFn()
+        if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData["hounded"] and EventTimer.CurrentShardId then
+            HoundedAnimChangeFn(WarningEvents["hounded"], { worldtype = GetWorldtypeStr() })
+            local warningevent_child = ThePlayer.HUD["hounded_" .. EventTimer.CurrentShardId]
+            if warningevent_child then
+                warningevent_child:SetEventAnim(WarningEvents["hounded"].anim)
+            end
         end
     end)
 end)
@@ -65,7 +55,7 @@ info = {
                     info.gettimefn = function() end
                 end
             end)
-            is_cave_world = TheWorld:HasTag("cave") -- 为了兼容深埋之下，不能直接清空gettextfn，否则对方给森林世界弄的gettextfn会被删除
+            is_cave_world = TheWorld:HasTag("cave") -- 为了兼容【深埋之下】，不能直接清空gettextfn，否则对方给森林世界弄的gettextfn会被删除
         end)
     end,
     gettimefn = function()
@@ -89,13 +79,14 @@ info = {
             return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(time), _wave_override_chance * 100)
         end
     end,
-    imagechangefn = function(self, time, text)
+    imagechangefn = function(self, context)
+        local text = context.text
+        local worldtype = context.world_type
         local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
-        local worldtype = GetWorldtypeStr()
         if worldtype == "porkland" then
             self.image = nil
         elseif worldtype == "shipwrecked" or worldtype == "volcano" then
-            self.image = self.islandimage
+            self.image = nil
         elseif is_worm_boss then
             self.image = self.wormbossimage
         elseif worldtype == "cave" then
@@ -181,12 +172,28 @@ info = {
             y = 0,
         }
     },
-    DisableShardRPC = true, -- 动态Anim目前不支持多世界
-    announcefn = function(time, text)
+    -- DisableShardRPC = true,
+    announcefn = function(context)
+        local time = context.time
+        local text = context.text
+        local world_type = context.world_type
+        local desc
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
-        return (is_worm_boss and text) or (time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[GetWorldtypeStr()]), TimeToString(time)))
+        if is_worm_boss then
+            desc = text
+        else
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[world_type]), TimeToString(time))
+        end
+        if context.shard_id ~= EventTimer.CurrentShardId then
+            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
+        end
+        return desc
     end,
-    tipsfn = function(time, text)
+    tipsfn = function(context)
+        if context.shard_id ~= EventTimer.CurrentShardId then return end
+
+        local time = context.time
+        local text = context.text
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
 
         if time > 2 and time <= 90 then
@@ -196,7 +203,7 @@ info = {
         elseif JustEntered(time) then
             return true, info.announcefn, 10, nil, 1
         elseif ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.hounded.attack[is_worm_boss and "worm_boss" or GetWorldtypeStr()])), 10, time, 3
+            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.hounded.attack[is_worm_boss and "worm_boss" or context.world_type])), 10, time, 3
         end
         return false
     end

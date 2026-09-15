@@ -19,7 +19,8 @@ info = {
         scale = 0.9,
     },
     -- DisableShardRPC = true, -- 其它世界有宝藏吗？没有！
-    announcefn = function(time, text)
+    announcefn = function(context)
+        local text = context.text
         text = string.gsub(text, "\n", ": ")
         return text
     end,
