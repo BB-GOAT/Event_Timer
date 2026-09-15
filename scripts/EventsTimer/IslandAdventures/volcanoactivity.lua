@@ -55,9 +55,7 @@ info = {
     },
     announcefn = function(context)
         local desc = string.format(STRINGS.eventtimer.volcanoactivity.eruption, TimeToString(context.time))
-        if context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context) -- 非海难火山世界不提示

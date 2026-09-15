@@ -313,7 +313,14 @@ local function ready_attack(time)
     return false
 end
 
--- 获取事件计时
+-- 添加世界前缀标识，不被玩家的模组设置影响
+local function MarkData(desc, context)
+    if desc and context.shard_id ~= EventTimer.CurrentShardId then
+        return string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc
+    end
+    return desc
+end
+
 local file_env = {
     TimeToString = TimeToString, -- 格式化时间
     StringToTime = StringToTime, -- 将字符串转换为时间
@@ -336,6 +343,7 @@ local file_env = {
     StringToFunction = StringToFunction, -- 将字符串打包为一个返回该字符串的函数
     JustEntered = JustEntered, -- 如果event_time > 0，在刚进入游戏的10秒内返回true
     ready_attack = ready_attack, -- 当time在0~2秒时返回true
+    MarkData = MarkData, -- 标记数据来源
 }
 if GLOBAL.TheNet:GetIsServer() then
     AddComponentPostInit("clock", function(self)

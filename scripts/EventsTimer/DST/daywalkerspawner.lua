@@ -51,9 +51,7 @@ info = {
         local text = context.text
         if string.find(text, ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.ready)) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.tips)
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, (GetTime() > 10) and StringToFunction(desc), 10, nil, 2
         end
         return false

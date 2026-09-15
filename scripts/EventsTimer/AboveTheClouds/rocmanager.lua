@@ -33,9 +33,7 @@ info = {
         elseif time > 0 then
             desc = string.format(ReplacePrefabName(STRINGS.eventtimer.rocmanager.cooldown), TimeToString(time))
         end
-        if desc and context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
@@ -47,9 +45,7 @@ info = {
             return true, info.announcefn, 10, nil, 2
         elseif text == ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.rocmanager.tips)
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, nil, 3
         elseif JustEntered(time) then
             return true, info.announcefn, 10, nil, 1

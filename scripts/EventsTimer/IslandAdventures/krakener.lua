@@ -31,18 +31,14 @@ info = {
         else
             desc = ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
         end
-        if desc and context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
         local time = context.time
         if ready_attack(time) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.krakener.tips)
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, time, 2
         end
         return false

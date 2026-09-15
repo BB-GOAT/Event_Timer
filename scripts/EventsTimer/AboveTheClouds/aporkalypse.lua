@@ -32,30 +32,22 @@ aporkalypse = {
     announcefn = function(context)
         local time = context.time
         local desc = string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time))
-        if context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
         local time = context.time
         if (JustEntered(time) and time < 2400) then
             local desc = string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time))
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, nil, 1
         elseif time == 480 then
             local desc = string.format(STRINGS.eventtimer.aporkalypse.tips, TimeToString(time))
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, nil, 2
         elseif time == 0 then -- 这个写法比较特殊..为了保证大灾变确实开始了
             local desc = STRINGS.eventtimer.aporkalypse.tips_ready
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, (GetTime() > 10) and StringToFunction(desc), 5, 1, 3 -- 延迟1秒是因为大灾变在1秒后才真正开始
         end
         return false
@@ -93,9 +85,7 @@ aporkalypse_attack = {
         local next_bat_attack, next_herald_attack = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.aporkalypse.attack))
         if not (next_bat_attack and next_herald_attack) then return end
         local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.aporkalypse.announce_attack), next_bat_attack, next_herald_attack)
-        if context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = nil, -- 几分钟就来一次，一直Tips不嫌烦么？
@@ -145,9 +135,7 @@ batted = {
     announcefn = function(context)
         local time = context.time
         local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.batted.cooldown), TimeToString(time))
-        if context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
@@ -160,9 +148,7 @@ batted = {
             return true, batted.announcefn, 10, nil, 1
         elseif ready_attack(time) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.batted.attack)
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, time, 3
         end
         return false

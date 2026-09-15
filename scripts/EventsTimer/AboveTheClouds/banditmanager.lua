@@ -42,9 +42,7 @@ info = {
             stolen_oincs = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext))
             desc = stolen_oincs and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.ready), stolen_oincs)
         end
-        if desc and context.shard_id ~= EventTimer.CurrentShardId then
-            desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-        end
+        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
@@ -52,9 +50,7 @@ info = {
         local ready = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext))
         if ready then
             local desc = ReplacePrefabName(STRINGS.eventtimer.banditmanager.tips)
-            if context.shard_id ~= EventTimer.CurrentShardId then
-                desc = string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc -- 添加世界前缀标识，不被玩家的模组设置影响（怎么感觉有点屎山）
-            end
+            desc = MarkData(desc, context)
             return true, StringToFunction(desc), 5, nil, 3
         end
         return false
