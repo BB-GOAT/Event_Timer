@@ -25,9 +25,7 @@ info = {
             y = -5,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.atrium_gate_time
-        local text = ThePlayer.HUD.WarningEventTimeData.atrium_gate_text
+    announcefn = function(time, text)
         if string.find(text, ReplacePrefabName("<prefab=atrium_gate>")) then
             return time and string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(time))
         else

@@ -12,8 +12,7 @@ info = {
             y = -5,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.toadstoolspawner_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.toadstoolspawner.cooldown), TimeToString(time))
     end
 }

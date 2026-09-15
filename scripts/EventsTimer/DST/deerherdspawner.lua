@@ -17,8 +17,7 @@ info = {
             y = -6,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.deerherdspawner_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.deerherdspawner.cooldown), TimeToString(time))
     end
 }

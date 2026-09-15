@@ -56,8 +56,7 @@ info = {
         }
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.piratespawner_text
+    announcefn = function(time, text)
         text = string.gsub(text, "\n", ", ")
         return text
     end,

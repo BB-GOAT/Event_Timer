@@ -238,10 +238,10 @@ end
 
 -- 合并字符串
 local function CombineLines(...)
-    local lines, argnum = nil, select("#",...)
+    local lines, argnum = nil, GLOBAL.select("#",...)
 
     for i = 1, argnum do
-        local v = select(i, ...)
+        local v = GLOBAL.select(i, ...)
 
         if v ~= nil then
             lines = lines or {}
@@ -371,6 +371,7 @@ GLOBAL.EventTimer = {
     UIButton = GetModConfigData("UIButton", true), -- UI开关何时显示
     ClientPrediction = GetModConfigData("ClientPrediction", true), -- 客户端预测倒计时
     TimerTips = GetModConfigData("ShowTips", true), -- 醒目提示
+    MarkDataSource = GetModConfigData("MarkDataSource", true), -- 标记数据来源
 }
 
 ----------------------------------------加载模组---------------------------------------

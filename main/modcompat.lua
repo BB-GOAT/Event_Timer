@@ -132,6 +132,16 @@ MOD_util:CreatePage(pagename, {
             end
         },
         {
+            description = zh and "标记数据来源" or "Mark Data Source",
+            key = "EventsTimer_MarkDataSource",
+            default = true,
+            options = enabledisableoption,
+            onapplyfn = function()
+                EventTimer.MarkDataSource = MOD_util:GetMOption("EventsTimer_MarkDataSource", true)
+                ChangeModConfig("MarkDataSource", EventTimer.MarkDataSource)
+            end
+        },
+        {
             description = zh and "重置计时器面板打开按钮位置" or "Reset timer panel open button position",
             onclickfn = function()
                 if table.typecheckedgetfield(ThePlayer, "table","HUD", "EventTimerButton", "openbutton") and EventTimer.UIButton == "always" then

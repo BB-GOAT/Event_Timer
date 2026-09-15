@@ -8,8 +8,7 @@ info = {
         animation = "inert",
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.crabkingspawner_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.crabkingspawner.cooldown), TimeToString(time))
     end
 }

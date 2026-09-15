@@ -37,12 +37,8 @@ info = {
         scale = 0.9,
     },
     playerly = true, -- 指明是针对单个玩家的事件
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.flotsamgenerator_text
-        if not text or text == "" then return end
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), data[player_userid])
+    announcefn = function(time, text)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), text)
     end
 }
 

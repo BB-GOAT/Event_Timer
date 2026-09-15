@@ -20,14 +20,12 @@ info = {
             y = 0,
         }
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.pugalisk_fountain_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.pugalisk_fountain.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.pugalisk_fountain_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.pugalisk_fountain.tips)), 5, time, 1
         end

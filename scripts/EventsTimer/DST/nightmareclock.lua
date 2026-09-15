@@ -21,28 +21,22 @@ local STATES = {
     dawn = "dawn_loop", -- 黎明
     lock = "wild_lock", -- 锁定暴动阶段
 }
-local NightmareWildAnimChange_task
-local function NightmareWildAnimChange(self)
-    if TheNet:IsDedicated() then
-        return
-    end
 
+local function NightmareWildAnimChange()
     local last_anim
-    if not NightmareWildAnimChange_task then
-        NightmareWildAnimChange_task = TheWorld:DoPeriodicTask(1, function()
-            local text = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.nightmareclock_text
-            if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
-                self.anim.animation = STATES.wild -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
-            elseif ThePlayer and ThePlayer.HUD.nightmareclock then
-                self.anim.animation = STATES[TheWorld.state.nightmarephase]
-            end
+    local fn = function(self, warningevent_child, time, text)
+        if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
+            self.anim.animation = STATES.wild -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
+        else
+            self.anim.animation = STATES[TheWorld.state.nightmarephase]
+        end
 
-            if self.anim.animation ~= last_anim and ThePlayer and ThePlayer.HUD and ThePlayer.HUD.nightmareclock then
-                last_anim = self.anim.animation
-                ThePlayer.HUD.nightmareclock:SetEventAnim(self.anim) -- 屏幕左上角的倒计时不会自动刷新Anim，需要手动刷新
-            end
-        end)
+        if self.anim.animation ~= last_anim then
+            last_anim = self.anim.animation
+            warningevent_child:SetEventAnim(self.anim) -- 屏幕左上角的倒计时不会自动刷新Anim，需要手动刷新
+        end
     end
+    return 1, fn
 end
 
 local info
@@ -71,11 +65,9 @@ info = {
             y = 15,
         },
     },
-    animchangefn = NightmareWildAnimChange,
+    animchangetaskfn = NightmareWildAnimChange,
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.nightmareclock_time
-        local text = ThePlayer.HUD.WarningEventTimeData.nightmareclock_text
+    announcefn = function(time, text)
         if string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
             return STRINGS.eventtimer.nightmareclock.phase_locked
         end

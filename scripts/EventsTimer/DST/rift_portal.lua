@@ -91,8 +91,7 @@ info = {
         tex = "lunarrift_portal.png",
         scale = 0.8,
     },
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.rift_portal_text
+    announcefn = function(time, text)
         text = string.gsub(text,"\n",", ")
         return STRINGS.eventtimer.rift_portal.name .. ": " .. text
     end

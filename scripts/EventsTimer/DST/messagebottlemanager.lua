@@ -19,8 +19,7 @@ info = {
         scale = 0.9,
     },
     -- DisableShardRPC = true, -- 其它世界有宝藏吗？没有！
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.messagebottlemanager_text
+    announcefn = function(time, text)
         text = string.gsub(text, "\n", ": ")
         return text
     end,

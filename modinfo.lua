@@ -39,8 +39,7 @@ client_only_mod = false
 server_only_mod = false
 
 server_filter_tags = { -- 服务器标签
-    "全局事件计时器 V" .. version,
-    "Global Events Timer V" .. version,
+    name .. " v" .. version,
 }
 
 icon_atlas = "images/modicon.xml"
@@ -175,4 +174,12 @@ configuration_options = {
         default = true,
         client = true,
     },
+    {
+        name = "MarkDataSource",
+        label = en_zh("Mark Data Source", "标记数据来源"),
+        hover = en_zh("", "开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新"),
+        options = toggle,
+        default = true,
+        client = true,
+    }
 }

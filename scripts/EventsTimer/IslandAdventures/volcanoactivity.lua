@@ -53,12 +53,10 @@ info = {
         tex = "Volcano_Active.tex",
         scale = 0.8,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.volcanoactivity_time
+    announcefn = function(time, text)
         return time > 0 and string.format(STRINGS.eventtimer.volcanoactivity.eruption, TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.volcanoactivity_time
+    tipsfn = function(time, text)
         if time > 0 then
             return true, info.announcefn, time, nil, 1 -- 无声音 常驻显示爆发剩余时间
         end

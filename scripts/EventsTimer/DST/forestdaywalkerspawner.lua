@@ -40,9 +40,7 @@ info = {
         },
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.forestdaywalkerspawner_time
-        local text = ThePlayer.HUD.WarningEventTimeData.forestdaywalkerspawner_text
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
         else
@@ -50,8 +48,7 @@ info = {
             return text
         end
     end,
-    tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.forestdaywalkerspawner_text
+    tipsfn = function(time, text)
         if string.find(text, ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)) then
             return true, not (GetTime() < 10) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.tips)), 10, nil, 2
         end

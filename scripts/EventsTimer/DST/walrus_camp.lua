@@ -61,8 +61,7 @@ info = {
         animation = "idle",
         loop = true,
     },
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.walrus_camp_text
+    announcefn = function(time, text)
         text = string.gsub(text, "\n", " ")
         return ReplacePrefabName("<prefab=walrus_camp>") .. " : " .. text
     end

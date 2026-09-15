@@ -25,12 +25,10 @@ info = {
             y = -4,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.dragonfly_spawner_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.dragonfly_spawner.cooldown), TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.dragonfly_spawner_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.dragonfly_spawner.tips)), 10, time, 2
         end

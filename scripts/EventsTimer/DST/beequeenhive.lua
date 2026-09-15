@@ -34,12 +34,10 @@ info = {
         },
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.beequeenhive_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.beequeenhive.cooldown), TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.beequeenhive_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.beequeenhive.tips)), 10, time, 2
         end

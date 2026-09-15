@@ -12,12 +12,10 @@ info = {
         },
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.terrarium_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.terrarium.cooldown), TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.terrarium_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.terrarium.tips)), 10, time, 2
         end

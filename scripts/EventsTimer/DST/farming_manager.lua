@@ -35,14 +35,12 @@ info = {
         loop = true,
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.farming_manager_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.farming_manager_text
+    tipsfn = function(time, text)
         local ready = text == ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
         if ready then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.farming_manager.tips)), 5, nil, 3

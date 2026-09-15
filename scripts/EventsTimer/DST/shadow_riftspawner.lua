@@ -27,8 +27,7 @@ info = {
     --     bank = "shadowrift_portal",
     --     animation = "scrapbook",
     -- },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.shadow_riftspawner_time
+    announcefn = function(time, text)
         return time > 0 and string.format(STRINGS.eventtimer.riftspawner.shadow_cooldown, TimeToString(time))
     end,
 }

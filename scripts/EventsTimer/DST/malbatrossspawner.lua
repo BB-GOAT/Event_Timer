@@ -12,8 +12,7 @@ info = {
             y = -10,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.malbatrossspawner_time
+    announcefn = function(time, text)
         return time and string.format(ReplacePrefabName(STRINGS.eventtimer.malbatrossspawner.cooldown), TimeToString(time))
     end
 }

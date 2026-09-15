@@ -66,8 +66,7 @@ info = {
             end
         end
     end,
-    imagechangefn = function(self)
-        local text = ThePlayer.HUD.WarningEventTimeData.moon_text
+    imagechangefn = function(self, time, text)
         if not text or text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             self.image = self.fullimage
@@ -86,9 +85,8 @@ info = {
         tex = "moon_new.tex",
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.moon_text
-        if not text or text == "" then return end
+    announcefn = function(time, text)
+        if text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             local day = Extract_by_format(text, STRINGS.eventtimer.moon.moon_full)
             if tonumber(day) == 10 then
@@ -103,9 +101,8 @@ info = {
             return text
         end
     end,
-    tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.moon_text
-        if not text or text == "" then return end
+    tipsfn = function(time, text)
+        if text == "" then return end
         if string.find(text, STRINGS.eventtimer.moon.str_full) then
             local day = Extract_by_format(text, STRINGS.eventtimer.moon.moon_full)
             if tonumber(day) == 10 then

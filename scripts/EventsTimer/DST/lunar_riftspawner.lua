@@ -32,8 +32,7 @@ info = {
         },
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.lunar_riftspawner_time
+    announcefn = function(time, text)
         return time > 0 and string.format(STRINGS.eventtimer.riftspawner.lunar_cooldown, TimeToString(time))
     end,
 }

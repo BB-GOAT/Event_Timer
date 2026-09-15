@@ -28,12 +28,10 @@ info = {
         animation = "active_idle_pst",
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.volcanomanager_time
+    announcefn = function(time, text)
         return time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.volcanomanager.cooldown), TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.volcanomanager_time
+    tipsfn = function(time, text)
         if time > 2 and time <= 60 then
             return true, info.announcefn, time, nil, 2
         elseif JustEntered(time) and time <= 480 then

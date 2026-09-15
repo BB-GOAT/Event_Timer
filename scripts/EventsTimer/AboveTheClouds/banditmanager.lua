@@ -30,9 +30,7 @@ info = {
         }
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.banditmanager_time
-        local text = ThePlayer.HUD.WarningEventTimeData.banditmanager_text
+    announcefn = function(time, text)
         local _time, stolen_oincs = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown))
         if stolen_oincs then
             return time and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.announce_cooldown), TimeToString(time), stolen_oincs)
@@ -41,8 +39,7 @@ info = {
             return stolen_oincs and string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.ready), stolen_oincs)
         end
     end,
-    tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.banditmanager_text
+    tipsfn = function(time, text)
         local ready = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext))
         if ready then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.banditmanager.tips)), 5, nil, 3

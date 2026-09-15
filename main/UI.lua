@@ -71,11 +71,11 @@ local function AddWarningEvents(self)
     end
 
     -- 醒目提示
-    function self:ShowTips(timefn, second, level)
+    function self:ShowTips(timefn, second, level, context)
         if not EventTimer.TimerTips then return end -- 判断模组设置是否开启了醒目提示功能
         if type(timefn) ~= "function" then return end
 
-        local text = timefn()
+        local text = timefn(context.time or 0, context.text or "")
         if type(text) ~= "string" or text == "" then return end
 
         warningtips_root:MoveToFront()
@@ -87,7 +87,7 @@ local function AddWarningEvents(self)
 
         -- 启动定时器
         message.inst:DoPeriodicTask(0.5, function() -- 更新倒计时时间
-            if not message:SetText(timefn()) then
+            if not message:SetText(timefn(context.time or 0, context.text or "")) then
                 remove_message(message)
                 return
             end
@@ -115,71 +115,97 @@ local function AddWarningEvents(self)
     warningevents_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
     warningevents_design_root:SetClickable(false)
 
-    for warningevent, data in pairs(WarningEvents) do
-        self[warningevent] = warningevents_design_root:AddChild(WarningEvent(data.anim, data.image))
-        self[warningevent]:Hide()
-        self[warningevent].force = RW_Data:GetValue(warningevent) -- 读取存储的数据来决定是否显示计时器在屏幕左上角
-    end
-
     function self:UpdateWarningEvents()
-        local eventsdata = self.WarningEventTimeData -- 由RPC.lua提供
+        local eventsdata = self.WarningEventTimeData or {} -- 由RPC.lua提供
         local i = 0
         local line_num = 2
         local scale = TheFrontEnd:GetProportionalHUDScale()
-        for warningevent, data in pairs(WarningEvents) do
-            local row = math.floor(i/line_num)
-            local line = i - row * line_num
-            local x = (row * 150 + 80) * scale
-            local y = (-line * 70 - 30) * scale
+        for warningevent, data_list in pairs(eventsdata) do
+            local data = WarningEvents[warningevent]
+            for shard_id in pairs(data_list) do
+                local row = math.floor(i/line_num)
+                local line = i - row * line_num
+                local x = (row * 150 + 80) * scale
+                local y = (-line * 70 - 30) * scale
+                local warningevent_child = warningevent .. "_" .. shard_id
 
-            self[warningevent]:SetScale(scale)
-            self[warningevent]:SetPosition(x, y, 0)
-            local time = eventsdata[warningevent .. "_time"] or 0 -- 屏幕左上角倒计时只显示time，不显示text，因为text内容太多
-
-            -- if self[warningevent].last_time == time then
-            --     self[warningevent].sametick = (self[warningevent].sametick or 0) + 1
-            -- else
-            --     self[warningevent].sametick = 0
-            -- end
-
-            if data.gettimefn then
-                if not self[warningevent].force or ((time and time <= 0) --[[or self[warningevent].sametick >= 100]]) then
-                    if self[warningevent].shown then
-                        self[warningevent]:Hide()
-                    end
-                else
-                    if not self[warningevent].shown then
-                        if data.animchangefn then
-                            data:animchangefn()
-                            self[warningevent]:SetEventAnim(data.anim)
-                        elseif data.imagechangefn then
-                            data:imagechangefn()
-                            self[warningevent]:SetEventImage(data.image)
-                        end
-                        self[warningevent]:Show()
-                    end
-                    -- self[warningevent].last_time = time
-
-                    self[warningevent]:OnUpdate(time)
-
-                    i = i + 1
+                if not self[warningevent_child] then
+                    self[warningevent_child] = warningevents_design_root:AddChild(WarningEvent(data.anim, data.image))
+                    self[warningevent_child]:Hide()
+                    self[warningevent_child].force = RW_Data:GetValue(warningevent) -- 读取存储的数据来决定是否显示计时器在屏幕左上角
                 end
-            end
 
-            if data.tipsfn and game_ready then
-                local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn() -- 加载事件列表的tips函数
-                last_tips_cache[warningevent] = last_tips_cache[warningevent] or false
-                if need_tips and not last_tips_cache[warningevent] then
-                    last_tips_cache[warningevent] = true
-                    if delay and TheWorld then
-                        TheWorld:DoTaskInTime(delay, function() -- 延迟提示
-                            self:ShowTips(tipstextfn, tipstime, level)
-                        end)
+                self[warningevent_child]:SetScale(scale)
+                self[warningevent_child]:SetPosition(x, y, 0)
+                local time = eventsdata[warningevent][shard_id].time or 0
+                local text = eventsdata[warningevent][shard_id].text or "" -- 屏幕左上角倒计时只显示time，不显示text，因为text内容太多
+
+                -- if self[warningevent_child].last_time == time then
+                --     self[warningevent_child].sametick = (self[warningevent_child].sametick or 0) + 1
+                -- else
+                --     self[warningevent_child].sametick = 0
+                -- end
+
+                if data.gettimefn then
+                    if not self[warningevent_child].force or ((time and time <= 0) --[[or self[warningevent_child].sametick >= 100]]) then
+                        if self[warningevent_child].shown then
+                            self[warningevent_child]:Hide()
+                        end
+                        if data.animchangetask then
+                            data.animchangetask:Cancel()
+                            data.animchangetask = nil
+                        elseif data.imagechangetask then
+                            data.imagechangetask:Cancel()
+                            data.imagechangetask = nil
+                        end
                     else
-                        self:ShowTips(tipstextfn, tipstime, level)
+                        if not self[warningevent_child].shown then
+                            if data.animchangefn then
+                                data:animchangefn(time, text)
+                                self[warningevent_child]:SetEventAnim(data.anim)
+                            elseif data.imagechangefn then
+                                data:imagechangefn(time, text)
+                                self[warningevent_child]:SetEventImage(data.image)
+                            end
+
+                            -- 梦到啥写啥，以后可能也许大概还会改，看有没有新需求了
+                            if data.animchangetaskfn and not data.animchangetask then
+                                local interval, fn = data.animchangetaskfn()
+                                if TheWorld then
+                                    data.animchangetask = TheWorld:DoTaskInTime(interval, fn(data, self[warningevent_child], time, text))
+                                end
+                            elseif data.imagechangetaskfn and not data.imagechangetask then
+                                local interval, fn = data.imagechangetaskfn()
+                                if TheWorld then
+                                    data.imagechangetask = TheWorld:DoTaskInTime(interval, fn)
+                                end
+                            end
+
+                            self[warningevent_child]:Show()
+                        end
+                        -- self[warningevent_child].last_time = time
+
+                        self[warningevent_child]:OnUpdate(time)
+
+                        i = i + 1
                     end
-                elseif not need_tips then
-                    last_tips_cache[warningevent] = false
+                end
+
+                if data.tipsfn and game_ready then
+                    local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(time, text) -- 加载事件列表的tips函数
+                    last_tips_cache[warningevent_child] = last_tips_cache[warningevent_child] or false
+                    if need_tips and not last_tips_cache[warningevent_child] then
+                        last_tips_cache[warningevent_child] = true
+                        if delay and TheWorld then
+                            TheWorld:DoTaskInTime(delay, function() -- 延迟提示
+                                self:ShowTips(tipstextfn, tipstime, level, eventsdata[warningevent][shard_id])
+                            end)
+                        elseif TheWorld then
+                            self:ShowTips(tipstextfn, tipstime, level, eventsdata[warningevent][shard_id])
+                        end
+                    elseif not need_tips then
+                        last_tips_cache[warningevent_child] = false
+                    end
                 end
             end
         end

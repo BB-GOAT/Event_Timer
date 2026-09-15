@@ -29,15 +29,12 @@ aporkalypse = {
         tex = "Aporkalypse_Clock.tex",
         scale = 0.2
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.aporkalypse_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.aporkalypse_time
-
+    tipsfn = function(time, text)
         if (JustEntered(time) and time < 2400) then
             return true, string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time)), 10, nil, 1
         elseif time == 480 then
@@ -75,8 +72,7 @@ aporkalypse_attack = {
             y = 7,
         }
     },
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.aporkalypse_attack_text
+    announcefn = function(time, text)
         local next_bat_attack, next_herald_attack = Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.aporkalypse.attack))
         if not (next_bat_attack and next_herald_attack) then return end
         return string.format(ReplacePrefabName(STRINGS.eventtimer.aporkalypse.announce_attack), next_bat_attack, next_herald_attack)
@@ -125,14 +121,12 @@ batted = {
         }
     },
     DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.batted_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.batted.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.batted_time
+    tipsfn = function(time, text)
         if time > 2 and time <= 90 then
             return true, batted.announcefn, time, nil, 2
         elseif JustEntered(time) and time < 960 then

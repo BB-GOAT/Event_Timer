@@ -28,23 +28,11 @@ info = {
         },
     },
     playerly = true, -- 指明是针对单个玩家的事件
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_text
-        if not text or text == "" then return end
-
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), data[player_userid])
+    announcefn = function(time, text)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), text)
     end,
-    tipsfn = function ()
-        local text = ThePlayer.HUD.WarningEventTimeData.yoth_knightmanager_text
-        if not text or text == "" then return end
-
-        local data = json.decode(text)
-        if type(data) ~= "table" or not data[player_userid] then return end
-
-        local time = StringToTime(data[player_userid])
+    tipsfn = function(time, text)
+        local time = StringToTime(text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.tips)), 10, time, 2
         end

@@ -1,49 +1,47 @@
 -- 猎犬/洞穴蠕虫/鳄狗/巨大洞穴蠕虫 Anim刷新
-local HoundedAnimChangeFn
-local function HoundedAnimChange(self)
-    if TheNet:IsDedicated() then
-        return
+local last_anim
+local function HoundedAnimChangeFn(self, time, text)
+    if not self then
+        self = WarningEvents['hounded']
+    end
+    local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
+    local worldtype = GetWorldtypeStr()
+    if worldtype == "shipwrecked" or worldtype == "volcano" then
+        self.anim = self.islandanim
+    elseif is_worm_boss then
+        self.anim = self.wormbossanim
+    elseif worldtype == "cave" then
+        self.anim = self.caveanim
+    elseif worldtype == "porkland" then
+        self.anim = {
+            scale = 0.08,
+            build = "bat_vamp_build",
+            bank = "bat", -- 云霄国度是 bat_vamp
+            animation = "fly_loop",
+            loop = true,
+            uioffset = {
+                x = 10,
+                y = -15,
+            },
+            offset = {
+                x = 0,
+                y = -15,
+            }
+        }
+    else
+        self.anim = self.forestanim
     end
 
-    local last_anim
-    if not HoundedAnimChangeFn then
-        HoundedAnimChangeFn = function()
-            local text = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.hounded_text
-            local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
-            local worldtype = GetWorldtypeStr()
-            if worldtype == "shipwrecked" or worldtype == "volcano" then
-                self.anim = self.islandanim
-            elseif is_worm_boss then
-                self.anim = self.wormbossanim
-            elseif worldtype == "cave" then
-                self.anim = self.caveanim
-            elseif worldtype == "porkland" then
-                self.anim = {
-                    scale = 0.08,
-                    build = "bat_vamp_build",
-                    bank = "bat", -- 云霄国度是 bat_vamp
-                    animation = "fly_loop",
-                    loop = true,
-                    uioffset = {
-                        x = 10,
-                        y = -15,
-                    },
-                    offset = {
-                        x = 0,
-                        y = -15,
-                    }
-                }
-            else
-                self.anim = self.forestanim
-            end
-
-            if (self.anim and self.anim.bank ~= last_anim) and ThePlayer and ThePlayer.HUD and ThePlayer.HUD.hounded then
+    local current_shardid = ThePlayer and ThePlayer.eventtimer_current_shardid
+    if current_shardid then
+        local warningevent_child = "hounded_" .. current_shardid
+        if warningevent_child then
+            if (self.anim and self.anim.bank ~= last_anim) and ThePlayer and ThePlayer.HUD and ThePlayer.HUD[warningevent_child] then
                 last_anim = self.anim.bank
-                ThePlayer.HUD.hounded:SetEventAnim(self.anim)
+                ThePlayer.HUD[warningevent_child]:SetEventAnim(self.anim)
             end
         end
     end
-    HoundedAnimChangeFn()
 end
 
 -- 监听热带冒险的区域变化事件
@@ -91,8 +89,7 @@ info = {
             return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(time), _wave_override_chance * 100)
         end
     end,
-    imagechangefn = function(self)
-        local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
+    imagechangefn = function(self, time, text)
         local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
         local worldtype = GetWorldtypeStr()
         if worldtype == "porkland" then
@@ -122,7 +119,7 @@ info = {
         tex = "Worm_boss.tex",
         scale = 0.2,
     },
-    animchangefn = HoundedAnimChange,
+    animchangefn = HoundedAnimChangeFn,
     forestanim = {
         scale = 0.099,
         bank = "hound",
@@ -184,16 +181,12 @@ info = {
             y = 0,
         }
     },
-    DisableShardRPC = true,
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.hounded_time
-        local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
+    DisableShardRPC = true, -- 动态Anim目前不支持多世界
+    announcefn = function(time, text)
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
         return (is_worm_boss and text) or (time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[GetWorldtypeStr()]), TimeToString(time)))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.hounded_time
-        local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
+    tipsfn = function(time, text)
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
 
         if time > 2 and time <= 90 then

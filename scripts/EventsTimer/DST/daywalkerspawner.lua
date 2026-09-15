@@ -37,9 +37,7 @@ info = {
         },
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.daywalkerspawner_time
-        local text = ThePlayer.HUD.WarningEventTimeData.daywalkerspawner_text
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.cooldown), TimeToString(time))
         else
@@ -47,8 +45,7 @@ info = {
             return text
         end
     end,
-    tipsfn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.daywalkerspawner_text
+    tipsfn = function(time, text)
         if string.find(text, ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.ready)) then
             return true, not (GetTime() < 10) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.tips)), 10, nil, 2
         end

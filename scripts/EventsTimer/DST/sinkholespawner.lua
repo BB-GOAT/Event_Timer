@@ -12,12 +12,10 @@ info = {
             y = -5,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.sinkholespawner_time
+    announcefn = function(time, text)
         return time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.sinkholespawner.cooldown), TimeToString(time))
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.sinkholespawner_time
+    tipsfn = function(time, text)
         if time > 2 and time <= 60 then
             return true, info.announcefn, time, nil, 2
         elseif ready_attack(time) then

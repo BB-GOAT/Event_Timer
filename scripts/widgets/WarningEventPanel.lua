@@ -92,11 +92,11 @@ local WarningEventHUD = Class(Widget, function(self, owner)
             widget.destitem.describe:SetString(text)
 
             if data.animchangefn then
-                data:animchangefn()
+                data:animchangefn(data.time, data.text)
             end
 
             if data.imagechangefn then
-                data:imagechangefn()
+                data:imagechangefn(data.time, data.text)
             end
 
             -- 移除背景，暂未使用
@@ -157,6 +157,10 @@ local WarningEventHUD = Class(Widget, function(self, owner)
             end
 
             if data.gettimefn then
+                if not ThePlayer.HUD[data.warningevent_child] then
+                    return
+                end
+
                 if not widget.destitem.checkbox then
                     widget.destitem.checkbox = widget.destitem:AddChild(ImageButton(
                         "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
@@ -166,7 +170,7 @@ local WarningEventHUD = Class(Widget, function(self, owner)
                 end
 
                 -- 更新复选框状态
-                if ThePlayer.HUD[data.name].force then
+                if ThePlayer.HUD[data.warningevent_child].force then
                     widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
                 else
                     widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
@@ -174,10 +178,10 @@ local WarningEventHUD = Class(Widget, function(self, owner)
 
                 -- 设置复选框按下后执行的函数
                 widget.destitem.checkbox:SetOnClick(function()
-                    ThePlayer.HUD[data.name].force = not ThePlayer.HUD[data.name].force
+                    ThePlayer.HUD[data.warningevent_child].force = not ThePlayer.HUD[data.warningevent_child].force
 
                     -- 根据切换结果设置 checkbox 状态
-                    if ThePlayer.HUD[data.name].force then
+                    if ThePlayer.HUD[data.warningevent_child].force then
                         RW_Data:SetValue(data.name, true)
                         widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
                     else
@@ -195,7 +199,7 @@ local WarningEventHUD = Class(Widget, function(self, owner)
             -- 点击倒计时后触发的事件
             widget.destitem.backing:SetOnClick(function()
                 if type(data.announcefn) == "function" then
-                    local res = data.announcefn()
+                    local res = data.announcefn(data.time or 0, data.text or "")
                     if type(res) == "string" then
                         TheNet:Say(STRINGS.LMB .. ' ' .. res, TheInput:IsKeyDown(KEY_CTRL))
                     end
@@ -227,28 +231,43 @@ local WarningEventHUD = Class(Widget, function(self, owner)
     self.default_focus = self.scrollpanel
 end)
 
--- 更新数据
+-- 更新数据，TODO 优化性能
 function WarningEventHUD:UpdateDestItem()
     local data_list = {}
-    local eventsdata = ThePlayer.HUD.WarningEventTimeData
-    for name, value in pairs(WarningEvents) do
-        local datatext = eventsdata[name .. "_text"]
-        local datatime = eventsdata[name .. "_time"]
-        value.name = name -- name在这定义，注意这一点
-        if type(datatext) == "string" and datatext ~= "" then
-            if value.playerly then
-                local text = json.decode(datatext)
-                if type(text) == "table" and text[ThePlayer.userid] then
-                    value.text = text[ThePlayer.userid]
-                    data_list[#data_list + 1] = value -- 必须条件都满足了才添加到data_list，否则会影响事件列表长度
+    local eventsdata = ThePlayer.HUD.WarningEventTimeData or {}
+    for warningevent, datalist in pairs(eventsdata) do
+        local origin_data = WarningEvents[warningevent]
+        for shard_id in pairs(datalist) do
+            local datatext = eventsdata[warningevent][shard_id].text or ""
+            local datatime = eventsdata[warningevent][shard_id].time or 0
+
+            local data = setmetatable(
+                {
+                    name = warningevent,
+                    warningevent_child = warningevent .. "_" .. shard_id,
+                    time = datatime,
+                },
+                {
+                    __index = origin_data
+                }
+            )
+
+
+            if type(datatext) == "string" and datatext ~= "" then
+                if origin_data.playerly then
+                    local text = json.decode(datatext)
+                    if type(text) == "table" and text[ThePlayer.userid] then
+                        data.text = text[ThePlayer.userid]
+                        data_list[#data_list + 1] = data -- 必须条件都满足了才添加到data_list，否则会影响事件列表长度
+                    end
+                else
+                    data.text = datatext
+                    data_list[#data_list + 1] = data
                 end
-            else
-                value.text = datatext
-                data_list[#data_list + 1] = value
+            elseif type(datatime) == "number" and datatime > 0 then
+                data.text = TimeToString(datatime)
+                data_list[#data_list + 1] = data
             end
-        elseif type(datatime) == "number" and datatime > 0 then
-            value.text = TimeToString(datatime)
-            data_list[#data_list + 1] = value
         end
     end
     self.scrollpanel:SetItemsData(data_list)

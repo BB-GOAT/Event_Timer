@@ -30,9 +30,7 @@ info = {
         animation = "idle",
         loop = true,
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.mock_dragonflyspawner_time
-        local text = ThePlayer.HUD.WarningEventTimeData.mock_dragonflyspawner_text
+    announcefn = function(time, text)
         local target, _ = Extract_by_format(text, STRINGS.eventtimer.mock_dragonflyspawner.targeted)
         if target and time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.mock_dragonflyspawner.target), target, TimeToString(time))
@@ -40,8 +38,7 @@ info = {
             return string.format(ReplacePrefabName(STRINGS.eventtimer.mock_dragonflyspawner.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.mock_dragonflyspawner_time
+    tipsfn = function(time, text)
         if time > 2 and time <= 60 and GetWorldtypeStr() == "forest" then
             return true, info.announcefn, time, nil, 2
         elseif time == 480 or JustEntered(time) then

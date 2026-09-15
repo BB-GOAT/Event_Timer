@@ -24,18 +24,14 @@ info = {
             y = -15,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.rocmanager_time
-        local text = ThePlayer.HUD.WarningEventTimeData.rocmanager_text
+    announcefn = function(time, text)
         if string.find(text, ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)) then
             return ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)
         elseif time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.rocmanager.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.rocmanager_time
-        local text = ThePlayer.HUD.WarningEventTimeData.rocmanager_text
+    tipsfn = function(time, text)
         if time > TUNING.SEG_TIME and time <= 90 then -- 如果没有目标玩家就从0变成30，为了防止重复tips需修改此处
             return true, info.announcefn, 10, nil, 2
         elseif JustEntered(time) and time < 960 then

@@ -23,15 +23,13 @@ info = {
             y = -6,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.krakener_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
         end
         return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.krakener_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.krakener.tips)), 10, time, 2
         end

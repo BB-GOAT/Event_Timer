@@ -32,9 +32,7 @@ info = {
             y = -6,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.tigersharker_time
-        local text = ThePlayer.HUD.WarningEventTimeData.tigersharker_text
+    announcefn = function(time, text)
         local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
         local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
         if exists then
@@ -47,8 +45,7 @@ info = {
             return ReplacePrefabName(STRINGS.eventtimer.tigersharker.ready)
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.tigersharker_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.tigersharker.tips)), 10, time, 2
         end

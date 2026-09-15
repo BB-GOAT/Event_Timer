@@ -40,8 +40,7 @@ info = {
         tex = "lunarthrall_plant.png",
         scale = 0.8,
     },
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.lunarthrall_plantspawner_text
+    announcefn = function(time, text)
         text = string.gsub(text,"\n",", ")
         return STRINGS.NAMES.LUNARTHRALL_PLANT .. ": " .. text
     end,

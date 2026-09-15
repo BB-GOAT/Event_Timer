@@ -25,9 +25,7 @@ info ={
         build = "klaus_bag",
         animation = "idle",
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.klaussackspawner_time
-        local text = ThePlayer.HUD.WarningEventTimeData.klaussackspawner_text
+    announcefn = function(time, text)
         local despawnday = Extract_by_format(text, STRINGS.eventtimer.klaussackspawner.despawntext)
         if despawnday then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.despawn), despawnday)
@@ -35,8 +33,7 @@ info ={
             return string.format(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.klaussackspawner_time
+    tipsfn = function(time, text)
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.tips)), 10, time, 2
         end

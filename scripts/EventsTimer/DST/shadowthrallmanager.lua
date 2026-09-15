@@ -79,8 +79,7 @@ info = {
             y = -2,
         },
     },
-    announcefn = function()
-        local text = ThePlayer.HUD.WarningEventTimeData.shadowthrallmanager_text
+    announcefn = function(time, text)
         text = string.gsub(text,"\n",", ")
         return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. text
     end,

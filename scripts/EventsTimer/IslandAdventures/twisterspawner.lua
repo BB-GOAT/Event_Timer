@@ -26,9 +26,7 @@ info = {
         animation = "idle_loop",
         loop = true
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.twisterspawner_time
-        local text = ThePlayer.HUD.WarningEventTimeData.twisterspawner_text
+    announcefn = function(time, text)
         local target, _ = Extract_by_format(text, STRINGS.eventtimer.twisterspawner.targeted)
         if target and time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.target), target, TimeToString(time))
@@ -36,8 +34,7 @@ info = {
             return string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(time))
         end
     end,
-    tipsfn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.twisterspawner_time
+    tipsfn = function(time, text)
         if time > 2 and time <= 60 and GetWorldtypeStr() == "shipwrecked" then
             return true, info.announcefn, time, nil, 2
         elseif time == 480 or JustEntered(time) then

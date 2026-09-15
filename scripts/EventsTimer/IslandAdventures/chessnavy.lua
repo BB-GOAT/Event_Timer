@@ -20,8 +20,7 @@ info = {
             y = -2,
         },
     },
-    announcefn = function()
-        local time = ThePlayer.HUD.WarningEventTimeData.chessnavy_time
+    announcefn = function(time, text)
         if time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.chessnavy.cooldown), TimeToString(time))
         end
