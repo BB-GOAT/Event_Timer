@@ -182,7 +182,7 @@ local function AddWarningEvents(self)
             self[warningevent]:SetPosition(x, y, 0)
             local time = eventsdata[warningevent .. "_time"] or 0 -- 屏幕左上角倒计时只显示time，不显示text，因为text内容太多
 
-            -- if data.gettimefn then
+            -- if data.gettimefn or data.playerly then
                 if not self[warningevent].force or ((time and time <= 0) --[[or self[warningevent].sametick >= 100]]) then
                     if self[warningevent].shown then
                         self[warningevent]:Hide()
@@ -331,6 +331,7 @@ AddClassPostConstruct("screens/redux/pausescreen", function(self)
 
     EventUIButton:SetClickable(true)
     EventUIButton.onclick = function()
+        if not ThePlayer then return end
         self:unpause()
         ThePlayer.HUD.EventTimerButton:ToggleEventTimerUI()
     end

@@ -114,7 +114,7 @@ end
 if Ismodloaded("workshop-3511498282") then
     -- 关闭饥饥事件计时器的模组UI
     AddClassPostConstruct("widgets/controls", function()
-        if ThePlayer.HUD and ThePlayer.HUD.timebox then
+        if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.timebox then
             ThePlayer.HUD.timebox:Hide()
         end
     end)

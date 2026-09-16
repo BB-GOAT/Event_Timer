@@ -156,8 +156,7 @@ local WarningEventHUD = Class(Widget, function(self, owner)
                 widget.destitem.anim:GetAnimState():Pause()
             end
 
-            -- if data.gettimefn then -- 旧的判断方法
-            if ThePlayer.HUD.WarningEventTimeData[data.name .. "_time"] > 0 then
+            if ThePlayer and ThePlayer.HUD.WarningEventTimeData[data.name .. "_time"] > 0 then
                 if not widget.destitem.checkbox then
                     widget.destitem.checkbox = widget.destitem:AddChild(ImageButton(
                         "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
@@ -230,6 +229,7 @@ end)
 
 -- 更新数据
 function WarningEventHUD:UpdateDestItem()
+    if not ThePlayer then return end
     local data_list = {}
     local eventsdata = ThePlayer.HUD.WarningEventTimeData
     for name, value in pairs(ClientWarningEvents) do
