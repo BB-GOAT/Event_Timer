@@ -18,7 +18,34 @@ local function GetSeparator(i)
     end
 end
 
+local get_text_fn = function()
+    local lines = {}
+    for i, info in ipairs(walrus_house_list) do
+        local inst = info.ent
+        local time_str = TimeToString(GetWorldSettingsTimeLeft("walrus", inst)) or STRINGS.eventtimer.walrus_camp.ready
+        table.insert(lines, string.format(STRINGS.eventtimer.walrus_camp.cooldown, i, time_str))
+    end
+    local description = ""
+    for i, line in ipairs(lines) do
+        description = description .. (i == 1 and "" or GetSeparator(i)) .. line
+    end
+    return description
+end
+
 local info
+local function OnIsWinter()
+    if TheWorld and TheWorld.state.iswinter then
+        info.gettextfn = get_text_fn
+    else
+        info.gettextfn = nil
+        -- 清理数据
+        if EventTimer.EventTimerData and EventTimer.EventTimerData["walrus_camp"] then
+            EventTimer.EventTimerData["walrus_camp"][EventTimer.CurrentShardId].text = ""
+            EventTimer.env.SyncEventData("walrus_camp", "", "event_textrpc", EventTimer.CurrentShardId)
+            SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, "walrus_camp", "")
+        end
+    end
+end
 info = {
     postinitfn = function()
         if not TheNet:GetIsServer() then return end
@@ -38,22 +65,14 @@ info = {
                 end
             end)
         end)
+
+        AddPrefabPostInit("world", function(inst)
+            inst:WatchWorldState("iswinter", function()
+                OnIsWinter()
+            end)
+            OnIsWinter()
+        end)
     end,
-    gettextfn = function()
-        if not (TheWorld and TheWorld.state.iswinter) then return end -- TODO: 也许可以监听季节变化，非冬季的时候直接把gettextfn改为nil
-        local lines = {}
-        for i, info in ipairs(walrus_house_list) do
-            local inst = info.ent
-            local time_str = TimeToString(GetWorldSettingsTimeLeft("walrus", inst)) or STRINGS.eventtimer.walrus_camp.ready
-            table.insert(lines, string.format(STRINGS.eventtimer.walrus_camp.cooldown, i, time_str))
-        end
-        local description = ""
-        for i, line in ipairs(lines) do
-            description = description .. (i == 1 and "" or GetSeparator(i)) .. line
-        end
-        return description
-    end,
-    DisableShardRPC = true, -- TODO：取消禁用，记得检查数据是否会被正常删除（上面的监听会把gettextfn改为nil）
     anim = {
         scale = 0.05,
         bank = "walrus_house",

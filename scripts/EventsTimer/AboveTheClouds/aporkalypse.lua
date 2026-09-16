@@ -131,7 +131,7 @@ batted = {
             y = -15,
         }
     },
-    DisableShardRPC = true,
+    -- DisableShardRPC = true,
     announcefn = function(context)
         local time = context.time
         local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.batted.cooldown), TimeToString(time))

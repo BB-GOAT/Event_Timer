@@ -11,15 +11,17 @@ info = {
             y = -4,
         },
     },
-    DisableShardRPC = true,
     announcefn = function(context)
-        local time = context.time
-        return time and string.format(ReplacePrefabName(STRINGS.eventtimer.terrarium.cooldown), TimeToString(time))
+        local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.terrarium.cooldown), TimeToString(context.time))
+        desc = MarkData(desc, context)
+        return desc
     end,
     tipsfn = function(context)
         local time = context.time
         if ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.terrarium.tips)), 10, time, 2
+            local desc = ReplacePrefabName(STRINGS.eventtimer.terrarium.tips)
+            desc = MarkData(desc, context)
+            return true, StringToFunction(desc), 10, time, 2
         end
         return false
     end,

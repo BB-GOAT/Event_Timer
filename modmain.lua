@@ -220,6 +220,14 @@ function GetWorldtypeStr()
     return cache_world_type
 end
 
+-- 添加世界前缀标识，不被玩家的模组设置影响
+function MarkData(desc, context)
+    if desc and context.shard_id ~= EventTimer.CurrentShardId then
+        return string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc
+    end
+    return desc
+end
+
 ----------------------------------------事件计时需要用到的函数---------------------------------------
 
 -- 从worldsettingstimer或TimerPrefabs获取倒计时
@@ -311,14 +319,6 @@ local function ready_attack(time)
         return true
     end
     return false
-end
-
--- 添加世界前缀标识，不被玩家的模组设置影响
-local function MarkData(desc, context)
-    if desc and context.shard_id ~= EventTimer.CurrentShardId then
-        return string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc
-    end
-    return desc
 end
 
 local file_env = {
