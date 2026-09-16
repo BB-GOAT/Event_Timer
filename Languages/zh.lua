@@ -176,6 +176,11 @@ STRINGS.eventtimer = {
         announce = "我的<prefab=knight_yoth>会重生于%s后",
         tips = "<prefab=knight_yoth>已准备就绪",
     },
+    acidbatwavemanager = {
+        chance = "<prefab=bat>袭击概率: %.1f%% (预计: %.1f%%)",
+        next_wave_spawn = "<prefab=bat>袭击(%s)于%s后",
+        cooldown = "<prefab=bat>袭击冷却: %s",
+    },
 
     ----------------------------------------海难----------------------------------------
 

@@ -49,6 +49,7 @@ GameEvents = {
     -- 针对单个玩家的事件，不支持gettimefn，gettextfn返回一个包含所有玩家信息的json字符串。不支持跨世界同步
     flotsamgenerator = RequireEvent("DST/flotsamgenerator"),
     yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"),
+    acidbatwavemanager = RequireEvent("DST/acidbatwavemanager"),
 }
 for k, v in pairs(GameEvents) do
     WarningEvents[k] = v

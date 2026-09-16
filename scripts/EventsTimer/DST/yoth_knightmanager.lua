@@ -1,7 +1,4 @@
 -- 镀金骑士冷却倒计时
-
-local player_userid = TheNet:GetUserID()
-
 local info
 info = {
     gettextfn = function()
@@ -28,6 +25,7 @@ info = {
         },
     },
     playerly = true, -- 指明是针对单个玩家的事件
+    playerly_datatype = "time", -- 每个玩家的数据类型
     announcefn = function(context)
         return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), context.text)
     end,

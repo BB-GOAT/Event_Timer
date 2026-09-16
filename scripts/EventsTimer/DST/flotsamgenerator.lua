@@ -2,8 +2,6 @@
 -- 参考了Insight代码 https://steamcommunity.com/sharedfiles/filedetails/?id=2189004162 @penguin0616
 
 local _guaranteed_spawn_tasks
-local player_userid = TheNet:GetUserID()
-
 local info
 info = {
     postinitfn = function()
@@ -41,6 +39,7 @@ info = {
         },
     },
     playerly = true, -- 指明是针对单个玩家的事件
+    playerly_datatype = "time", -- 每个玩家的数据类型
     announcefn = function(context)
         return string.format(ReplacePrefabName(STRINGS.eventtimer.flotsamgenerator.announce), context.text)
     end

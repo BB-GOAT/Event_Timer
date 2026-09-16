@@ -176,6 +176,11 @@ STRINGS.eventtimer = {
         announce = "My <prefab=knight_yoth> will respawn in %s.",
         tips = "<prefab=knight_yoth> ready to spawn."
     },
+    acidbatwavemanager = {
+        chance = "Chance of bat raid: %.1f%% (estimated: %.1f%%)",
+        next_wave_spawn = "<prefab=bat> raid (%s) arrives in %s",
+        cooldown = "<prefab=bat> attack cooldown: %s",
+    },
 
     ----------------------------------------Shipwrecked----------------------------------------
 

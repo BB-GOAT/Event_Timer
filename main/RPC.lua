@@ -44,8 +44,11 @@ function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
             if GLOBAL.type(textdata) == "table" then
                 for userid, text in pairs(textdata) do
                     if need_sync(userid_to_player(userid), event, text, type, shardid) then
-                        -- SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_textrpc"], userid, event, text, shardid)
-                        SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_timerpc"], userid, event, StringToTime(text), shardid)
+                        if WarningEvents[event].playerly_datatype == "time" then
+                            SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_timerpc"], userid, event, StringToTime(text), shardid)
+                        else -- text
+                            SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_textrpc"], userid, event, text, shardid)
+                        end
                     end
                 end
             end
