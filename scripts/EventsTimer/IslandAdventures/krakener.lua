@@ -9,15 +9,27 @@ info = {
         end
         return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
     end,
-    anim = { -- TODO 冬季盛宴海妖
-        scale = 0.027,
+    animchangefn = ChangeanimByWintersFeast,
+    defaultanim = {
+        scale = 0.025,
         bank = "quacken",
         build = "quacken",
         animation = "idle_loop",
         loop = true,
         uioffset = {
             x = 0,
-            y = -6,
+            y = -3,
+        },
+    },
+    winterfeastanim = {
+        scale = 0.025,
+        bank = "quacken",
+        build = "quacken_yule",
+        animation = "idle_loop",
+        loop = true,
+        uioffset = {
+            x = 0,
+            y = -3,
         },
     },
     announcefn = function(context)
