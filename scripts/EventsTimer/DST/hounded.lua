@@ -10,21 +10,7 @@ local function HoundedAnimChangeFn(self, context)
     elseif worldtype == "cave" then
         self.anim = self.caveanim
     elseif worldtype == "porkland" then
-        self.anim = {
-            scale = 0.08,
-            build = "bat_vamp_build",
-            bank = "bat", -- 岛屿冒险猪镇是 bat | 云霄国度是 bat_vamp
-            animation = "fly_loop",
-            loop = true,
-            uioffset = {
-                x = 10,
-                y = -15,
-            },
-            offset = {
-                x = 0,
-                y = -15,
-            }
-        }
+        self.anim = self.porklandanim
     else
         self.anim = self.forestanim
     end
@@ -151,6 +137,21 @@ info = {
             y = 0,
         }
     },
+    porklandanim = {
+        scale = 0.08,
+        build = "bat_vamp_build",
+        bank = "bat", -- 岛屿冒险猪镇是 bat | 云霄国度是 bat_vamp
+        animation = "fly_loop",
+        loop = true,
+        uioffset = {
+            x = 10,
+            y = -15,
+        },
+        offset = {
+            x = 0,
+            y = -15,
+        }
+    },
     wormbossanim = {
         scale = 0.066,
         bank = "worm_boss",
@@ -177,7 +178,7 @@ info = {
         if is_worm_boss then
             desc = text
         else
-            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[world_type]), TimeToString(time))
+            desc = time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[world_type]), TimeToString(time))
         end
         desc = MarkData(desc, context)
         return desc

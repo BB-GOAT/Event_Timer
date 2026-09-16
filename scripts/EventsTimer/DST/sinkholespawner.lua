@@ -16,7 +16,7 @@ info = {
     },
     announcefn = function(context)
         local time = context.time
-        local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.sinkholespawner.cooldown), TimeToString(time))
+        local desc = time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.sinkholespawner.cooldown), TimeToString(time))
         desc = MarkData(desc, context)
         return desc
     end,

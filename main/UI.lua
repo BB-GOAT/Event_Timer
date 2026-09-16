@@ -123,7 +123,6 @@ local function AddWarningEvents(self)
     ---------------------------------------------------------------------------------------------------------------
 
     -- 屏幕左上角倒计时
-    local eventsdata
     local warningevents_root = self:AddChild(Widget("WarningEventsResolutionRoot"))
     warningevents_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     warningevents_root:SetHAnchor(ANCHOR_LEFT)
@@ -134,20 +133,22 @@ local function AddWarningEvents(self)
     warningevents_design_root:SetScale(2/3) -- SCALEMODE_PROPORTIONAL以1280x720为基准，乘以2/3后转为1920x1080设计坐标。
     warningevents_design_root:SetClickable(false)
 
-    -- 面板数据
+    local eventsdata
     local Panel_data_list = {}
+    local context_cache = {}
+    local panel_data_cache = {}
     TarnsferPanel.UpdateDestItem = function(self)
-        self.scrollpanel:SetItemsData(Panel_data_list)
+        self.scrollpanel:SetItemsData(Panel_data_list) -- 面板数据
     end
 
     function self:UpdateWarningEvents()
-        Panel_data_list = {}
         if not eventsdata then
             eventsdata = self.WarningEventTimeData -- 由RPC.lua提供
             if not eventsdata then return end
         end
 
         local i = 0
+        local panel_count = 0
         local line_num = 2
         local scale = TheFrontEnd:GetProportionalHUDScale()
         for warningevent, data_list in pairs(eventsdata) do
@@ -170,20 +171,23 @@ local function AddWarningEvents(self)
                 local time = eventsdata[warningevent][shard_id].time or 0
 
                 local world_type, world_str = GetShardInfo(shard_id)
-                -- TODO: 也许可以优化性能
-                local context = setmetatable( -- 传入给事件模块的信息
-                    {
-                        shard_id = shard_id, -- 事件所处世界ID
-                        world_type = world_type, -- 事件所处世界类型
-                        world_str = world_str, -- 事件所处世界中文名称
-                        warningevent_child = self[warningevent_child],
-                    },
-                    {
-                        __index = function(t, key)
-                            return eventsdata[warningevent][shard_id][key] -- time 或 text 从这里获取
-                        end
-                    }
-                )
+                local context = context_cache[warningevent_child]
+                if not context then
+                    context = setmetatable( -- 传入给事件模块的信息
+                        {
+                            shard_id = shard_id, -- 事件所处世界ID
+                        },
+                        {
+                            __index = function(t, key)
+                                return eventsdata[warningevent][shard_id][key] -- time 和 text 在这里获取
+                            end
+                        }
+                    )
+                    context_cache[warningevent_child] = context
+                end
+                context.world_type = world_type
+                context.world_str = world_str
+                context.warningevent_child = self[warningevent_child]
 
                 -- if self[warningevent_child].last_time == time then
                 --     self[warningevent_child].sametick = (self[warningevent_child].sametick or 0) + 1
@@ -223,7 +227,7 @@ local function AddWarningEvents(self)
                     end
                 end
 
-                if data.tipsfn and game_ready then -- TODO: EventTimer.TimerTips 是不是应该在这里判断？有什么事件是始终依赖tips的吗？
+                if data.tipsfn and game_ready then -- EventTimer.TimerTips 是不是应该在这里判断？有什么事件是始终依赖tips的吗？(遗迹阶段事件模块)
                     local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(context) -- 加载事件列表的tips函数
                     last_tips_cache[warningevent_child] = last_tips_cache[warningevent_child] or false
                     if need_tips and not last_tips_cache[warningevent_child] then
@@ -241,36 +245,46 @@ local function AddWarningEvents(self)
                 end
 
                 -- 更新面板数据
-                -- TODO: 优化性能
-                local datatext = eventsdata[warningevent][shard_id].text or ""
-                local datatime = eventsdata[warningevent][shard_id].time or 0
-                local tmp_data = setmetatable(
-                    {
-                        name = warningevent, -- 事件名称
-                        context = context
-                    },
-                    {
-                        __index = function(t, k)
-                            return context[k] or WarningEvents[warningevent][k]
-                        end,
-                        __newindex = function(t, k, v)
-                            if k == "text" then
-                                rawset(t, k, v)
-                            else
-                                rawset(WarningEvents[warningevent], k, v)
-                            end
-                        end
-                    }
-                )
-                if type(datatext) == "string" and datatext ~= "" then
-                    tmp_data.text = datatext
-                    Panel_data_list[#Panel_data_list + 1] = tmp_data
-                elseif type(datatime) == "number" and datatime > 0 then
-                    tmp_data.text = TimeToString(datatime)
-                    Panel_data_list[#Panel_data_list + 1] = tmp_data
+                local text = eventsdata[warningevent][shard_id].text or ""
+                local panel_text
+                if type(text) == "string" and text ~= "" then
+                    panel_text = text
+                elseif type(time) == "number" and time > 0 then
+                    panel_text = TimeToString(time)
+                end
+                if panel_text then
+                    local tmp_data = panel_data_cache[warningevent_child]
+                    if not tmp_data then
+                        tmp_data = setmetatable(
+                            {
+                                name = warningevent, -- 事件名称
+                                context = context
+                            },
+                            {
+                                __index = function(t, k)
+                                    return context[k] or WarningEvents[warningevent][k]
+                                end,
+                                __newindex = function(t, k, v)
+                                    if k == "text" then
+                                        rawset(t, k, v)
+                                    else
+                                        rawset(WarningEvents[warningevent], k, v)
+                                    end
+                                end
+                            }
+                        )
+                        panel_data_cache[warningevent_child] = tmp_data
+                    end
+                    tmp_data.text = panel_text
+                    panel_count = panel_count + 1
+                    Panel_data_list[panel_count] = tmp_data
                 end
 
             end
+        end
+        -- 原地更新列表，移除本轮不再显示的尾部条目，避免残留或重复。
+        for index = #Panel_data_list, panel_count + 1, -1 do
+            Panel_data_list[index] = nil
         end
     end
 end
