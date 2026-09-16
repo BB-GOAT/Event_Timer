@@ -1,7 +1,7 @@
 local info
 info = {
     gettimefn = function(self)
-        return GetWorldSettingsTimeLeft("mockfly_timetoattack") 
+        return GetWorldSettingsTimeLeft("mockfly_timetoattack")
     end,
     gettextfn = function(self, time)
         local description

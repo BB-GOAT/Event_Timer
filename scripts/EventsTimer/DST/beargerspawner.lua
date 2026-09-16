@@ -1,7 +1,7 @@
 local info
 info = {
     gettimefn = function(self)
-       return GetWorldSettingsTimeLeft("bearger_timetospawn", self)
+       return GetWorldSettingsTimeLeft("bearger_timetospawn")
     end,
     gettextfn = function(self, time)
         local description

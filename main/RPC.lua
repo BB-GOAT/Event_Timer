@@ -152,12 +152,12 @@ local cache_world_type = STRINGS.eventtimer.worldtype.unknown -- 默认：未知
 local valid_data = {}
 local function AddTimerDescriptor(self, warningevent, data)
     if valid_data[warningevent] then
-        print('警告：检测到重复AddTimerDescriptor', warningevent)
+        MOD_util:Warning('检测到重复AddTimerDescriptor : ' .. warningevent)
         return -- 重复注册？返回
     end
 
     local inst = self.inst or self
-    inst:DoPeriodicTask(UpdateTime, function()
+    inst:DoPeriodicTask(UpdateTime, function() -- 虽然按组件单独DoPeriodicTask，但实际上依旧被分布在同一帧，因为等游戏加载完了才统一开始
         -- 初始化数据重复次数表
         if not ShardId then return end
         if not valid_data[warningevent] then
@@ -169,13 +169,12 @@ local function AddTimerDescriptor(self, warningevent, data)
                 text_sametick = 0,
                 text_valid = false,
             }
-
-            -- 同时在warningtimer表中初始化数据
+        end
+        if not warningtimer[warningevent] then
             warningtimer[warningevent] = {
                 [ShardId] = {}
             }
         end
-
         local time
         if data.gettimefn then
             time = data.gettimefn(self)
@@ -254,25 +253,20 @@ local TimerPrefabList = {
     ["pugalisk_fountain"] = true, -- 云霄国度：不老泉
 }
 
----
-AddPrefabPostInit("terrarium",function(self)
-    if not GLOBAL.TheWorld.ismastersim then
-        return
-    end
-    self:DoPeriodicTask(1, function()
-        print('测试一下看看')
-    end)
-end)
----
-
 if GLOBAL.TheNet:GetIsServer() then
     for warningevent, data in pairs(GLOBAL.WarningEvents) do
         if TimerPrefabList[warningevent] then
             AddPrefabPostInit(warningevent, function(self)
                 AddTimerDescriptor(self, warningevent, data)
-                -- self:ListenForEvent("onremove", function()
-                    -- valid_data[warningevent] = nil
-                -- end)
+                self:ListenForEvent("onremove", function()
+                    MOD_util:Warning(warningevent .. "事件依赖的组件已被移除")
+                    valid_data[warningevent] = nil
+                    warningtimer[warningevent][ShardId] = {}
+                    SyncEventData(warningevent, 0, "event_timerpc", ShardId)
+                    SyncEventData(warningevent, "", "event_textrpc", ShardId)
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
+                end)
             end)
         else
             AddComponentPostInit(warningevent, function(self)

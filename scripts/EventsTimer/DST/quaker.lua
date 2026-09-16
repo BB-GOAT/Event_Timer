@@ -12,7 +12,7 @@ info = {
         end)
     end,
     gettimefn = function(self)
-        local _task = debug.getupvalue(pre_fn, up_i)
+        local name, _task = debug.getupvalue(pre_fn, up_i)
         if _task and GetTaskRemaining(_task) then
             return GetTaskRemaining(_task)
         end

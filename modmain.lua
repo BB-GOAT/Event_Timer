@@ -1,9 +1,9 @@
 -- 以防万一
 GLOBAL.setmetatable(env, {
     __index = function(t, k)
-        -- local info = GLOBAL.debug.getinfo(2)
-        -- if not info.source:find(modname) then return end
-        -- print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
+        local info = GLOBAL.debug.getinfo(2)
+        if not info.source:find(modname) then return end
+        print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
         return GLOBAL.rawget(GLOBAL, k)
     end
 })

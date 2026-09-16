@@ -1,7 +1,7 @@
 local info
 info = {
     gettimefn = function(self)
-        return GetWorldSettingsTimeLeft("deerclops_timetoattack", self)
+        return GetWorldSettingsTimeLeft("deerclops_timetoattack")
     end,
     gettextfn = function(self, time)
         local description
