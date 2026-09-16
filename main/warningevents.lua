@@ -22,15 +22,14 @@ GameEvents = {
     beequeenhive = RequireEvent("DST/beequeenhive"),
     terrarium = RequireEvent("DST/terrarium"),
     malbatrossspawner = RequireEvent("DST/malbatrossspawner"),
-    crabkingspawner = RequireEvent("DST/crabkingspawner"),
-    moon = RequireEvent("DST/moon"),
+    crabking_spawner = RequireEvent("DST/crabking_spawner"),
+    clock = RequireEvent("DST/clock"), -- moon 月相
     farming_manager = RequireEvent("DST/farming_manager"),
     piratespawner = RequireEvent("DST/piratespawner"),
     forestdaywalkerspawner = RequireEvent("DST/forestdaywalkerspawner"),
     messagebottlemanager = RequireEvent("DST/messagebottlemanager"),
     lunarthrall_plantspawner = RequireEvent("DST/lunarthrall_plantspawner"),
-    lunar_riftspawner = RequireEvent("DST/lunar_riftspawner"),
-    shadow_riftspawner = RequireEvent("DST/shadow_riftspawner"),
+    riftspawner = RequireEvent("DST/riftspawner"),
     rift_portal = RequireEvent("DST/rift_portal"),
     walrus_camp = RequireEvent("DST/walrus_camp"),
 
@@ -80,8 +79,7 @@ or Ismodloaded("workshop-3322803908") and
     pugalisk_fountain = RequireEvent("AboveTheClouds/pugalisk_fountain"),
     banditmanager = RequireEvent("AboveTheClouds/banditmanager"),
     aporkalypse = RequireEvent("AboveTheClouds/aporkalypse"),
-    aporkalypse_attack = select(2, RequireEvent("AboveTheClouds/aporkalypse")),
-    batted = select(3, RequireEvent("AboveTheClouds/aporkalypse")),
+    batted = select(2, RequireEvent("AboveTheClouds/aporkalypse")),
     rocmanager = RequireEvent("AboveTheClouds/rocmanager"),
 } or {}
 

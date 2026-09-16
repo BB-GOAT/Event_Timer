@@ -10,8 +10,7 @@ info = {
             end
         end)
     end,
-    gettimefn = function()
-        local self = TheWorld.components.forestdaywalkerspawner
+    gettimefn = function(self)
         if not self then return end
         local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
         if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "forestjunkpile" or self.daywalker ~= nil or self.bigjunk ~= nil or not self.days_to_spawn or not CalcTimeOfDay then
@@ -19,9 +18,7 @@ info = {
         end
         return (self.days_to_spawn + 1) * TUNING.TOTAL_DAY_TIME - CalcTimeOfDay()
     end,
-    gettextfn = function()
-        local self = TheWorld.components.forestdaywalkerspawner
-        if not self then return end
+    gettextfn = function(self, time)
         if self.bigjunk ~= nil then
             return ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)
         elseif self.daywalker ~= nil then

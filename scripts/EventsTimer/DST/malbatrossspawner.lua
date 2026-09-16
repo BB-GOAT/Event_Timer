@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("malbatross_timetospawn"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("malbatross_timetospawn")
+    end,
     anim = {
         scale = 0.035,
         bank = "malbatross",

@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("bearger_timetospawn"),
-    gettextfn = function(time)
-        local self = TheWorld.components.beargerspawner
-        if not self then return end
+    gettimefn = function(self)
+       return GetWorldSettingsTimeLeft("bearger_timetospawn", self)
+    end,
+    gettextfn = function(self, time)
         local description
         local target = Upvaluehelper.GetUpvalue(self.OnUpdate, "_targetplayer")
         if time and target and target.name then

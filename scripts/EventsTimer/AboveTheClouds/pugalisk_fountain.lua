@@ -1,8 +1,7 @@
 local info
 info = {
-    gettimefn = function()
-        local self = TimerPrefabs["pugalisk_fountain"]
-        return self and self.resettaskinfo and self:TimeRemainingInTask(self.resettaskinfo)
+    gettimefn = function(self)
+        return self.TimeRemainingInTask and self.resettaskinfo and self:TimeRemainingInTask(self.resettaskinfo)
     end,
     image = {
         atlas = "images/lifeplant.xml",

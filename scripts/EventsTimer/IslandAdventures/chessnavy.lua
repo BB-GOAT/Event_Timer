@@ -1,12 +1,9 @@
 local info
 info = {
-    gettimefn = function()
-        if TheWorld.components.chessnavy then
-            return TheWorld.components.chessnavy.spawn_timer
-        end
+    gettimefn = function(self)
+        return self.spawn_timer
     end,
-    gettextfn = function(time)
-        if not TheWorld.components.chessnavy then return end
+    gettextfn = function(self, time)
         return time and time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.chessnavy.cooldown), TimeToString(time)) or STRINGS.eventtimer.chessnavy.readytext
     end,
     anim = {

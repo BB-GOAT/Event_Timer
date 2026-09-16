@@ -51,9 +51,7 @@ end
 
 local info
 info = {
-    gettextfn = function()
-        local self = TheWorld.components.acidbatwavemanager
-        if not self then return end
+    gettextfn = function(self)
         local text_list = {}
         for _, player in pairs(AllPlayers) do
             if player and player:IsValid() and player.userid then

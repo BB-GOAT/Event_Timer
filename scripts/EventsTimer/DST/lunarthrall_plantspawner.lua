@@ -17,9 +17,7 @@ info = {
             end)
         end)
     end,
-    gettextfn = function()
-        local self = TheWorld.components.lunarthrall_plantspawner
-        if not self then return end
+    gettextfn = function(self)
         local count = #lunarthrall_plant_table
         if count == 0 and not self.waves_to_release then
             return

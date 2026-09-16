@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("cooldown", "terrarium"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("cooldown", self)
+    end,
     anim = {
         scale = 0.2,
         bank = "terrarium",

@@ -38,13 +38,13 @@ end
 ---@param data number|string 数据
 ---@param shardid number 世界ID
 function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
-    if WarningEvents[event].playerly then -- 单独处理playerly数据
+    if GLOBAL.WarningEvents[event].playerly then -- 单独处理playerly数据
         if GLOBAL.type(data) == "string" and data ~= "" then
             local textdata = GLOBAL.json.decode(data)
             if GLOBAL.type(textdata) == "table" then
                 for userid, text in pairs(textdata) do
                     if need_sync(userid_to_player(userid), event, text, type, shardid) then
-                        if WarningEvents[event].playerly_datatype == "time" then
+                        if GLOBAL.WarningEvents[event].playerly_datatype == "time" then
                             SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_timerpc"], userid, event, StringToTime(text), shardid)
                         else -- text
                             SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"]["event_textrpc"], userid, event, text, shardid)
@@ -131,6 +131,7 @@ AddClientModRPCHandler("EventTimer", "event_textrpc", function(event, text, shar
     ClientWarningTimer:OnWarningEventDirty(event, "text", shardid, text)
 end)
 
+-- 同步Shard数据
 AddClientModRPCHandler("EventTimer", "sync_world_data", function(data_type, data_1, data_2)
     if data_type == 'world_list' then
         world_list[data_1] = data_2
@@ -140,14 +141,25 @@ AddClientModRPCHandler("EventTimer", "sync_world_data", function(data_type, data
     end
 end)
 
+-- 更新事件anim或image
+AddClientModRPCHandler("EventTimer", "change_anim_or_image", function(warningevent, shard_id, anim_or_image, key, value)
+    ChangeAnimOrImage(warningevent, shard_id, anim_or_image, key, value)
+end)
+
 ---------------------------------------服务器更新逻辑---------------------------------------
 
 local cache_world_type = STRINGS.eventtimer.worldtype.unknown -- 默认：未知世界类型
 local valid_data = {}
-local function UpdateEventData()
-    for warningevent, data in pairs(GLOBAL.WarningEvents) do
+local function AddTimerDescriptor(self, warningevent, data)
+    if valid_data[warningevent] then
+        print('警告：检测到重复AddTimerDescriptor', warningevent)
+        return -- 重复注册？返回
+    end
 
+    local inst = self.inst or self
+    inst:DoPeriodicTask(UpdateTime, function()
         -- 初始化数据重复次数表
+        if not ShardId then return end
         if not valid_data[warningevent] then
             valid_data[warningevent] = {
                 time_last = 0, -- 上次记录的时间
@@ -166,7 +178,7 @@ local function UpdateEventData()
 
         local time
         if data.gettimefn then
-            time = data.gettimefn() -- TODO: 把对应世界组件传进去？ TheWorld.components[warningevent] or TheWorld.net.components[warningevent]
+            time = data.gettimefn(self)
             if time and time < 0 then time = 0 end -- 避免被负数影响
 
             -- 判断时间是否有变化
@@ -202,7 +214,7 @@ local function UpdateEventData()
             end
         end
         if data.gettextfn then
-            local text = data.gettextfn(time) -- TODO: 把对应世界组件传进去？
+            local text = data.gettextfn(self, time)
 
             -- 更新本世界数据
             warningtimer[warningevent][ShardId].text = text or ""
@@ -227,6 +239,45 @@ local function UpdateEventData()
                     SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, text)
                 end
             end
+        end
+    end)
+end
+
+local TimerPrefabList = {
+    ["dragonfly_spawner"] = true, -- 龙蝇
+    ["beequeenhive"] = true, -- 巨大的蜂窝
+    ["terrarium"] = true, -- 盒中泰拉
+    ["crabking_spawner"] = true, -- 帝王蟹
+    ["atrium_gate"] = true, -- 远古大门
+    ["lunarrift_portal"] = true, -- 月亮裂隙
+    ["shadowrift_portal"] = true, -- 暗影裂隙
+    ["pugalisk_fountain"] = true, -- 云霄国度：不老泉
+}
+
+---
+AddPrefabPostInit("terrarium",function(self)
+    if not GLOBAL.TheWorld.ismastersim then
+        return
+    end
+    self:DoPeriodicTask(1, function()
+        print('测试一下看看')
+    end)
+end)
+---
+
+if GLOBAL.TheNet:GetIsServer() then
+    for warningevent, data in pairs(GLOBAL.WarningEvents) do
+        if TimerPrefabList[warningevent] then
+            AddPrefabPostInit(warningevent, function(self)
+                AddTimerDescriptor(self, warningevent, data)
+                -- self:ListenForEvent("onremove", function()
+                    -- valid_data[warningevent] = nil
+                -- end)
+            end)
+        else
+            AddComponentPostInit(warningevent, function(self)
+                AddTimerDescriptor(self, warningevent, data)
+            end)
         end
     end
 end
@@ -409,7 +460,6 @@ AddPrefabPostInit("world", function(self)
     world_list[ShardId] = cache_world_type
 
     GLOBAL.EventTimer.EventTimerData = warningtimer -- 方便从其它地方获取事件数据
-    self:DoPeriodicTask(UpdateTime, UpdateEventData) -- 更新各事件数据
 end)
 
 -- 服务器世界互联时同步世界类型

@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("klaussack_tropical_spawntimer"),
-    gettextfn = function(time)
-        local self = TheWorld.components.islandsklaussackspawner
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("klaussack_tropical_spawntimer")
+    end,
+    gettextfn = function(self, time)
         local function sack_can_despawn(inst)
             if not IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) and
                 inst.components.entitytracker:GetEntity("klaus") == nil and

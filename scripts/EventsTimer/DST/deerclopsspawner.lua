@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("deerclops_timetoattack"),
-    gettextfn = function(time)
-        local self = TheWorld.components.deerclopsspawner
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("deerclops_timetoattack", self)
+    end,
+    gettextfn = function(self, time)
         local description
         local target = Upvaluehelper.GetUpvalue(self.OnUpdate, "_targetplayer")
         if time and target and target.name then

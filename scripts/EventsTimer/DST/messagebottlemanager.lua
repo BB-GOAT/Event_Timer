@@ -2,9 +2,7 @@
 
 local info
 info = {
-    gettextfn = function()
-        local self = TheWorld.components.messagebottlemanager
-        if not self then return end
+    gettextfn = function(self)
         local count = 0
         for _ in pairs(self.active_treasure_hunt_markers) do
             count = count + 1

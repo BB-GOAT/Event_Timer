@@ -106,6 +106,7 @@ STRINGS.eventtimer = {
     riftspawner = {
         lunar_cooldown = "Lunar Rifts will spawn in %s",
         shadow_cooldown = "Shadow Rifts will spawn in %s",
+        cooldown = "A <prefab=lunarrift_portal> will spawn in %s",
         stage = "Stage: %s / %s",
     },
 	lunarthrall_plantspawner = {

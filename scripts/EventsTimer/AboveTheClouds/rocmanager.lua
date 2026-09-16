@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("ROC_RESPAWN_TIMER"),
-    gettextfn = function(time)
-        local self = TheWorld.components.rocmanager
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("ROC_RESPAWN_TIMER")
+    end,
+    gettextfn = function(self, time)
         local data = self:OnSave()
         if data.roc then
             return ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)

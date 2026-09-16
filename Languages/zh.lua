@@ -106,6 +106,7 @@ STRINGS.eventtimer = {
     riftspawner = { -- 裂隙生成倒计时
         lunar_cooldown = "月亮裂隙将生成于%s后",
         shadow_cooldown = "暗影裂隙将生成于%s后",
+        cooldown = "一个<prefab=lunarrift_portal>将生成于%s后",
         stage = "阶段: %s / %s",
     },
 	lunarthrall_plantspawner = { -- 致命亮茄

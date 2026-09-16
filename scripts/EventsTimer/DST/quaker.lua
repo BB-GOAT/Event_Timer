@@ -1,11 +1,18 @@
 -- 洞穴地震
 
+local up_i, pre_fn
 local info
 info = {
-    gettimefn = function()
-        local self = TheWorld.net.components.quaker
-        if not self then return end
-        local _task = Upvaluehelper.GetUpvalue(self.GetDebugString, "_task")
+    postinitfn = function()
+        if not TheNet:GetIsServer() then return end
+        AddComponentPostInit("quaker", function(self)
+            local _, i, prefn = Upvaluehelper.GetUpvalue(self.GetDebugString, "_task")
+            up_i = i
+            pre_fn = prefn
+        end)
+    end,
+    gettimefn = function(self)
+        local _task = debug.getupvalue(pre_fn, up_i)
         if _task and GetTaskRemaining(_task) then
             return GetTaskRemaining(_task)
         end

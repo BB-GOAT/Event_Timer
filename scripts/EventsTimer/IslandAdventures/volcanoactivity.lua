@@ -27,9 +27,7 @@ info = {
             end)
         end
     end,
-    gettimefn = function()
-        local self = TheWorld.net.components.volcanoactivity
-        if not self then return end
+    gettimefn = function(self)
         if not _eruption then return end
 
         local remaining_time
@@ -41,7 +39,7 @@ info = {
 
         return remaining_time
     end,
-    gettextfn = function(remaining_time)
+    gettextfn = function(self, remaining_time)
         return remaining_time and remaining_time > 0 and
             string.format(
                 STRINGS.eventtimer.volcanoactivity.eruption,

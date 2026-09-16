@@ -19,10 +19,7 @@ info = {
             MAX_CRYSTAL_DISTANCE_BY_STAGE = Upvaluehelper.GetUpvalue(_G.Prefabs.lunarrift_portal.fn, "MAX_CRYSTAL_DISTANCE_BY_STAGE") -- TUNING.RIFT_LUNAR1_STAGEUP_BASE_TIME / 3
         end)
     end,
-    gettextfn = function()
-        local inst = TimerPrefabs["lunarrift_portal"]
-        if not inst then return end
-
+    gettextfn = function(inst)
         -- 裂隙阶段信息
         local stage_info = string.format(STRINGS.eventtimer.riftspawner.stage, inst._stage, TUNING.RIFT_LUNAR1_MAXSTAGE) -- 阶段信息，内容类似：阶段 1 / 3
         if inst.components.timer and inst.components.timer:TimerExists(STAGE_GROWTH_TIMER) and not (inst._stage == TUNING.RIFT_LUNAR1_MAXSTAGE) then

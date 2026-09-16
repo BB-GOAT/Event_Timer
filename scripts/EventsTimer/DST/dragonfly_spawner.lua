@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("regen_dragonfly", "dragonfly_spawner"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("regen_dragonfly", self)
+    end,
     animchangefn = ChangeanimByWintersFeast,
     defaultanim = {
         scale = 0.044,
@@ -13,7 +15,6 @@ info = {
             y = -4,
         },
     },
-
     winterfeastanim = {
         scale = 0.044,
         bank = "dragonfly",

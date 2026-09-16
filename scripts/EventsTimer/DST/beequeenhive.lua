@@ -1,8 +1,7 @@
 local stagetimne = TUNING.BEEQUEEN_RESPAWN_TIME / 3
 local info
 info = {
-    gettimefn = function()
-        local beequeenhive = TimerPrefabs["beequeenhive"]
+    gettimefn = function(beequeenhive)
         if not beequeenhive or not beequeenhive:IsValid() then
             return
         end

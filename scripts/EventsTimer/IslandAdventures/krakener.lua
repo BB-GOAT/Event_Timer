@@ -1,18 +1,15 @@
 local info
 info = {
-    gettimefn = function()
-        if TheWorld.components.krakener then
-            return TheWorld.components.krakener:TimeUntilCanSpawn()
-        end
+    gettimefn = function(self)
+        return self.TimeUntilCanSpawn and self:TimeUntilCanSpawn()
     end,
-    gettextfn = function(time)
-        if not TheWorld.components.krakener then return end
+    gettextfn = function(self, time)
         if time and time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
         end
         return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
     end,
-    anim = {
+    anim = { -- TODO 冬季盛宴海妖
         scale = 0.027,
         bank = "quacken",
         build = "quacken",

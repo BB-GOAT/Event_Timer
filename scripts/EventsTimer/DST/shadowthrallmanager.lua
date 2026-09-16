@@ -14,10 +14,7 @@ local THRALL_NAMES = setmetatable({
 
 local info
 info = {
-    gettextfn = function()
-        local self = TheWorld.components.shadowthrallmanager
-        if not self then return end
-
+    gettextfn = function(self)
         local thrall_string -- 奴隶
         local fissure_string -- 裂隙
 

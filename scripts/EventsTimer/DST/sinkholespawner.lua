@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("rage", "antlion"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("rage", self.inst)
+    end,
     anim = {
         scale = 0.05,
         bank = "antlion",

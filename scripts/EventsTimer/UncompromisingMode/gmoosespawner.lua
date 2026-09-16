@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("mothergoose_timetoattack"),
-    gettextfn = function(time)
-        local self = TheWorld.components.gmoosespawner
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("mothergoose_timetoattack")
+    end,
+    gettextfn = function(self, time)
         local description
         local target = Upvaluehelper.GetUpvalue(self.OnUpdate, "_targetplayer")
         if time and target and target.name then

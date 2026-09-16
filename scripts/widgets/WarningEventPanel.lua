@@ -158,7 +158,7 @@ local WarningEventHUD = Class(Widget, function(self, owner)
 
             if data.time and data.time > 0 then
                 local warningevent_child = data.name .. "_" .. data.shard_id
-                if not ThePlayer.HUD[warningevent_child] then
+                if not (ThePlayer and ThePlayer.HUD[warningevent_child]) then
                     return
                 end
 

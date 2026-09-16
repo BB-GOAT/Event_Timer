@@ -2,6 +2,7 @@
 GLOBAL.setmetatable(env, {
     __index = function(t, k)
         -- local info = GLOBAL.debug.getinfo(2)
+        -- if not info.source:find(modname) then return end
         -- print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
         return GLOBAL.rawget(GLOBAL, k)
     end
@@ -85,7 +86,6 @@ else
 end
 
 modimport("Languages/" .. ModLanguage) -- 加载模组字符串
-modimport("main/timerprefab")
 
 ----------------------------------------加载模组工具---------------------------------------
 
@@ -222,26 +222,48 @@ end
 
 -- 添加世界前缀标识，不被玩家的模组设置影响
 function MarkData(desc, context)
-    if desc and context.shard_id ~= EventTimer.CurrentShardId then
+    if desc and context.shard_id ~= GLOBAL.EventTimer.CurrentShardId then
         return string.format(STRINGS.eventtimer.worldid, context.shard_id) .. "(" .. context.world_str .. ") : " .. desc
     end
     return desc
+end
+
+-- 更新指定事件的动画/贴图
+---@param warningevent string 事件名
+---@param shard_id number 世界ID
+---@param anim_or_image "anim"|"image"
+---@param key string
+---@param value string|nil
+function ChangeAnimOrImage(warningevent, shard_id, anim_or_image, key, value)
+    if not (warningevent and shard_id and anim_or_image and key) then return end
+    local warningevent_child = warningevent .. "_" .. shard_id
+    local ThePlayer = GLOBAL.ThePlayer
+    local child = ThePlayer and ThePlayer.HUD and ThePlayer.HUD[warningevent_child]
+    if child then
+        local data = WarningEvents[warningevent]
+        if not value then
+            data[anim_or_image] = data[key]
+        else
+            data[anim_or_image][key] = value
+        end
+
+        if anim_or_image == "anim" then
+            child:SetEventAnim(data[anim_or_image])
+        elseif anim_or_image == "image" then
+            child:SetEventImage(data[anim_or_image])
+        end
+    end
 end
 
 ----------------------------------------事件计时需要用到的函数---------------------------------------
 
 -- 从worldsettingstimer或TimerPrefabs获取倒计时
 local function GetWorldSettingsTimeLeft(name, prefab)
-    return function()
-        local ent = GLOBAL.TheWorld
-        if prefab then
-            ent = GLOBAL.TimerPrefabs[prefab]
-        end
-        if ent and ent.components.worldsettingstimer then
-            if not ent.components.worldsettingstimer:IsPaused(name) then
-                local time = ent.components.worldsettingstimer:GetTimeLeft(name)
-                return time
-            end
+    local ent = prefab or GLOBAL.TheWorld
+    if ent and ent.components.worldsettingstimer then
+        if not ent.components.worldsettingstimer:IsPaused(name) then
+            local time = ent.components.worldsettingstimer:GetTimeLeft(name)
+            return time
         end
     end
 end
@@ -263,7 +285,7 @@ local function CombineLines(...)
 end
 
 -- 根据冬季盛宴活动决定anim
-local function ChangeanimByWintersFeast(self)
+local function ChangeanimByWintersFeast(self, context)
     if GLOBAL.IsSpecialEventActive(GLOBAL.SPECIAL_EVENTS.WINTERS_FEAST) then
         self.anim = self.winterfeastanim
     else
@@ -272,10 +294,12 @@ local function ChangeanimByWintersFeast(self)
 end
 
 -- 根据世界类型决定image
-local function ChangeimageByWorld(self)
-    local worldtype = GetWorldtypeStr()
+local function ChangeimageByWorld(self, context)
+    local worldtype = context.world_type
     if worldtype == "porkland" then
         self.image = self.porklandimage
+    elseif worldtype == "volcano" then
+        self.image = self.volcanoimage or self.islandimage
     elseif worldtype == "shipwrecked" then
         self.image = self.islandimage
     elseif worldtype == "cave" then
@@ -286,10 +310,12 @@ local function ChangeimageByWorld(self)
 end
 
 -- 根据世界类型决定anim
-local function ChangeanimByWorld(self)
-    local worldtype = GetWorldtypeStr()
+local function ChangeanimByWorld(self, context)
+    local worldtype = context.world_type
     if worldtype == "porkland" then
         self.anim = self.porklandanim
+    elseif worldtype == "volcano" then
+        self.anim = self.volcanoanim or self.islandanim
     elseif worldtype == "shipwrecked" then
         self.anim = self.islandanim
     elseif worldtype == "cave" then
@@ -334,7 +360,6 @@ local file_env = {
     AddComponentPostInit = AddComponentPostInit,
     ---
     GetWorldSettingsTimeLeft = GetWorldSettingsTimeLeft, -- 从worldsettingstimer或TimerPrefabs获取倒计时
-    TimerPrefabs = GLOBAL.TimerPrefabs,
     CombineLines = CombineLines, -- 合并字符串
     ---
     ChangeanimByWintersFeast = ChangeanimByWintersFeast, -- 根据冬季盛宴活动决定anim
@@ -344,6 +369,7 @@ local file_env = {
     JustEntered = JustEntered, -- 如果event_time > 0，在刚进入游戏的10秒内返回true
     ready_attack = ready_attack, -- 当time在0~2秒时返回true
     MarkData = MarkData, -- 标记数据来源
+    ChangeAnimOrImage = ChangeAnimOrImage, -- 更新指定事件的动画/贴图
 }
 if GLOBAL.TheNet:GetIsServer() then
     AddComponentPostInit("clock", function(self)

@@ -213,25 +213,6 @@ local function AddWarningEvents(self)
                                 self[warningevent_child]:SetEventImage(data.image)
                             end
 
-                            -- 梦到啥写啥，以后可能也许大概还会改，看有没有新需求了
-                            if data.animchangetaskfn and not data.animchangetask then
-                                local interval, fn = data.animchangetaskfn()
-                                if TheWorld then
-                                    data.animchangetask = TheWorld:DoTaskInTime(interval, function()
-                                        fn(data, context)
-                                        self[warningevent_child]:SetEventAnim(data.anim)
-                                    end)
-                                end
-                            elseif data.imagechangetaskfn and not data.imagechangetask then
-                                local interval, fn = data.imagechangetaskfn()
-                                if TheWorld then
-                                    data.imagechangetask = TheWorld:DoTaskInTime(interval, function()
-                                        fn(data, context)
-                                        self[warningevent_child]:SetEventImage(data.image)
-                                    end)
-                                end
-                            end
-
                             self[warningevent_child]:Show()
                         end
                         -- self[warningevent_child].last_time = time
@@ -242,7 +223,7 @@ local function AddWarningEvents(self)
                     end
                 end
 
-                if data.tipsfn and game_ready then
+                if data.tipsfn and game_ready then -- TODO: EventTimer.TimerTips 是不是应该在这里判断？有什么事件是始终依赖tips的吗？
                     local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(context) -- 加载事件列表的tips函数
                     last_tips_cache[warningevent_child] = last_tips_cache[warningevent_child] or false
                     if need_tips and not last_tips_cache[warningevent_child] then
@@ -398,6 +379,7 @@ AddClassPostConstruct("screens/redux/pausescreen", function(self)
 
     EventUIButton:SetClickable(true)
     EventUIButton.onclick = function()
+        if not ThePlayer then return end
         self:unpause()
         ThePlayer.HUD.EventTimerButton:ToggleEventTimerUI()
     end

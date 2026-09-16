@@ -12,7 +12,7 @@ info = {
             end
         end)
     end,
-    gettextfn = function()
+    gettextfn = function(self)
         if not _guaranteed_spawn_tasks then return end
         local time_list = {}
         for _, player in pairs(AllPlayers) do

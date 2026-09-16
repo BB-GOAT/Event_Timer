@@ -10,18 +10,14 @@ info = {
             end
         end)
     end,
-    gettimefn = function()
-        local self = TheWorld.components.daywalkerspawner
-        if not self then return end
+    gettimefn = function(self)
         local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
         if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "cavejail" or self.daywalker ~= nil or not self.days_to_spawn or not CalcTimeOfDay then
             return
         end
         return (self.days_to_spawn + 1) * TUNING.TOTAL_DAY_TIME - CalcTimeOfDay()
     end,
-    gettextfn = function()
-        local self = TheWorld.components.daywalkerspawner
-        if not self then return end
+    gettextfn = function(self, time)
         if self.daywalker ~= nil then
             return ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.ready)
         end

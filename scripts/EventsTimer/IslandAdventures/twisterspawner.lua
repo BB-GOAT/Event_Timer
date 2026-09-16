@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("twister_timetoattack"),
-    gettextfn = function(time)
-        local self = TheWorld.components.twisterspawner
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("twister_timetoattack")
+    end,
+    gettextfn = function(self, time)
         local description
         local target = Upvaluehelper.GetUpvalue(self.OnUpdate, "_targetplayer")
         if time and target and target.name then
@@ -11,7 +11,6 @@ info = {
         elseif time then
             description = string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(time))
         end
-
         return description
     end,
     image = {

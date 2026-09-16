@@ -1,18 +1,15 @@
 local info
 info = {
-    gettimefn = function()
-        local self = TheWorld.components.tigersharker
-        if not self then return end
+    gettimefn = function(self)
+        if not self.TimeUntilCanAppear and self.TimeUntilRespawn then return end
         local appear_time = self:TimeUntilCanAppear()
         local respawn_time = self:TimeUntilRespawn()
         return math.max(appear_time, respawn_time)
     end,
-    gettextfn = function(time)
-        local self = TheWorld.components.tigersharker
-        if not self then return end
+    gettextfn = function(self, time)
         if self.shark then
             return ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
-        elseif self:CanSpawn(true, true) then
+        elseif self.CanSpawn and self:CanSpawn(true, true) then
             if time and time > 0 then
                 return string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time))
             else

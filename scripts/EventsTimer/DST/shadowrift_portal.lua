@@ -5,11 +5,8 @@ local RIFT_CLOSE_TIMER = "close"
 
 local info
 info = {
-    gettimefn = nil, -- gettimefn有必要吗？也许没必要
-    gettextfn = function()
-        local inst = TimerPrefabs["shadowrift_portal"]
-        if not inst then return end
-
+    gettimefn = nil, -- gettimefn有必要吗？也许没必要，月亮裂隙也没有。位置留给裂隙生成倒计时
+    gettextfn = function(inst)
         local stage_info = string.format(ReplacePrefabName(STRINGS.eventtimer.riftspawner.stage), inst._stage, TUNING.RIFT_SHADOW1_MAXSTAGE)
         local rift_close_time
 

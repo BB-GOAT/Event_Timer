@@ -1,8 +1,9 @@
 -- 月相状态，参考了 饥饥事件计时器 的代码 https://steamcommunity.com/sharedfiles/filedetails/?id=3511498282 @不要看上我的菊
 
 local second_world_moonphase -- 当前月相阶段(从世界使用)
-
-
+local MOON_PHASE_CYCLES
+local _mooniswaxing
+local _mooomphasecycle
 
 local info
 info = {
@@ -30,15 +31,9 @@ info = {
                 end
             end
         end)
-    end,
-    gettextfn = function()
-        if TheWorld.ismastershard then -- 主世界
-            local self = TheWorld.net.components.clock
-            if not self then return end
-            local MOON_PHASE_CYCLES
-            local _mooniswaxing
-            local _mooomphasecycle
 
+        AddComponentPostInit("clock", function(self)
+            if not TheNet:GetIsServer() then return end
             if TheWorld:HasTag("forest") or TheWorld:HasTag("cave") then
                 MOON_PHASE_CYCLES = Upvaluehelper.FindUpvalue(self.OnLoad, "MOON_PHASE_CYCLES", "scripts/components/clock.lua")
                 _mooniswaxing = Upvaluehelper.FindUpvalue(self.OnLoad, "_mooniswaxing", "scripts/components/clock.lua")
@@ -48,7 +43,10 @@ info = {
                 _mooniswaxing = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooniswaxing")
                 _mooomphasecycle = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooomphasecycle")
             end
-
+        end)
+    end,
+    gettextfn = function(self)
+        if TheWorld.ismastershard then -- 主世界
             if not (MOON_PHASE_CYCLES and _mooniswaxing and _mooomphasecycle) then
                 return
             end

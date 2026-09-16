@@ -2,13 +2,13 @@
 
 local info
 info = {
-    gettimefn = function()
-        if not (TimerPrefabs.atrium_gate and TimerPrefabs.atrium_gate.components.worldsettingstimer) then return end
-        return GetWorldSettingsTimeLeft("cooldown", "atrium_gate")() or GetWorldSettingsTimeLeft("destabilizing", "atrium_gate")()
+    gettimefn = function(self)
+        if not (self and self.components.worldsettingstimer) then return end
+        return GetWorldSettingsTimeLeft("cooldown", self) or GetWorldSettingsTimeLeft("destabilizing", self)
     end,
-    gettextfn = function(time)
+    gettextfn = function(self, time)
         if time and time > 0 then
-            if GetWorldSettingsTimeLeft("cooldown", "atrium_gate")() then
+            if GetWorldSettingsTimeLeft("cooldown", self) then
                 return string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(time))
             else
                 return string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(time))

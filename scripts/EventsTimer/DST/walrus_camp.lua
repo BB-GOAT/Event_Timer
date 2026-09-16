@@ -18,7 +18,7 @@ local function GetSeparator(i)
     end
 end
 
-local get_text_fn = function()
+local get_text_fn = function(self)
     local lines = {}
     for i, info in ipairs(walrus_house_list) do
         local inst = info.ent

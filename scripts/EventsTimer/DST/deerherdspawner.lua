@@ -1,10 +1,8 @@
 local info
 info = {
-    gettimefn = function()
-        if TheWorld.components.deerherdspawner then
-            local data = TheWorld.components.deerherdspawner:OnSave()
-            return data and data._timetospawn
-        end
+    gettimefn = function(self)
+        local data = self:OnSave()
+        return data and data._timetospawn
     end,
     anim = {
         scale = 0.088,

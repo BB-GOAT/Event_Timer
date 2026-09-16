@@ -58,17 +58,12 @@ info = {
             is_cave_world = TheWorld:HasTag("cave") -- 为了兼容【深埋之下】，不能直接清空gettextfn，否则对方给森林世界弄的gettextfn会被删除
         end)
     end,
-    gettimefn = function()
-        local self = TheWorld.components.hounded
-        if not self then return end
-
+    gettimefn = function(self)
         local data = self:OnSave()
         return data and data.timetoattack
     end,
-    gettextfn = function(time)
+    gettextfn = function(self, time)
         if not is_cave_world or not time then return end
-        local self = TheWorld.components.hounded
-        if not self then return end
 
         local next_wave_is_wormboss = Upvaluehelper.GetUpvalue(self.DoWarningSpeech, "_wave_pre_upgraded")
         local _wave_override_chance = self:OnSave().wave_override_chance

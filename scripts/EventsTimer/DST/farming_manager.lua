@@ -13,8 +13,10 @@ info = {
             end)
         end)
     end,
-    gettimefn = GetWorldSettingsTimeLeft("lordfruitfly_spawntime"),
-    gettextfn = function()
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("lordfruitfly_spawntime")
+    end,
+    gettextfn = function(self, time)
         if lordfruitfly_spawned then
             return ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
         end

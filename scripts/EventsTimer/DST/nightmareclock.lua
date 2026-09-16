@@ -7,27 +7,31 @@ local STATES = {
     lock = "wild_lock", -- 锁定暴动阶段
 }
 
-local function NightmareWildAnimChange()
-    local fn = function(self, context)
-        local text = context.text
-        if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
-            self.anim.animation = STATES.wild -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
-        else
-            self.anim.animation = STATES[TheWorld.state.nightmarephase]
-        end
+local sync_task
+local function NightmareWildAnimChange(context)
+    local text = context.text
+    if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
+        ChangeAnimOrImage("nightmareclock", context.shard_id, "anim", "animation", STATES.wild) -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
+    else
+        ChangeAnimOrImage("nightmareclock", context.shard_id, "anim", "animation", STATES[TheWorld.state.nightmarephase])
     end
-    return 1, fn
+    sync_task = nil
+end
+
+local CreateSyncAnimTask = function(context)
+    local time = context.time
+    if not sync_task then
+        if not checknumber(time) or not TheWorld then return end -- 事情为什么会变成这样呢
+        sync_task = TheWorld:DoTaskInTime(time, function()
+            NightmareWildAnimChange(context)
+        end)
+    end
 end
 
 local info
 info = {
-    gettimefn = function() -- 仅返回倒计时
-        local nightmareclock = TheWorld.net.components.nightmareclock
-        if not nightmareclock then
-            return
-        end
-
-        local data = nightmareclock:OnSave()
+    gettimefn = function(self) -- 仅返回倒计时
+        local data = self:OnSave()
         local locked = data.lockedphase
         local remainingtimeinphase = data.remainingtimeinphase
 
@@ -35,13 +39,8 @@ info = {
 
         return remainingtimeinphase
     end,
-    gettextfn = function() -- 仅锁定阶段返回
-        local nightmareclock = TheWorld.net.components.nightmareclock
-        if not nightmareclock then
-            return
-        end
-
-        local data = nightmareclock:OnSave()
+    gettextfn = function(self, time) -- 仅锁定阶段返回
+        local data = self:OnSave()
         return data.lockedphase and STRINGS.eventtimer.nightmareclock.phase_locked_text
     end,
     anim = {
@@ -58,7 +57,6 @@ info = {
             y = 15,
         },
     },
-    animchangetaskfn = NightmareWildAnimChange,
     DisableShardRPC = true,
     announcefn = function(context)
         local time = context.time
@@ -72,6 +70,10 @@ info = {
             local phase = STRINGS.eventtimer.nightmareclock.phases[TheWorld.state.nightmarephase]
             return time and phase and string.format(STRINGS.eventtimer.nightmareclock.cooldown, phase, TimeToString(time))
         end
+    end,
+    tipsfn = function(context) -- 邪修用法？？？
+        CreateSyncAnimTask(context) -- 为了context
+        return false
     end
 }
 

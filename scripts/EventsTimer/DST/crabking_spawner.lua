@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("regen_crabking", "crabking_spawner"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("regen_crabking", self)
+    end,
     anim = {
         scale = 0.022,
         bank = "king_crab",

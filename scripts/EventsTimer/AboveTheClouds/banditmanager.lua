@@ -1,9 +1,9 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("pig_bandit_respawn_time_"),
-    gettextfn = function(time)
-        local self = TheWorld.components.banditmanager
-        if not self then return end
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("pig_bandit_respawn_time_")
+    end,
+    gettextfn = function(self, time)
         local str = self:GetDebugString()
         local stolen_oincs, active_bandit = string.match(str, "Stolen Oincs: (%d+) Active Bandit: (%a+) Respawns In")
         if not (stolen_oincs and active_bandit) then return end

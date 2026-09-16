@@ -1,7 +1,7 @@
 -- 镀金骑士冷却倒计时
 local info
 info = {
-    gettextfn = function()
+    gettextfn = function(self)
         local time_list = {}
         for _, player in pairs(AllPlayers) do
             if player and player:IsValid() and player.userid then

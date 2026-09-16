@@ -1,6 +1,8 @@
 local info
 info = {
-    gettimefn = GetWorldSettingsTimeLeft("toadstool_respawntask"),
+    gettimefn = function(self)
+        return GetWorldSettingsTimeLeft("toadstool_respawntask")
+    end,
     anim = {
         scale = 0.03,
         bank = "toadstool",
