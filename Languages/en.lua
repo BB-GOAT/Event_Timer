@@ -230,7 +230,7 @@ STRINGS.eventtimer = {
     },
     banditmanager = {
         cooldown = "Try to spawn in: %s\n[Stolen Oincs: %s , Active Bandit: %s]",
-        announce_cooldown = "<prefab=pigbandit> will try to spawn in %s    Currently stolen Oincs: %s",
+        announce_cooldown = "<prefab=pigbandit> will try to spawn in %s , Currently stolen Oincs: %s",
         ready = "<prefab=pigbandit> is present. Currently stolen Oincs: %s",
         readytext = "<prefab=pigbandit> is present.\nCurrently stolen Oincs: %s",
         tips = "WARNING: <prefab=pigbandit> is present!",

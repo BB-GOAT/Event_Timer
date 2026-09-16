@@ -19,11 +19,6 @@ aporkalypse = {
     gettimefn = function()
         return Next_Aporkalypse_Time
     end,
-    gettextfn = function(time)
-        if time and time > 0 then
-            return string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time))
-        end
-    end,
     image = {
         atlas = "images/Aporkalypse_Clock.xml",
         tex = "Aporkalypse_Clock.tex",

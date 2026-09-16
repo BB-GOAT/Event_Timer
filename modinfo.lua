@@ -181,7 +181,7 @@ configuration_options = {
         name = "MarkDataSource",
         label = en_zh("Mark Data Source", "标记数据来源"),
         hover = en_zh(
-            "游玩多层世界服务器时不建议关闭此功能，开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新", -- TODO 英文翻译
+            "Shows the source world of other worlds' data.\nExample: World 2 (Caves) Nightmare Werepig has respawned",
             "游玩多层世界服务器时不建议关闭此功能，开启后其它世界的数据会在面板内显示来源\n例如：世界2(洞穴) 梦魇疯猪已刷新"
         ),
         options = toggle,

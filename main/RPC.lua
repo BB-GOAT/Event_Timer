@@ -1,5 +1,5 @@
-local SyncTimer = GetModConfigData("SyncTimer")
-local UpdateTime = GetModConfigData("UpdateTime")
+local SyncTimer = GLOBAL.EventTimer.SyncTimer
+local UpdateTime = GLOBAL.EventTimer.UpdateTime
 local unpack = GLOBAL.unpack
 local STRINGS = GLOBAL.STRINGS
 
@@ -256,7 +256,7 @@ local function Client_Init()
     local ReplacePrefabName = ReplacePrefabName
     local TimeToString = TimeToString
     local StringToTime = StringToTime
-    local TimerMode = GetModConfigData("BossTimer")
+    local TimerMode = GLOBAL.EventTimer.TimerMode
 
     local day_str = STRINGS.eventtimer.time.day
     local hour_str = STRINGS.eventtimer.time.hour
