@@ -86,6 +86,7 @@ info = {
         tex = "moon_new.tex",
     },
     DisableShardRPC = true,
+    DisableClientPrediction = true,
     announcefn = function(context)
         local text = context.text
         if text == "" then return end

@@ -19,6 +19,7 @@ info = {
         scale = 0.9,
     },
     -- DisableShardRPC = true, -- 其它世界有宝藏吗？没有！
+    DisableClientPrediction = true,
     announcefn = function(context)
         local text = context.text
         text = string.gsub(text, "\n", ": ")

@@ -328,6 +328,10 @@ local function Client_Init()
 
         eventstime[warningevent][shardid][type] = data
 
+        if GLOBAL.WarningEvents[warningevent].DisableClientPrediction then
+            return
+        end
+
         if GLOBAL.EventTimer.ClientPrediction then
             if client_prediction_tasks[warningevent] then
                 client_prediction_tasks[warningevent]:Cancel()
