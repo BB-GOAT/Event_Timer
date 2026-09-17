@@ -27,10 +27,10 @@ info = {
     playerly = true, -- 指明是针对单个玩家的事件
     playerly_datatype = "time", -- 每个玩家的数据类型
     announcefn = function(context)
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), context.text)
+        return string.format(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.announce), TimeToString(context.time))
     end,
     tipsfn = function(context)
-        local time = StringToTime(context.text)
+        local time = context.time
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.yoth_knightmanager.tips)), 10, time, 2
         end

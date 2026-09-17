@@ -171,14 +171,14 @@ STRINGS.eventtimer = {
 
     ----------------------------------------玩家----------------------------------------
 
-    flotsamgenerator = {
+    flotsamgenerator = { -- 瓶中信
         announce = "我的下一个<prefab=messagebottle>将于%s后尝试刷新",
     },
-    yoth_knightmanager = {
+    yoth_knightmanager = { -- 镀金骑士
         announce = "我的<prefab=knight_yoth>会重生于%s后",
         tips = "<prefab=knight_yoth>已准备就绪",
     },
-    acidbatwavemanager = {
+    acidbatwavemanager = { -- 硝石蝙蝠
         chance = "<prefab=bat>袭击概率: %.1f%% (预计: %.1f%%)",
         next_wave_spawn = "<prefab=bat>袭击(%s)于%s后",
         cooldown = "<prefab=bat>袭击冷却: %s",
@@ -227,32 +227,32 @@ STRINGS.eventtimer = {
     ----------------------------------------猪镇----------------------------------------
 
     pugalisk_fountain = { -- 不老泉
-        cooldown = "<prefab=waterdrop>会再生于%s后。",
+        cooldown = "<prefab=waterdrop>会再生于%s后",
         tips = "<prefab=waterdrop>已刷新！",
     },
     banditmanager = { -- 蒙面猪人
         cooldown = "尝试刷新于: %s后\n[被盗的呼噜币数量: %s，当前盗贼出没: %s]",
-        announce_cooldown = "<prefab=pigbandit>将于%s后尝试刷新。当前已盗走%s个呼噜币。",
+        announce_cooldown = "<prefab=pigbandit>将于%s后尝试刷新。当前已盗走%s个呼噜币",
         ready = "<prefab=pigbandit>正在出没。当前盗走的呼噜币数量: %s",
         readytext = "<prefab=pigbandit>正在出没。\n当前盗走的呼噜币数量: %s",
         tips = "警告：<prefab=pigbandit>正在出没！！！",
     },
     aporkalypse = { -- 大灾变
-        cooldown = "大灾变将在%s后到来。",
+        cooldown = "大灾变将在%s后到来",
         attack = "下一次<prefab=vampirebat>袭击: %s后\n下一次<prefab=ancient_herald>袭击: %s后",
         announce_attack = "下一次<prefab=vampirebat>袭击: %s后    下一次<prefab=ancient_herald>袭击: %s后",
         tips = "警告：大灾变将在%s后到来！！！",
         tips_ready = "血月降临！",
-        tips_attack = "警告：<prefab=ancient_herald>会在%s后生成。", -- 未使用
+        tips_attack = "警告：<prefab=ancient_herald>会在%s后生成", -- 未使用
         tips_attack_ready = "警告：<prefab=ancient_herald>攻击开始！！！", -- 未使用
     },
     batted = { -- 吸血蝙蝠
-        cooldown = "<prefab=vampirebat>会在%s后攻击。",
+        cooldown = "<prefab=vampirebat>会在%s后攻击",
         cooldowntext = "%s\n[数量: %s，下一只蝙蝠生成还需: %s]",
         attack = "警告：<prefab=vampirebat>攻击开始！！！",
     },
     rocmanager = { -- 友善的大鹏
-        cooldown = "<prefab=roc_head>会在%s后到来。",
+        cooldown = "<prefab=roc_head>会在%s后到来",
         exists = "<prefab=roc_head>正在出没",
         tips = "警告：<prefab=roc_head>正在出没！"
     },

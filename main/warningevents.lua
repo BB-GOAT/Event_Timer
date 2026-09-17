@@ -30,7 +30,7 @@ GameEvents = {
     messagebottlemanager = RequireEvent("DST/messagebottlemanager"),
     lunarthrall_plantspawner = RequireEvent("DST/lunarthrall_plantspawner"),
     riftspawner = RequireEvent("DST/riftspawner"),
-    rift_portal = RequireEvent("DST/rift_portal"),
+    lunarrift_portal = RequireEvent("DST/lunarrift_portal"),
     walrus_camp = RequireEvent("DST/walrus_camp"),
 
     ---------------------------------------- Cave ----------------------------------------

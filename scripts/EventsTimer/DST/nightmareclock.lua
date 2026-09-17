@@ -4,29 +4,9 @@ local STATES = {
     warn = "warn_loop", -- 警告
     wild = "wild_loop", -- 暴动
     dawn = "dawn_loop", -- 黎明
-    lock = "wild_lock", -- 锁定暴动阶段
+    -- lock = "wild_lock", -- 锁定暴动阶段
+    lock = "wild_loop" -- 因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画
 }
-
-local sync_task
-local function NightmareWildAnimChange(context)
-    local text = context.text
-    if text and string.find(text, STRINGS.eventtimer.nightmareclock.phase_locked_text) then
-        ChangeAnimOrImage("nightmareclock", context.shard_id, "anim", "animation", STATES.wild) -- 暴动锁定(因为计时器面板UI里的Anim是不会播放动画的，所以改用静态动画)
-    else
-        ChangeAnimOrImage("nightmareclock", context.shard_id, "anim", "animation", STATES[TheWorld.state.nightmarephase])
-    end
-    sync_task = nil
-end
-
-local CreateSyncAnimTask = function(context)
-    local time = context.time
-    if not sync_task then
-        if not checknumber(time) or not TheWorld then return end -- 事情为什么会变成这样呢
-        sync_task = TheWorld:DoTaskInTime(time, function()
-            NightmareWildAnimChange(context)
-        end)
-    end
-end
 
 local info
 info = {
@@ -42,6 +22,9 @@ info = {
     gettextfn = function(self, time) -- 仅锁定阶段返回
         local data = self:OnSave()
         return data.lockedphase and STRINGS.eventtimer.nightmareclock.phase_locked_text
+    end,
+    animchangefn = function(self, context)
+        self.anim.animation = STATES[TheWorld.state.nightmarephase]
     end,
     anim = {
         scale = 0.5,
@@ -71,10 +54,6 @@ info = {
             return time and phase and string.format(STRINGS.eventtimer.nightmareclock.cooldown, phase, TimeToString(time))
         end
     end,
-    tipsfn = function(context) -- 邪修用法？？？
-        CreateSyncAnimTask(context) -- 为了context
-        return false
-    end
 }
 
 return info

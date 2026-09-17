@@ -11,15 +11,8 @@ local shadow_rift_worlds = {
 local info
 info = {
     gettimefn = function(self) -- 当裂隙出现时，不显示
-        if (lunar_rift_worlds[GetWorldtypeStr()] and
-            EventTimer.EventTimerData and
-            EventTimer.EventTimerData.rift_portal and
-            EventTimer.EventTimerData.rift_portal[EventTimer.CurrentShardId].text == "")
-            or
-            (shadow_rift_worlds[GetWorldtypeStr()] and
-            EventTimer.EventTimerData and
-            EventTimer.EventTimerData.shadowrift_portal and
-            EventTimer.EventTimerData.shadowrift_portal[EventTimer.CurrentShardId].text == "")
+        if (lunar_rift_worlds[GetWorldtypeStr()] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "lunarrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
+            or (shadow_rift_worlds[GetWorldtypeStr()] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "shadowrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
         then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")
         end
@@ -56,11 +49,10 @@ info = {
         loop = true,
     },
     announcefn = function(context)
-        local time = context.time
-        local str = lunar_rift_worlds[context.world_type] and STRINGS.eventtimer.riftspawner.lunar_cooldown
-                    or shadow_rift_worlds[context.world_type] and STRINGS.eventtimer.riftspawner.shadow_cooldown
+        local str = (lunar_rift_worlds[context.world_type] and STRINGS.eventtimer.riftspawner.lunar_cooldown)
+                    or (shadow_rift_worlds[context.world_type] and STRINGS.eventtimer.riftspawner.shadow_cooldown)
                     or ReplacePrefabName(STRINGS.eventtimer.riftspawner.cooldown)
-        local desc = string.format(str, TimeToString(time))
+        local desc = string.format(str, TimeToString(context.time))
         desc = MarkData(desc, context)
         return desc
     end,

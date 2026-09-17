@@ -21,6 +21,10 @@ info = {
         atlas = "images/inventoryimages.xml",
         tex = "rocks.tex",
         scale = 0.8,
+        offset = {
+            x = 0,
+            y = 20,
+        }
     },
     DisableShardRPC = true, -- 我觉得同步这个意义不大
     announcefn = function(context)

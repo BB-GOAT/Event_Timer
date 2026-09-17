@@ -18,7 +18,7 @@ local function GetSeparator(i)
     end
 end
 
-local get_text_fn = function(self)
+local get_text_fn = function(TheWorld)
     local lines = {}
     for i, info in ipairs(walrus_house_list) do
         local inst = info.ent
@@ -70,7 +70,7 @@ info = {
             inst:WatchWorldState("iswinter", function()
                 OnIsWinter()
             end)
-            OnIsWinter()
+            inst:DoTaskInTime(0, OnIsWinter)
         end)
     end,
     anim = {

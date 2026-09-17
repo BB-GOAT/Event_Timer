@@ -189,40 +189,29 @@ local function AddWarningEvents(self)
                 context.world_str = world_str
                 context.warningevent_child = self[warningevent_child]
 
-                -- if self[warningevent_child].last_time == time then
-                --     self[warningevent_child].sametick = (self[warningevent_child].sametick or 0) + 1
-                -- else
-                --     self[warningevent_child].sametick = 0
-                -- end
-
                 if data.gettimefn or data.playerly then
-                    if not self[warningevent_child].force or ((time and time <= 0) --[[or self[warningevent_child].sametick >= 100]]) then
+                    -- 每轮新计时更新一次anim或image
+                    if not self[warningevent_child].last_time or (time > self[warningevent_child].last_time) or (math.abs(time - self[warningevent_child].last_time) > 10) then
+                        -- 2种图片都更新，万一前面的更新没了还能有后面的补上
+                        if data.animchangefn then
+                            data:animchangefn(context)
+                        end
+                        if data.imagechangefn then
+                            data:imagechangefn(context)
+                        end
+                        self[warningevent_child]:RefreshAnimImage(data.anim, data.image)
+                    end
+                    self[warningevent_child].last_time = time
+
+                    if not self[warningevent_child].force or (time == 0) then
                         if self[warningevent_child].shown then
                             self[warningevent_child]:Hide()
                         end
-                        if data.animchangetask then
-                            data.animchangetask:Cancel()
-                            data.animchangetask = nil
-                        elseif data.imagechangetask then
-                            data.imagechangetask:Cancel()
-                            data.imagechangetask = nil
-                        end
                     else
                         if not self[warningevent_child].shown then
-                            if data.animchangefn then
-                                data:animchangefn(context)
-                                self[warningevent_child]:SetEventAnim(data.anim)
-                            elseif data.imagechangefn then
-                                data:imagechangefn(context)
-                                self[warningevent_child]:SetEventImage(data.image)
-                            end
-
                             self[warningevent_child]:Show()
                         end
-                        -- self[warningevent_child].last_time = time
-
                         self[warningevent_child]:OnUpdate(time)
-
                         i = i + 1
                     end
                 end

@@ -13,6 +13,8 @@ TUNING.GlobalEventsTimerEnabled = true
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
+	Asset("ATLAS", "images/Bat.xml"), -- 蝙蝠
+	Asset("IMAGE", "images/Bat.tex"),
 	Asset("ATLAS", "images/Hound.xml"), -- 猎犬
 	Asset("IMAGE", "images/Hound.tex"),
     Asset("ATLAS", "images/Depths_Worm.xml"), -- 洞穴蠕虫
@@ -228,33 +230,6 @@ function MarkData(desc, context)
     return desc
 end
 
--- 更新指定事件的动画/贴图
----@param warningevent string 事件名
----@param shard_id number 世界ID
----@param anim_or_image "anim"|"image"
----@param key string
----@param value string|nil
-function ChangeAnimOrImage(warningevent, shard_id, anim_or_image, key, value)
-    if not (warningevent and shard_id and anim_or_image and key) then return end
-    local warningevent_child = warningevent .. "_" .. shard_id
-    local ThePlayer = GLOBAL.ThePlayer
-    local child = ThePlayer and ThePlayer.HUD and ThePlayer.HUD[warningevent_child]
-    if child then
-        local data = WarningEvents[warningevent]
-        if not value then
-            data[anim_or_image] = data[key]
-        else
-            data[anim_or_image][key] = value
-        end
-
-        if anim_or_image == "anim" then
-            child:SetEventAnim(data[anim_or_image])
-        elseif anim_or_image == "image" then
-            child:SetEventImage(data[anim_or_image])
-        end
-    end
-end
-
 ----------------------------------------事件计时需要用到的函数---------------------------------------
 
 -- 从worldsettingstimer或TimerPrefabs获取倒计时
@@ -369,7 +344,6 @@ local file_env = {
     JustEntered = JustEntered, -- 如果event_time > 0，在刚进入游戏的10秒内返回true
     ready_attack = ready_attack, -- 当time在0~2秒时返回true
     MarkData = MarkData, -- 标记数据来源
-    ChangeAnimOrImage = ChangeAnimOrImage, -- 更新指定事件的动画/贴图
 }
 if GLOBAL.TheNet:GetIsServer() then
     AddComponentPostInit("clock", function(self)

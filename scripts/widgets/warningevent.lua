@@ -81,6 +81,9 @@ function WarningEvent:SetEventAnim(data)
     if data.offset then
         self.anim:SetPosition(-45 + data.offset.x, -25 + data.offset.y)
     end
+
+    self.anim:Show()
+    self.image:Hide()
 end
 
 function WarningEvent:SetEventImage(data)
@@ -89,6 +92,17 @@ function WarningEvent:SetEventImage(data)
     self.image:SetTexture(data.atlas, data.tex)
     if data.offset then
         self.image:SetPosition(-45 + data.offset.x, -25 + data.offset.y)
+    end
+
+    self.image:Show()
+    self.anim:Hide()
+end
+
+function WarningEvent:RefreshAnimImage(anim_data, image_data)
+    if anim_data then
+        self:SetEventAnim(anim_data)
+    elseif image_data then
+        self:SetEventImage(image_data)
     end
 end
 

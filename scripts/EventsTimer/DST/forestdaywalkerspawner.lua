@@ -40,16 +40,15 @@ info = {
     announcefn = function(context)
         local time = context.time
         local text = context.text
-        if time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
-        else
+        if text ~= "" then
             text = string.gsub(text,"\n",": ")
             return text
+        elseif time > 0 then
+            return string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
         end
     end,
     tipsfn = function(context)
-        local text = context.text
-        if string.find(text, ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)) then
+        if string.find(context.text, ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.tips)
             desc = MarkData(desc, context)
             return true, (GetTime() > 10) and StringToFunction(desc), 10, nil, 2

@@ -1,9 +1,10 @@
 -- 月相状态，参考了 饥饥事件计时器 的代码 https://steamcommunity.com/sharedfiles/filedetails/?id=3511498282 @不要看上我的菊
 
 local second_world_moonphase -- 当前月相阶段(从世界使用)
-local MOON_PHASE_CYCLES
-local _mooniswaxing
-local _mooomphasecycle
+local _
+local fn_i_MOON_PHASE_CYCLES, pre_fn_MOON_PHASE_CYCLES
+local fn_i_mooniswaxing, pre_fn_mooniswaxing
+local fn_i_mooomphasecycle, pre_fn_mooomphasecycle
 
 local info
 info = {
@@ -35,18 +36,26 @@ info = {
         AddComponentPostInit("clock", function(self)
             if not TheNet:GetIsServer() then return end
             if TheWorld:HasTag("forest") or TheWorld:HasTag("cave") then
-                MOON_PHASE_CYCLES = Upvaluehelper.FindUpvalue(self.OnLoad, "MOON_PHASE_CYCLES", "scripts/components/clock.lua")
-                _mooniswaxing = Upvaluehelper.FindUpvalue(self.OnLoad, "_mooniswaxing", "scripts/components/clock.lua")
-                _mooomphasecycle = Upvaluehelper.FindUpvalue(self.OnLoad, "_mooomphasecycle", "scripts/components/clock.lua")
+                _, fn_i_MOON_PHASE_CYCLES, pre_fn_MOON_PHASE_CYCLES = Upvaluehelper.FindUpvalue(self.OnLoad, "MOON_PHASE_CYCLES", "scripts/components/clock.lua")
+                _, fn_i_mooniswaxing, pre_fn_mooniswaxing = Upvaluehelper.FindUpvalue(self.OnLoad, "_mooniswaxing", "scripts/components/clock.lua")
+                _, fn_i_mooomphasecycle, pre_fn_mooomphasecycle = Upvaluehelper.FindUpvalue(self.OnLoad, "_mooomphasecycle", "scripts/components/clock.lua")
             else
-                MOON_PHASE_CYCLES = Upvaluehelper.GetUpvalue(self.OnLoad, "MOON_PHASE_CYCLES")
-                _mooniswaxing = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooniswaxing")
-                _mooomphasecycle = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooomphasecycle")
+                _, fn_i_MOON_PHASE_CYCLES, pre_fn_MOON_PHASE_CYCLES = Upvaluehelper.GetUpvalue(self.OnLoad, "MOON_PHASE_CYCLES")
+                _, fn_i_mooniswaxing, pre_fn_mooniswaxing = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooniswaxing")
+                _, fn_i_mooomphasecycle, pre_fn_mooomphasecycle = Upvaluehelper.GetUpvalue(self.OnLoad, "_mooomphasecycle")
             end
         end)
     end,
     gettextfn = function(self)
         if TheWorld.ismastershard then -- 主世界
+            local MOON_PHASE_CYCLES
+            local _mooniswaxing
+            local _mooomphasecycle
+
+            _, MOON_PHASE_CYCLES = debug.getupvalue(pre_fn_MOON_PHASE_CYCLES, fn_i_MOON_PHASE_CYCLES)
+            _, _mooniswaxing = debug.getupvalue(pre_fn_mooniswaxing, fn_i_mooniswaxing)
+            _, _mooomphasecycle = debug.getupvalue(pre_fn_mooomphasecycle, fn_i_mooomphasecycle)
+
             if not (MOON_PHASE_CYCLES and _mooniswaxing and _mooomphasecycle) then
                 return
             end

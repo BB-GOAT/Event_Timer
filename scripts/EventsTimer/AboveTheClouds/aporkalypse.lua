@@ -1,17 +1,7 @@
 -- 大灾变倒计时/大灾变期间的事件计时/蝙蝠袭击倒计时
 
 local Next_Aporkalypse_Time
-local aporkalypse, aporkalypse_attack, batted
-
-local sync_task
-local CreateSyncAnimTask = function(time, key)
-    if not sync_task then
-        if not checknumber(time) or not TheWorld then return end -- 事情为什么会变成这样呢
-        sync_task = TheWorld:DoTaskInTime(time, function()
-            SendModRPCToClient("EventTimer", "change_anim_or_image", "aporkalypse", EventTimer.CurrentShardId, "image", key)
-        end)
-    end
-end
+local aporkalypse, batted
 
 -- 大灾变倒计时
 aporkalypse = {
@@ -28,10 +18,8 @@ aporkalypse = {
     gettimefn = function(self)
         if Next_Aporkalypse_Time == 0 then
             local next_herald_attack = Upvaluehelper.GetUpvalue(self.OnUpdate, "_herald_time") -- 远古先驱袭击倒计时
-            CreateSyncAnimTask(next_herald_attack, "Ancient_Herald_image")
             return next_herald_attack
         else
-            CreateSyncAnimTask(Next_Aporkalypse_Time, "Aporkalypse_Clock_image")
             return Next_Aporkalypse_Time
         end
     end,
@@ -83,13 +71,9 @@ aporkalypse = {
 
         local time = context.time
         if (JustEntered(time) and time < 2400) then
-            local desc = string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time))
-            desc = MarkData(desc, context)
-            return true, StringToFunction(desc), 10, nil, 1
+            return true, aporkalypse.announcefn, 10, nil, 1
         elseif time == 480 then
-            local desc = string.format(STRINGS.eventtimer.aporkalypse.tips, TimeToString(time))
-            desc = MarkData(desc, context)
-            return true, StringToFunction(desc), 10, nil, 2
+            return true, function() return MarkData(string.format(STRINGS.eventtimer.aporkalypse.tips, TimeToString(context.time)), context) end, 10, nil, 2
         elseif time == 0 then -- 这个写法比较特殊..为了保证大灾变确实开始了
             local desc = STRINGS.eventtimer.aporkalypse.tips_ready
             desc = MarkData(desc, context)
@@ -159,4 +143,4 @@ batted = {
     end
 }
 
-return aporkalypse, aporkalypse_attack, batted
+return aporkalypse, batted
