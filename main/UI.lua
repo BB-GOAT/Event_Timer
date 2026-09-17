@@ -90,7 +90,6 @@ local function AddWarningEvents(self)
 
     -- 醒目提示
     function self:ShowTips(timefn, second, level, context)
-        if not EventTimer.TimerTips then return end -- 判断模组设置是否开启了醒目提示功能
         if type(timefn) ~= "function" then return end
 
         local text = timefn(context)
@@ -216,7 +215,7 @@ local function AddWarningEvents(self)
                     end
                 end
 
-                if data.tipsfn and game_ready then -- EventTimer.TimerTips 是不是应该在这里判断？有什么事件是始终依赖tips的吗？(遗迹阶段事件模块)
+                if data.tipsfn and game_ready and EventTimer.TimerTips then
                     local need_tips, tipstextfn, tipstime, delay, level = data.tipsfn(context) -- 加载事件列表的tips函数
                     last_tips_cache[warningevent_child] = last_tips_cache[warningevent_child] or false
                     if need_tips and not last_tips_cache[warningevent_child] then

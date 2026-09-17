@@ -1,7 +1,7 @@
 -- 猎犬/洞穴蠕虫/鳄狗/巨大洞穴蠕虫 Anim刷新
 local function HoundedAnimChangeFn(self, context)
     local text = context.text
-    local worldtype = context.world_type
+    local worldtype = context.shard_id == EventTimer.CurrentShardId and GetWorldtypeStr() or context.world_type
     local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
     if is_worm_boss then
         self.anim = self.wormbossanim
@@ -19,8 +19,8 @@ end
 -- 监听热带冒险的区域变化事件
 MOD_util:AddPlayerPostInit(function(world, player)
     player:ListenForEvent("regionchange_client", function(inst, data)
-        if ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData["hounded"] and EventTimer.CurrentShardId then
-            HoundedAnimChangeFn(WarningEvents["hounded"], { worldtype = GetWorldtypeStr() })
+        if table.typecheckedgetfield(ThePlayer, "table", "HUD", "WarningEventTimeData", "hounded") and EventTimer.CurrentShardId then
+            HoundedAnimChangeFn(WarningEvents["hounded"], { world_type = GetWorldtypeStr() })
             local warningevent_child = ThePlayer.HUD["hounded_" .. EventTimer.CurrentShardId]
             if warningevent_child then
                 warningevent_child:SetEventAnim(WarningEvents["hounded"].anim)
@@ -62,7 +62,7 @@ info = {
     end,
     imagechangefn = function(self, context)
         local text = context.text
-        local worldtype = context.world_type
+        local worldtype = context.shard_id == EventTimer.CurrentShardId and GetWorldtypeStr() or context.world_type -- 兼容【热带冒险】
         local is_worm_boss = text and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
         if worldtype == "porkland" then
             self.image = nil
@@ -172,7 +172,7 @@ info = {
     announcefn = function(context)
         local time = context.time
         local text = context.text
-        local world_type = context.world_type
+        local world_type = context.shard_id == EventTimer.CurrentShardId and GetWorldtypeStr() or context.world_type
         local desc
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
         if is_worm_boss then
@@ -188,6 +188,7 @@ info = {
 
         local time = context.time
         local text = context.text
+        local world_type = context.shard_id == EventTimer.CurrentShardId and GetWorldtypeStr() or context.world_type
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
 
         if time > 2 and time <= 90 then
@@ -197,7 +198,7 @@ info = {
         elseif JustEntered(time) then
             return true, info.announcefn, 10, nil, 1
         elseif ready_attack(time) then
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.hounded.attack[is_worm_boss and "worm_boss" or context.world_type])), 10, time, 3
+            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.hounded.attack[is_worm_boss and "worm_boss" or world_type])), 10, time, 3
         end
         return false
     end

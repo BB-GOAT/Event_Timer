@@ -166,14 +166,16 @@ end)
 ---------------------------------------服务器更新逻辑---------------------------------------
 
 local valid_data = {}
+local initialdelay = 0 -- 首次运行延迟多久开始
 local function AddTimerDescriptor(self, warningevent, data)
     if valid_data[warningevent] then
         MOD_util:Warning('检测到重复AddTimerDescriptor : ' .. warningevent)
         return -- 重复注册？返回
     end
 
+    initialdelay = initialdelay + 1
     local inst = self.inst or self
-    inst:DoPeriodicTask(UpdateTime, function() -- 虽然按组件单独DoPeriodicTask，但实际上依旧被分布在同一帧，因为等游戏加载完了才统一开始，有办法分开吗？
+    inst:DoPeriodicTask(UpdateTime, function()
         -- 初始化数据重复次数表
         if not (ShardId and warningtimer[warningevent]) then return end
         if not valid_data[warningevent] then
@@ -252,7 +254,7 @@ local function AddTimerDescriptor(self, warningevent, data)
                 end
             end
         end
-    end)
+    end, initialdelay * GLOBAL.FRAMES)
 end
 
 local TimerPrefabList = {
@@ -267,34 +269,57 @@ local TimerPrefabList = {
 }
 
 local OtherPrefabList = {
-    ["walrus_camp"] = true, -- 海象营地
+    ["walrus_camp"] = "world", -- 海象营地
 }
+
+GLOBAL.EventTimer.AddTimerDescriptor = function(warningevent, data)
+    if GLOBAL.type(warningevent) ~= "string" then
+        GLOBAL.error(string.format("bad argument #1 to 'AddTimerDescriptor' (string expected, got %s)", type(warningevent)))
+    end
+    if GLOBAL.type(data) ~= "table" then
+        GLOBAL.error(string.format("bad argument #2 to 'AddTimerDescriptor' (table expected, got %s)", type(data)))
+    end
+
+    if data.timerprefab then
+        AddPrefabPostInit(data.timerprefab, function(self)
+            AddTimerDescriptor(self, warningevent, data)
+            self:ListenForEvent("onremove", function()
+                MOD_util:Warning(GLOBAL.tostring(warningevent) .. "事件依赖的实体" .. GLOBAL.tostring(data.timerprefab) .. "已被移除")
+                valid_data[warningevent] = nil
+                warningtimer[warningevent][ShardId] = {}
+                SyncEventData(warningevent, 0, "event_timerpc", ShardId)
+                SyncEventData(warningevent, "", "event_textrpc", ShardId)
+                if not data.DisableShardRPC then
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
+                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
+                end
+            end)
+        end)
+    else
+        AddComponentPostInit(warningevent, function(self)
+            AddTimerDescriptor(self, warningevent, data)
+        end)
+    end
+end
 
 if SERVER_SIDE then
     for warningevent, data in pairs(GLOBAL.WarningEvents) do
         if TimerPrefabList[warningevent] then
-            AddPrefabPostInit(warningevent, function(self)
-                AddTimerDescriptor(self, warningevent, data)
-                self:ListenForEvent("onremove", function()
-                    MOD_util:Warning(warningevent .. "事件依赖的组件已被移除")
-                    valid_data[warningevent] = nil
-                    warningtimer[warningevent][ShardId] = {}
-                    SyncEventData(warningevent, 0, "event_timerpc", ShardId)
-                    SyncEventData(warningevent, "", "event_textrpc", ShardId)
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
-                end)
-            end)
+            data.timerprefab = warningevent
         elseif OtherPrefabList[warningevent] then
-            AddPrefabPostInit("world", function(self)
-                AddTimerDescriptor(self, warningevent, data)
-            end)
-        else
-            AddComponentPostInit(warningevent, function(self)
-                AddTimerDescriptor(self, warningevent, data)
-            end)
+            data.timerprefab = OtherPrefabList[warningevent]
         end
+
+        GLOBAL.EventTimer.AddTimerDescriptor(warningevent, data)
     end
+
+    GLOBAL.setmetatable(GLOBAL.WarningEvents, {
+        __newindex = function(self, warningevent, data)
+            GLOBAL.EventTimer.AddTimerDescriptor(warningevent, data) -- 自动注册
+            GLOBAL.rawset(self, warningevent, data)
+        end,
+        __metatable = "[全局事件计时器] 此元表已锁定"
+    })
 end
 
 -- 返回当前世界类型对应的字符串
