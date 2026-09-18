@@ -29,11 +29,13 @@ MOD_util:AddPlayerPostInit(function(world, player)
     end)
 end)
 
+local _activeplayers
 local info
 info = {
     postinitfn = function()
         if not TheNet:GetIsServer() then return end
         AddComponentPostInit("hounded", function(self)
+            _activeplayers = Upvaluehelper.GetUpvalue(self.OnUpdate, "_activeplayers")
             self.inst:DoTaskInTime(0.1, function()
                 local _spawnmode = Upvaluehelper.GetUpvalue(self.OnUpdate, "_spawnmode")
                 if _spawnmode == "never" then
@@ -45,6 +47,10 @@ info = {
     end,
     gettimefn = function(self)
         local data = self:OnSave()
+        local _attackplanned = data.attackplanned
+        if not _attackplanned or (_activeplayers and #_activeplayers == 0) then
+            return
+        end
         return data and data.timetoattack
     end,
     gettextfn = function(self, time)
