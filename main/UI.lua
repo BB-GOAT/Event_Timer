@@ -136,8 +136,14 @@ local function AddWarningEvents(self)
     local Panel_data_list = {}
     local context_cache = {}
     local panel_data_cache = {}
+    local panel_data_snapshot = {}
+    local panel_data_revision = 0
     TarnsferPanel.UpdateDestItem = function(self)
-        self.scrollpanel:SetItemsData(Panel_data_list) -- 面板数据
+        -- TrueScrollList:SetItemsData 会重新应用所有可见行，仅在面板数据实际变化时刷新。
+        if self._event_timer_panel_data_revision ~= panel_data_revision then
+            self.scrollpanel:SetItemsData(Panel_data_list) -- 面板数据
+            self._event_timer_panel_data_revision = panel_data_revision
+        end
     end
 
     function self:UpdateWarningEvents()
@@ -273,6 +279,48 @@ local function AddWarningEvents(self)
         -- 原地更新列表，移除本轮不再显示的尾部条目，避免残留或重复。
         for index = #Panel_data_list, panel_count + 1, -1 do
             Panel_data_list[index] = nil
+        end
+
+        -- 面板数据表会原地复用，不能直接比较表地址；只记录会影响行显示的字段。
+        local panel_data_changed = #panel_data_snapshot ~= panel_count
+        if not panel_data_changed then
+            for index = 1, panel_count do
+                local data = Panel_data_list[index]
+                local snapshot = panel_data_snapshot[index]
+                if not snapshot
+                    or snapshot.data ~= data
+                    or snapshot.text ~= data.text
+                    or snapshot.image ~= data.image
+                    or snapshot.anim ~= data.anim
+                    or snapshot.nobackground ~= data.nobackground
+                    or snapshot.has_time ~= (data.time and data.time > 0)
+                    or snapshot.force ~= (data.name and self[data.name .. "_" .. data.context.shard_id] and self[data.name .. "_" .. data.context.shard_id].force)
+                then
+                    panel_data_changed = true
+                    break
+                end
+            end
+        end
+
+        if panel_data_changed then
+            for index = 1, panel_count do
+                local data = Panel_data_list[index]
+                local warningevent_child = data.name .. "_" .. data.context.shard_id
+                local child = self[warningevent_child]
+                panel_data_snapshot[index] = {
+                    data = data,
+                    text = data.text,
+                    image = data.image,
+                    anim = data.anim,
+                    nobackground = data.nobackground,
+                    has_time = data.time and data.time > 0,
+                    force = child and child.force,
+                }
+            end
+            for index = panel_count + 1, #panel_data_snapshot do
+                panel_data_snapshot[index] = nil
+            end
+            panel_data_revision = panel_data_revision + 1
         end
     end
 end

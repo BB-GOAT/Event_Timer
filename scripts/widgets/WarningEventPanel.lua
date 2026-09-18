@@ -79,106 +79,208 @@ local WarningEventHUD = Class(Widget, function(self, owner)
     local function DestApply(context, widget, data, index)
         widget.destitem:Hide()
 
-        if widget.destitem.image then
-            widget.destitem.image:Kill()
-        end
-        if widget.destitem.anim then
-            widget.destitem.anim:Kill()
-        end
-
         local text = data and data.text
-        if text then
-            -- 设置文字
-            widget.destitem.describe:SetString(text)
-
-            if data.animchangefn then
-                data:animchangefn(data.context)
+        if not text then
+            if widget.destitem.checkbox then
+                widget.destitem.checkbox:Hide()
             end
+            widget._event_timer_data = nil
+            return
+        end
 
-            if data.imagechangefn then
-                data:imagechangefn(data.context)
+        if data.animchangefn then
+            data:animchangefn(data.context)
+        end
+
+        if data.imagechangefn then
+            data:imagechangefn(data.context)
+        end
+
+        local image_data = data.image and data.image.atlas and data.image.tex and data.image or nil
+        local anim_data = not image_data and data.anim or nil
+        local asset_kind = image_data and "image" or anim_data and "anim" or nil
+        local asset = image_data or anim_data
+        local asset_x, asset_y, asset_scale
+        local asset_atlas, asset_tex
+        local asset_bank, asset_build, asset_animation, asset_loop, asset_orientation
+
+        if image_data then
+            asset_x = -180 + (image_data.uioffset and image_data.uioffset.x or 0)
+            asset_y = image_data.uioffset and image_data.uioffset.y or 0
+            asset_scale = image_data.scale or 0.099
+            asset_atlas = image_data.atlas
+            asset_tex = image_data.tex
+        elseif anim_data then
+            asset_x = -180 + (anim_data.uioffset and anim_data.uioffset.x or 0)
+            asset_y = -15 + (anim_data.uioffset and anim_data.uioffset.y or 0)
+            asset_scale = anim_data.scale or 0.099
+            asset_bank = anim_data.bank
+            asset_build = anim_data.build
+            asset_animation = anim_data.animation or "idle"
+            asset_loop = anim_data.loop
+            asset_orientation = anim_data.orientation
+        end
+
+        local destitem = widget.destitem
+        local has_time = data.time and data.time > 0
+        local warningevent_child
+        local force
+        if has_time then
+            warningevent_child = data.name .. "_" .. data.shard_id
+            if not (ThePlayer and ThePlayer.HUD[warningevent_child]) then
+                return
             end
+            force = ThePlayer.HUD[warningevent_child].force
+        end
 
-            -- 移除背景，暂未使用
-            if data.nobackground and widget.destitem.background then
-                widget.destitem.background:Kill()
+        -- TrueScrollList 可能重复应用同一行；内容没有变化时不再触碰控件树。
+        if widget._event_timer_data == data
+            and widget._event_timer_text == text
+            and widget._event_timer_asset_kind == asset_kind
+            and widget._event_timer_asset == asset
+            and widget._event_timer_asset_x == asset_x
+            and widget._event_timer_asset_y == asset_y
+            and widget._event_timer_asset_scale == asset_scale
+            and widget._event_timer_asset_atlas == asset_atlas
+            and widget._event_timer_asset_tex == asset_tex
+            and widget._event_timer_asset_bank == asset_bank
+            and widget._event_timer_asset_build == asset_build
+            and widget._event_timer_asset_animation == asset_animation
+            and widget._event_timer_asset_loop == asset_loop
+            and widget._event_timer_asset_orientation == asset_orientation
+            and widget._event_timer_nobackground == data.nobackground
+            and widget._event_timer_has_time == has_time
+            and widget._event_timer_force == force
+        then
+            destitem:Show()
+            return
+        end
+
+        local item_data_changed = widget._event_timer_data ~= data
+        local has_time_changed = widget._event_timer_has_time ~= has_time
+        local asset_changed = widget._event_timer_asset_kind ~= asset_kind
+            or widget._event_timer_asset ~= asset
+            or widget._event_timer_asset_x ~= asset_x
+            or widget._event_timer_asset_y ~= asset_y
+            or widget._event_timer_asset_scale ~= asset_scale
+            or widget._event_timer_asset_atlas ~= asset_atlas
+            or widget._event_timer_asset_tex ~= asset_tex
+            or widget._event_timer_asset_bank ~= asset_bank
+            or widget._event_timer_asset_build ~= asset_build
+            or widget._event_timer_asset_animation ~= asset_animation
+            or widget._event_timer_asset_loop ~= asset_loop
+            or widget._event_timer_asset_orientation ~= asset_orientation
+
+        widget._event_timer_data = data
+        widget._event_timer_text = text
+        widget._event_timer_asset_kind = asset_kind
+        widget._event_timer_asset = asset
+        widget._event_timer_asset_x = asset_x
+        widget._event_timer_asset_y = asset_y
+        widget._event_timer_asset_scale = asset_scale
+        widget._event_timer_asset_atlas = asset_atlas
+        widget._event_timer_asset_tex = asset_tex
+        widget._event_timer_asset_bank = asset_bank
+        widget._event_timer_asset_build = asset_build
+        widget._event_timer_asset_animation = asset_animation
+        widget._event_timer_asset_loop = asset_loop
+        widget._event_timer_asset_orientation = asset_orientation
+        widget._event_timer_nobackground = data.nobackground
+        widget._event_timer_has_time = has_time
+        widget._event_timer_force = force
+
+        -- 设置文字
+        destitem.describe:SetString(text)
+
+        if destitem.background then
+            if data.nobackground then
+                destitem.background:Hide()
+            else
+                destitem.background:Show()
             end
+        end
 
-            if data.image and data.image.atlas and data.image.tex then -- 设置图片
-                local pos = { -- 默认位置
-                    x = -180,
-                    y = 0
-                }
-                if data.image.uioffset then -- 偏移位置
-                    pos.x = pos.x + (data.image.uioffset.x or 0)
-                    pos.y = pos.y + (data.image.uioffset.y or 0)
+        -- 资源没有变化时保留原控件；资源类型或配置变化时才重建。
+        if asset_changed then
+            if asset_kind == "image" then
+                if destitem.anim then
+                    destitem.anim:Kill()
+                    destitem.anim = nil
                 end
-
-                widget.destitem.image = widget.destitem:AddChild(Image(
-                    data.image.atlas,
-                    data.image.tex
-                ))
-                widget.destitem.image:SetPosition(pos.x, pos.y, 0)
-                widget.destitem.image:SetScale(data.image.scale or 0.099)
-            elseif data.anim then -- 设置动画
-                local pos = { -- 默认位置
-                    x = -180,
-                    y = -15,
-                }
-                if data.anim.uioffset then -- 偏移位置
-                    pos.x = pos.x + (data.anim.uioffset.x or 0)
-                    pos.y = pos.y + (data.anim.uioffset.y or 0)
+                if not destitem.image then
+                    destitem.image = destitem:AddChild(Image(asset_atlas, asset_tex))
+                else
+                    destitem.image:SetTexture(asset_atlas, asset_tex)
                 end
-                widget.destitem.anim = widget.destitem:AddChild(UIAnim())
-                widget.destitem.anim:SetPosition(pos.x, pos.y, 0)
-                widget.destitem.anim:SetScale(data.anim.scale or 0.099)
-                widget.destitem.anim:GetAnimState():SetBank(data.anim.bank)
-                widget.destitem.anim:GetAnimState():SetBuild(data.anim.build)
-                widget.destitem.anim:GetAnimState():PlayAnimation(data.anim.animation or "idle", data.anim.loop)
-                if data.anim.hidesymbol then
-                    for _, s in ipairs(data.anim.hidesymbol) do
-                        widget.destitem.anim:GetAnimState():HideSymbol(s)
+                destitem.image:SetPosition(asset_x, asset_y, 0)
+                destitem.image:SetScale(asset_scale)
+            elseif asset_kind == "anim" then
+                if destitem.image then
+                    destitem.image:Kill()
+                    destitem.image = nil
+                end
+                if destitem.anim then
+                    destitem.anim:Kill()
+                end
+                destitem.anim = destitem:AddChild(UIAnim())
+                destitem.anim:SetPosition(asset_x, asset_y, 0)
+                destitem.anim:SetScale(asset_scale)
+                destitem.anim:GetAnimState():SetBank(asset_bank)
+                destitem.anim:GetAnimState():SetBuild(asset_build)
+                destitem.anim:GetAnimState():PlayAnimation(asset_animation, asset_loop)
+                if anim_data.hidesymbol then
+                    for _, s in ipairs(anim_data.hidesymbol) do
+                        destitem.anim:GetAnimState():HideSymbol(s)
                     end
                 end
-                if data.anim.overridesymbol then
-                    widget.destitem.anim:GetAnimState():OverrideSymbol(data.anim.overridesymbol[1], data.anim.overridesymbol[2], data.anim.overridesymbol[3])
+                if anim_data.overridesymbol then
+                    destitem.anim:GetAnimState():OverrideSymbol(anim_data.overridesymbol[1], anim_data.overridesymbol[2], anim_data.overridesymbol[3])
                 end
-                if data.anim.overridebuild then
-                    local _, b = next(data.anim.overridebuild)
-                    widget.destitem.anim:GetAnimState():AddOverrideBuild(b)
+                if anim_data.overridebuild then
+                    local _, b = next(anim_data.overridebuild)
+                    destitem.anim:GetAnimState():AddOverrideBuild(b)
                 end
-                if data.anim.multcolour then
-                    widget.destitem.anim:GetAnimState():SetMultColour(data.anim.multcolour[1], data.anim.multcolour[2], data.anim.multcolour[3], data.anim.multcolour[4])
+                if anim_data.multcolour then
+                    destitem.anim:GetAnimState():SetMultColour(anim_data.multcolour[1], anim_data.multcolour[2], anim_data.multcolour[3], anim_data.multcolour[4])
                 end
-                if data.anim.orientation then
-                    widget.destitem.anim:GetAnimState():SetOrientation(data.anim.orientation)
+                if anim_data.orientation then
+                    destitem.anim:GetAnimState():SetOrientation(anim_data.orientation)
                 end
-                widget.destitem.anim:GetAnimState():Pause()
+                destitem.anim:GetAnimState():Pause()
+            else
+                if destitem.image then
+                    destitem.image:Kill()
+                    destitem.image = nil
+                end
+                if destitem.anim then
+                    destitem.anim:Kill()
+                    destitem.anim = nil
+                end
+            end
+        end
+
+        if has_time then
+            local checkbox_created = false
+            if not destitem.checkbox then
+                destitem.checkbox = destitem:AddChild(ImageButton(
+                    "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
+                ))
+                destitem.checkbox:SetPosition(184, 0)
+                destitem.checkbox:SetScale(1)
+                checkbox_created = true
+            end
+            destitem.checkbox:Show()
+
+            -- 更新复选框状态
+            if force then
+                destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
+            else
+                destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
             end
 
-            if data.time and data.time > 0 then
-                local warningevent_child = data.name .. "_" .. data.shard_id
-                if not (ThePlayer and ThePlayer.HUD[warningevent_child]) then
-                    return
-                end
-
-                if not widget.destitem.checkbox then
-                    widget.destitem.checkbox = widget.destitem:AddChild(ImageButton(
-                        "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
-                    ))
-                    widget.destitem.checkbox:SetPosition(184, 0)
-                    widget.destitem.checkbox:SetScale(1)
-                end
-
-                -- 更新复选框状态
-                if ThePlayer.HUD[warningevent_child].force then
-                    widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
-                else
-                    widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
-                end
-
+            if item_data_changed or has_time_changed or checkbox_created then
                 -- 设置复选框按下后执行的函数
-                widget.destitem.checkbox:SetOnClick(function()
+                destitem.checkbox:SetOnClick(function()
                     for shard_id in pairs(ThePlayer.HUD.WarningEventTimeData[data.name] or {}) do
                         local warningevent_child = data.name .. "_" .. shard_id
                         if ThePlayer.HUD[warningevent_child] then
@@ -187,23 +289,24 @@ local WarningEventHUD = Class(Widget, function(self, owner)
                             -- 根据切换结果设置 checkbox 状态
                             if ThePlayer.HUD[warningevent_child].force then
                                 RW_Data:SetValue(data.name, true)
-                                widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
+                                destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal_check.tex", "checkbox_focus_check.tex", "checkbox_focus.tex" )
                             else
                                 RW_Data:SetValue(data.name, nil)
-                                widget.destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
+                                destitem.checkbox:SetTextures( "images/global_redux.xml", "checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex" )
                             end
                         end
                     end
 
                     RW_Data:Save()
                 end)
-            elseif widget.destitem.checkbox then
-                widget.destitem.checkbox:Kill()
-                widget.destitem.checkbox = nil
             end
+        elseif destitem.checkbox then
+            destitem.checkbox:Hide()
+        end
 
+        if item_data_changed then
             -- 点击倒计时后触发的事件
-            widget.destitem.backing:SetOnClick(function()
+            destitem.backing:SetOnClick(function()
                 if type(data.announcefn) == "function" then
                     local res = data.announcefn(data.context)
                     if type(res) == "string" then
@@ -211,9 +314,9 @@ local WarningEventHUD = Class(Widget, function(self, owner)
                     end
                 end
             end)
-
-            widget.destitem:Show()
         end
+
+        destitem:Show()
     end
 
     -- 将滚动条添加到self.panel里去
@@ -270,13 +373,6 @@ function WarningEventHUD:InitDestItem()
     dest.describe:SetPosition(10, 0, 0) -- 设置坐标 X，Y，Z
     dest.describe:SetRegionSize(400, 100) -- 设置文字区域大小
     dest.describe:SetScale(0.8, 0.8) -- 设置文字大小
-
-    -- 复选框
-    dest.checkbox = dest:AddChild(ImageButton(
-        "images/global_redux.xml","checkbox_normal.tex", "checkbox_focus.tex", "checkbox_focus_check.tex", nil, nil, {1,1}, {0,0}
-    ))
-    dest.checkbox:SetPosition(184, 0)
-    dest.checkbox:SetScale(1)
 
     -- 将定义好的组件返回
     return dest
