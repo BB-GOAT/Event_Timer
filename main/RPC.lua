@@ -274,12 +274,13 @@ local OtherPrefabList = {
 
 GLOBAL.EventTimer.AddTimerDescriptor = function(warningevent, data)
     if GLOBAL.type(warningevent) ~= "string" then
-        GLOBAL.error(string.format("bad argument #1 to 'AddTimerDescriptor' (string expected, got %s)", type(warningevent)))
+        GLOBAL.error(string.format("bad argument #1 to 'EventTimer.AddTimerDescriptor' (string expected, got %s)", type(warningevent)))
     end
     if GLOBAL.type(data) ~= "table" then
-        GLOBAL.error(string.format("bad argument #2 to 'AddTimerDescriptor' (table expected, got %s)", type(data)))
+        GLOBAL.error(string.format("bad argument #2 to 'EventTimer.AddTimerDescriptor' (table expected, got %s)", type(data)))
     end
 
+    -- AddPrefabPostInit 和 AddComponentPostInit 保证了有实体的时候计时器才开始工作，避免浪费性能。缺点是必须在游戏加载完成前就注册，否则无效
     if data.timerprefab then
         AddPrefabPostInit(data.timerprefab, function(self)
             AddTimerDescriptor(self, warningevent, data)

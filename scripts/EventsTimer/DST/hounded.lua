@@ -30,7 +30,6 @@ MOD_util:AddPlayerPostInit(function(world, player)
 end)
 
 local info
-local is_cave_world
 info = {
     postinitfn = function()
         if not TheNet:GetIsServer() then return end
@@ -38,10 +37,10 @@ info = {
             self.inst:DoTaskInTime(0.1, function()
                 local _spawnmode = Upvaluehelper.GetUpvalue(self.OnUpdate, "_spawnmode")
                 if _spawnmode == "never" then
-                    info.gettimefn = function() end
+                    info.gettimefn = nil
+                    info.gettextfn = nil
                 end
             end)
-            is_cave_world = TheWorld:HasTag("cave") -- 为了兼容【深埋之下】，不能直接清空gettextfn，否则对方给森林世界弄的gettextfn会被删除
         end)
     end,
     gettimefn = function(self)
@@ -49,7 +48,7 @@ info = {
         return data and data.timetoattack
     end,
     gettextfn = function(self, time)
-        if not is_cave_world or not time then return end
+        if not time then return end
 
         local next_wave_is_wormboss = Upvaluehelper.GetUpvalue(self.DoWarningSpeech, "_wave_pre_upgraded")
         local _wave_override_chance = self:OnSave().wave_override_chance

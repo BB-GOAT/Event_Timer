@@ -11,8 +11,10 @@ local shadow_rift_worlds = {
 local info
 info = {
     gettimefn = function(self) -- 当裂隙出现时，不显示
-        if (lunar_rift_worlds[GetWorldtypeStr()] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "lunarrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
-            or (shadow_rift_worlds[GetWorldtypeStr()] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "shadowrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
+        local world_type = GetWorldtypeStr()
+        if (lunar_rift_worlds[world_type] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "lunarrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
+            or (shadow_rift_worlds[world_type] and (table.typecheckedgetfield(EventTimer.EventTimerData, "string", "shadowrift_portal", EventTimer.CurrentShardId, "text") or "") == "")
+            or not (lunar_rift_worlds[world_type] or shadow_rift_worlds[world_type]) -- 猪镇世界？
         then
             return GetWorldSettingsTimeLeft("rift_spawn_timer")
         end
