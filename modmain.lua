@@ -347,7 +347,11 @@ local file_env = {
 }
 if GLOBAL.TheNet:GetIsServer() then
     AddComponentPostInit("clock", function(self)
-        file_env.CalcTimeOfDay = Upvaluehelper.GetUpvalue(self.Dump, "CalcTimeOfDay") -- 今天还剩多少时间
+        local TheWorld = GLOBAL.TheWorld
+        local SW = TheWorld:HasTag("island") or TheWorld:HasTag("volcano")
+        local HAM = TheWorld:HasTag("porkland")
+        local clocktype = SW and "_tropical" or HAM and "_plateau" or ""
+        file_env.CalcTimeOfDay = Upvaluehelper.GetUpvalue(self["Dump" .. clocktype], "CalcTimeOfDay") -- 今天还剩多少时间
     end)
 end
 

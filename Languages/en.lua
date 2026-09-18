@@ -99,7 +99,7 @@ STRINGS.eventtimer = {
     },
     forestdaywalkerspawner = {
         cooldown = "<prefab=daywalker2> will respawn in %s",
-        ready = "<prefab=daywalker2> ready to spawn",
+        ready = "<prefab=daywalker2> is waiting for you to dig it out",
         exists = "<prefab=daywalker2> is present",
         tips = "<prefab=daywalker2> has respawned!",
     },
@@ -221,6 +221,17 @@ STRINGS.eventtimer = {
         despawn = "<prefab=klaus_sack_tropical> will despawn on day %s",
         despawntext = "Despawns on day: %s",
         tips = "<prefab=klaus_sack_tropical> has respawned!",
+    },
+    islandsdaywalkerspawner = {
+        cooldown = "<prefab=daywalker2> will respawn in %s",
+        ready = "<prefab=daywalker2> is waiting for you to dig it out",
+        exists = "<prefab=daywalker2> is present",
+        tips = "<prefab=daywalker2> has respawned!",
+    },
+    daywalkerspawner_tropical = {
+        cooldown = "<prefab=daywalker> will respawn in %s",
+        ready = "<prefab=daywalker> is ready",
+        tips = "<prefab=daywalker> has respawned!",
     },
 
     ----------------------------------------Hamlet----------------------------------------

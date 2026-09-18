@@ -63,6 +63,8 @@ local ShipwreckedEvents = rawget(_G, "IA_SW_ENABLED") and {
     krakener = RequireEvent("IslandAdventures/krakener"),
     tigersharker = RequireEvent("IslandAdventures/tigersharker"),
     islandsklaussackspawner = RequireEvent("IslandAdventures/islandsklaussackspawner"),
+    islandsdaywalkerspawner = RequireEvent("IslandAdventures/islandsdaywalkerspawner"),
+    daywalkerspawner_tropical = RequireEvent("IslandAdventures/daywalkerspawner_tropical"),
 } or {}
 
 -- 将海难计时添加到WarningEvents

@@ -13,7 +13,11 @@ info = {
     gettimefn = function(self)
         if not self then return end
         local shard_daywalkerspawner = TheWorld.shard.components.shard_daywalkerspawner
-        if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "forestjunkpile" or self.daywalker ~= nil or self.bigjunk ~= nil or not self.days_to_spawn or not CalcTimeOfDay then
+        if shard_daywalkerspawner ~= nil and shard_daywalkerspawner:GetLocationName() ~= "forestjunkpile"
+            or self.daywalker ~= nil
+            or self.bigjunk ~= nil
+            or not self.days_to_spawn
+            or not CalcTimeOfDay then
             return
         end
         return (self.days_to_spawn + 1) * TUNING.TOTAL_DAY_TIME - CalcTimeOfDay()
@@ -39,13 +43,14 @@ info = {
     },
     announcefn = function(context)
         local time = context.time
-        local text = context.text
-        if text ~= "" then
-            text = string.gsub(text,"\n",": ")
-            return text
-        elseif time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
+        local desc
+        if time > 0 then -- 可能会出现 世界1(森林) x天x分x秒的情况，所以优先检查时间
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.cooldown), TimeToString(time))
+            desc = MarkData(desc, context)
+        elseif not Extract_by_format(context.text, STRINGS.eventtimer.forestdaywalkerspawner.cooldown) then
+            desc = string.gsub(context.text,"\n",": ")
         end
+        return desc
     end,
     tipsfn = function(context)
         if string.find(context.text, ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)) then

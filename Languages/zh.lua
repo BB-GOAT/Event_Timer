@@ -223,6 +223,17 @@ STRINGS.eventtimer = {
         despawntext = "消失于第%s天",
         tips = "<prefab=klaus_sack_tropical>已刷新！",
     },
+    islandsdaywalkerspawner = { -- 海难拾荒疯猪
+        cooldown = "<prefab=daywalker2>会重生于%s后",
+        ready = "<prefab=daywalker2>正在等你去挖出",
+        exists = "<prefab=daywalker2>正在出没",
+        tips = "<prefab=daywalker2>已刷新！",
+    },
+    daywalkerspawner_tropical = { -- 火山梦魇疯猪
+        cooldown = "<prefab=daywalker>会重生于%s后",
+        ready = "<prefab=daywalker>已刷新",
+        tips = "<prefab=daywalker>已刷新！",
+    },
 
     ----------------------------------------猪镇----------------------------------------
 
