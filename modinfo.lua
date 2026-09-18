@@ -17,8 +17,8 @@ You can tick the checkbox on the right side of the panel to keep the timer alway
 点击事件可宣告其信息
 ]])
 author = "冰冰羊，Jerry"
-version = "0.3" -- 模组版本
-version_compatible = "0.3" -- 最低兼容版本
+version = "1.0" -- 模组版本
+version_compatible = "1.0" -- 最低兼容版本
 api_version = 10
 
 --[[
@@ -28,8 +28,9 @@ api_version = 10
 永不妥协 priority = -10
 永不妥协公开测试版 priority = -10
 热带冒险 priority = -100
+深埋之下 priority = -9999999
 ]]
-priority = -11 -- 模组加载优先级(比岛屿冒险、云霄国度、永不妥协低，比热带冒险高)
+priority = -11 -- 模组加载优先级
 
 dst_compatible = true -- 兼容联机版
 dont_starve_compatible = false -- 不兼容单机版
