@@ -1,9 +1,10 @@
 -- 以防万一
 GLOBAL.setmetatable(env, {
     __index = function(t, k)
-        local info = GLOBAL.debug.getinfo(2)
-        if not info.source:find(modname) then return end
-        print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
+        if not modname:find("workshop%-") then
+            local info = GLOBAL.debug.getinfo(2)
+            print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
+        end
         return GLOBAL.rawget(GLOBAL, k)
     end
 })
@@ -112,7 +113,7 @@ if not GLOBAL.rawget(GLOBAL, "BBGOAT_utils") then
     print("强制退出游戏！")
 
     -- Crash the game
-    local inst = CreateEntity()
+    local inst = GLOABL.CreateEntity()
 	inst.entity:AddTransform()
 	inst.entity:SetParent(inst.entity)
 

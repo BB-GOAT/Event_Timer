@@ -95,7 +95,7 @@ AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, eve
     -- if not (checkstring(event) and checknumber(timedata) and checkstring(worldtype)) then return end
 
     if not warningtimer[event][shardid] then
-        warningtimer[event][shardid] = {}
+        warningtimer[event][shardid] = { time = 0, text = "" }
     end
 
     warningtimer[event][shardid].time = timedata
@@ -112,7 +112,7 @@ AddShardModRPCHandler("EventTimer", "event_text_shardrpc", function(shardid, eve
     -- if not (checkstring(event) and checkstring(textdata) and checkstring(worldtype)) then return end
 
     if not warningtimer[event][shardid] then
-        warningtimer[event][shardid] = {}
+        warningtimer[event][shardid] = { time = 0, text = "" }
     end
 
     warningtimer[event][shardid].text = textdata or ""
@@ -287,7 +287,10 @@ GLOBAL.EventTimer.AddTimerDescriptor = function(warningevent, data)
             self:ListenForEvent("onremove", function()
                 MOD_util:Warning(GLOBAL.tostring(warningevent) .. "事件依赖的实体" .. GLOBAL.tostring(data.timerprefab) .. "已被移除")
                 valid_data[warningevent] = nil
-                warningtimer[warningevent][ShardId] = {}
+                warningtimer[warningevent][ShardId] = {
+                    time = 0,
+                    text = "",
+                }
                 SyncEventData(warningevent, 0, "event_timerpc", ShardId)
                 SyncEventData(warningevent, "", "event_textrpc", ShardId)
                 if not data.DisableShardRPC then
@@ -521,7 +524,10 @@ AddPrefabPostInit("world", function(self)
     for warningevent in pairs(GLOBAL.WarningEvents) do
         if not warningtimer[warningevent] then
             warningtimer[warningevent] = {
-                [ShardId] = {}
+                [ShardId] = {
+                    time = 0,
+                    text = "",
+                }
             }
         end
     end
