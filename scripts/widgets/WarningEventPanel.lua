@@ -229,7 +229,13 @@ end)
 
 -- 更新数据
 function WarningEventHUD:UpdateDestItem()
-    if not ThePlayer then return end
+    if not ThePlayer then
+        if self.updatetask then
+            self.updatetask:Cancel()
+            self.updatetask = nil
+        end
+        return
+    end
     local data_list = {}
     local eventsdata = ThePlayer.HUD.WarningEventTimeData
     for name, value in pairs(ClientWarningEvents) do
