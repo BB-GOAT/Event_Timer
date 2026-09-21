@@ -139,6 +139,13 @@ local function AddWarningEvents(self)
     local panel_data_snapshot = {}
     local panel_data_revision = 0
     TarnsferPanel.UpdateDestItem = function(self)
+        if not ThePlayer then
+            if self.updatetask then
+                self.updatetask:Cancel()
+                self.updatetask = nil
+            end
+            return
+        end
         -- TrueScrollList:SetItemsData 会重新应用所有可见行，仅在面板数据实际变化时刷新。
         if self._event_timer_panel_data_revision ~= panel_data_revision then
             self.scrollpanel:SetItemsData(Panel_data_list) -- 面板数据
