@@ -224,9 +224,8 @@ GLOBAL.WarningEvents.beequeenhive = {
 
 -- 总结：gettimefn/gettextfn 在服务器执行，imagechangefn/animchangefn/announcefn/tipsfn 在客户端执行，客户端无法调用 gettimefn/gettextfn
 
--- gettimefn/gettextfn 的返回类型和保存位置要严格遵守：
--- gettimefn 必须返回 number（秒），同名数据保存到 GLOBAL.ThePlayer.HUD.WarningEventTimeData.<event>_time。
--- gettextfn 必须返回 string，保存到 GLOBAL.ThePlayer.HUD.WarningEventTimeData.<event>_text
+-- gettimefn 返回 number|nil
+-- gettextfn 返回 string|nil
 
 -- 最后，将本模组和你的模组一起启用即可
 -- 本模组的各事件记录在 main/warningevents.lua 里
