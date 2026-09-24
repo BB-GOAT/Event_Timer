@@ -184,8 +184,8 @@ info = {
             desc = text
         else
             desc = time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[world_type]), TimeToString(time))
+            desc = MarkData(desc, context)
         end
-        desc = MarkData(desc, context)
         return desc
     end,
     tipsfn = function(context)
