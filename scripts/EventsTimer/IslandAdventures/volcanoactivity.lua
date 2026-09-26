@@ -44,7 +44,7 @@ info = {
         end)
     end,
     remotegettimefninterval = function()
-        return target_time_interval
+        return math.min(30, target_time_interval)
     end,
     image = {
         atlas = "images/Volcano_Active.xml",

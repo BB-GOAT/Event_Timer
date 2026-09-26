@@ -85,9 +85,6 @@ local remotegettextfn = function(Thread)
             if target_name then
                 local str = string.format(STRINGS.eventtimer.twisterspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
                 SaveTextData("twisterspawner", str)
-            else
-                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(ThePlayer.HUD.WarningEventTimeData.twisterspawner_time))
-                SaveTextData("twisterspawner", str)
             end
         end
     end)
@@ -114,6 +111,8 @@ info = {
                 if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("twisterspawner", res.time)
+                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.twisterspawner.cooldown), TimeToString(res.time))
+                SaveTextData("twisterspawner", str)
             elseif res and res.not_found then
                 -- 取消数据更新任务
                 if Thread then KillThreadsWithID(Thread.id) end
@@ -121,7 +120,12 @@ info = {
         end)
     end,
     remotegettextfn = remotegettextfn,
-    remotegettextfninterval = 1,
+    remotegettextfninterval = function()
+        local time = ThePlayer.HUD.WarningEventTimeData.twisterspawner_time
+        if time > 55 then
+            return time - 55
+        end
+    end,
     image = {
         atlas = "images/Twister.xml",
         tex = "Twister.tex",

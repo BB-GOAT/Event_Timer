@@ -85,9 +85,6 @@ local remotegettextfn = function(Thread)
             if target_name then
                 local str = string.format(STRINGS.eventtimer.deerclopsspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time))
                 SaveTextData("deerclopsspawner", str)
-            else
-                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.cooldown), TimeToString(ThePlayer.HUD.WarningEventTimeData.deerclopsspawner_time))
-                SaveTextData("deerclopsspawner", str)
             end
         end
     end)
@@ -113,6 +110,8 @@ info = {
                 if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("deerclopsspawner", res.time)
+                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.deerclopsspawner.cooldown), TimeToString(res.time))
+                SaveTextData("deerclopsspawner", str)
             elseif res and res.not_found then
                 -- 取消数据更新任务
                 if Thread then KillThreadsWithID(Thread.id) end
