@@ -44,7 +44,7 @@ info = {
     end,
     tipsfn = function(context)
         if context.text == ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready) and context.shard_id == EventTimer.CurrentShardId then -- 其它世界的text的前缀可能会被玩家关掉，仍需检查shard_id
-            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.farming_manager.tips)), 5, nil, 3
+            return true, (GetTime() > 10) and StringToFunction(ReplacePrefabName(STRINGS.eventtimer.farming_manager.tips)), 5, nil, 3
         end
         return false
     end,
