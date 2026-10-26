@@ -1,7 +1,14 @@
 -- 纯本地获取方式
 local localgettimefn = function()
-    AddPrefabPostInit("lunarrift_portal", function()
+    AddPrefabPostInit("lunarrift_portal", function() -- 月亮裂隙
         SaveTimeData("lunar_riftspawner", 0)
+    end)
+
+    MOD_util:AddPlayerPostInit(function(world, player)
+        if player ~= ThePlayer then return end
+        player:ListenForEvent("localplayer._lunarportalmax", function()
+            SaveTimeData("lunar_riftspawner", 0)
+        end)
     end)
 
     local need_save = false

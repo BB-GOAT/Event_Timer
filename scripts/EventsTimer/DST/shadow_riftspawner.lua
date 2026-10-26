@@ -3,6 +3,14 @@ local localgettimefn = function()
     AddPrefabPostInit("shadowrift_portal", function() -- 暗影裂隙
         SaveTimeData("shadow_riftspawner", 0)
     end)
+
+    MOD_util:AddPlayerPostInit(function(world, player)
+        if player ~= ThePlayer then return end
+        player:ListenForEvent("localplayer._shadowportalmax", function()
+            SaveTimeData("shadow_riftspawner", 0)
+        end)
+    end)
+
     AddPrefabPostInit("charlie_hand", function(inst) -- 召唤之手
         inst:DoTaskInTime(0.2, function(inst)
             inst:ListenForEvent("onremove", function(inst)
