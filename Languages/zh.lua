@@ -149,6 +149,14 @@ STRINGS.eventtimer = {
     toadstoolspawner = { -- 毒菌蟾蜍
 		cooldown = "<prefab=toadstool>会重生于%s后",
     },
+    rockybossspawner = { -- 石虾王
+        cooldown = "<prefab=rocky_boss>将在%s后尝试生成",
+    },
+    batbosscave = { -- 猎犬蝙蝠
+        cooldown = "%s后重生",
+        announce = "<prefab=bat_boss>: %s",
+        tips = "<prefab=bat_boss>已刷新！",
+    },
     atrium_gate = { -- 远古大门
 		cooldown = "<prefab=atrium_gate>会重置于%s后",
         destabilizing = "远古遗迹会重置于%s后",

@@ -148,6 +148,15 @@ STRINGS.eventtimer = {
     toadstoolspawner = {
 		cooldown = "<prefab=toadstool> will respawn in %s",
     },
+    rockybossspawner = {
+        cooldown = "<prefab=rocky_boss> will try to spawn in %s",
+        tips = "<prefab=rocky_boss> has respawned!",
+    },
+    batbosscave = {
+        cooldown = "Respawns in %s",
+        announce = "<prefab=bat_boss>: %s",
+        tips = "<prefab=bat_boss> has respawned!",
+    },
     atrium_gate = {
 		cooldown = "<prefab=atrium_gate> will reset in %s",
         destabilizing = "The ruins will reset in %s",

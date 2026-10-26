@@ -1,11 +1,7 @@
 -- 以防万一
 GLOBAL.setmetatable(env, {
     __index = function(t, k)
-        if not modname:find("workshop%-") then
-            local info = GLOBAL.debug.getinfo(2)
-            if not string.find(info.source, modname) then return end
-            print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline)
-        end
+        local info = GLOBAL.debug.getinfo(2) if string.find(info.source, modname) then print("[全局事件计时器] 当前正在尝试从全局环境获取值", k, "调用于", info.source, info.currentline) end
         return GLOBAL.rawget(GLOBAL, k)
     end
 })
@@ -54,7 +50,11 @@ Assets = {
     Asset("IMAGE", "images/Roc.tex"),
 	Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- Tips部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
 	Asset("IMAGE", "images/dyc_panel_shadow.tex"),
+
     Asset("ANIM", "anim/nigthmarephaseindicator_eventtimer_server.zip"), -- 远古遗迹阶段倒计时贴图，来自【Nightmare phase indicator】模组
+    Asset("ANIM", "anim/rocky.zip"), -- 石虾王动作
+    Asset("ANIM", "anim/rocky_boss.zip"), -- 石虾王外观
+    Asset("ANIM", "anim/bat_boss.zip"), -- 猎犬蝙蝠
 }
 
 ----------------------------------------语言检测---------------------------------------

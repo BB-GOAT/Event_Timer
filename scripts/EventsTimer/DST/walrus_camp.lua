@@ -51,10 +51,12 @@ info = {
         if not TheNet:GetIsServer() then return end
         -- 收集世界上的海象巢
         AddPrefabPostInit("walrus_camp", function(inst)
-            local x, y, z = inst.Transform:GetWorldPosition()
-            table.insert(walrus_house_list, {ent = inst, x = x, z = z})
-            table.sort(walrus_house_list, function(a, b) -- 按坐标排序，使得每次序号一致
-                return a.x < b.x
+            inst:DoTaskInTime(0, function(inst)
+                local x, y, z = inst.Transform:GetWorldPosition()
+                table.insert(walrus_house_list, {ent = inst, x = x, z = z})
+                table.sort(walrus_house_list, function(a, b)
+                    return a.x < b.x or (a.x == b.x and a.z < b.z)
+                end)
             end)
             inst:ListenForEvent("onremove", function(inst)
                 for i, v in ipairs(walrus_house_list) do
