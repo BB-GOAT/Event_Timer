@@ -173,7 +173,7 @@ info = {
             y = 0,
         }
     },
-    -- DisableShardRPC = true,
+    DisableShardRPC = true,
     announcefn = function(context)
         local time = context.time
         local text = context.text

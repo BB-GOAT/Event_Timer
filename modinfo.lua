@@ -121,6 +121,7 @@ configuration_options = {
             {description = "10s", data = 10},
         },
         default = 1,
+        slider_data = {1, 10, 1}, -- 3 个数字：最小值、最大值、步长
     },
     {
         name = "BossTimer",

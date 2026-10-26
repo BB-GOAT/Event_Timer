@@ -127,6 +127,8 @@ batted = {
         return desc
     end,
     tipsfn = function(context)
+        if context.shard_id ~= EventTimer.CurrentShardId then return end
+
         local time = context.time
         if time > 2 and time <= 90 then
             return true, batted.announcefn, time, nil, 2
