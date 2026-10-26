@@ -135,6 +135,8 @@ end
 ----------------------------------------加载资源---------------------------------------
 
 Assets = {
+    Asset("ATLAS", "images/Bat.xml"), -- 蝙蝠
+    Asset("IMAGE", "images/Bat.tex"),
     Asset("ATLAS", "images/Hound.xml"), -- 猎犬
     Asset("IMAGE", "images/Hound.tex"),
     Asset("ATLAS", "images/Depths_Worm.xml"), -- 洞穴蠕虫
@@ -173,6 +175,10 @@ Assets = {
     Asset("ATLAS", "images/dyc_panel_shadow.xml"), -- 醒目提示部件背景，来自单机饥荒模组【全能信息面板】，感谢DYC
     Asset("IMAGE", "images/dyc_panel_shadow.tex"),
     Asset("ANIM", "anim/nigthmarephaseindicator_eventtimer_client.zip"), -- 远古遗迹阶段倒计时贴图，来自【Nightmare phase indicator】模组
+
+    Asset("ANIM", "anim/rocky.zip"), -- 岩石大师动作
+    Asset("ANIM", "anim/rocky_boss.zip"), -- 岩石大师外观
+    Asset("ANIM", "anim/bat_boss.zip"), -- 猎犬蝙蝠
 }
 
 ----------------------------------------语言检测---------------------------------------

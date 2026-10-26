@@ -1,7 +1,7 @@
 -- 暗影裂隙信息，参考了Insight代码 https://steamcommunity.com/sharedfiles/filedetails/?id=2189004162 @penguin0616
 
 local remotegettextfn = function(Thread)
-    if not (TheWorld and TheWorld:HasTag("cave")) then -- 仅在洞穴世界更新数据
+    if not TheWorld:HasTag("cave") then -- 仅在洞穴世界更新数据
         -- 取消数据更新任务
         if Thread then KillThreadsWithID(Thread.id) end
         return

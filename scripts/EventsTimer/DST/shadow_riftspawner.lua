@@ -41,7 +41,7 @@ info = {
             return
         end
 
-        if not (TheWorld and TheWorld:HasTag("cave")) then -- 仅在洞穴世界更新数据
+        if not TheWorld:HasTag("cave") then -- 仅在洞穴世界更新数据
             -- 取消数据更新任务
             if Thread then KillThreadsWithID(Thread.id) end
             return

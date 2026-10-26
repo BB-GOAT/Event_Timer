@@ -147,6 +147,14 @@ STRINGS.eventtimer = {
     toadstoolspawner = { -- 毒菌蟾蜍
 		cooldown = "<prefab=toadstool>会重生于%s后",
     },
+    rockybossspawner = { -- 岩石大师
+        cooldown = "<prefab=rocky_boss>将在%s后尝试生成",
+    },
+    batbosscave = { -- 猎犬蝙蝠
+        cooldown = "%s后重生",
+        announce = "<prefab=bat_boss>: %s",
+        tips = "<prefab=bat_boss>已刷新！",
+    },
     atrium_gate = { -- 远古大门
 		cooldown = "<prefab=atrium_gate>会重置于%s后",
         destabilizing = "远古遗迹会重置于%s后",
@@ -174,6 +182,12 @@ STRINGS.eventtimer = {
     yoth_knightmanager = {
         announce = "我的<prefab=knight_yoth>会重生于%s后",
         tips = "<prefab=knight_yoth>已准备就绪",
+    },
+
+    acidbatwavemanager = { -- 硝石蝙蝠
+        chance = "<prefab=bat>袭击概率: %.1f%% (预计: %.1f%%)",
+        next_wave_spawn = "<prefab=bat>袭击(%s)于%s后",
+        cooldown = "<prefab=bat>袭击冷却: %s",
     },
 
     ----------------------------------------海难----------------------------------------

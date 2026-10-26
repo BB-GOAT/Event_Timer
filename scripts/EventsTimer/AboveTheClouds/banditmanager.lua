@@ -16,7 +16,6 @@ end
 ----------------------------------------------------------------------------------------------
 
 local remotegettextfn = function(Thread)
-    if not TheWorld:HasTag("cave") then return end
     local cmd = [[
         local self = TheWorld.components.banditmanager
         if not self then return DataDumper({ not_found = true })end

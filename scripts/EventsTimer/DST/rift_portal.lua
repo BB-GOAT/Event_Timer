@@ -2,7 +2,7 @@
 
 -- 吓哭了
 local remotegettextfn = function(Thread)
-    if not (TheWorld and TheWorld:HasTag("forest")) then -- 仅在森林世界更新数据
+    if not TheWorld:HasTag("forest") then -- 仅在森林世界更新数据
         -- 取消数据更新任务
         if Thread then KillThreadsWithID(Thread.id) end
         return

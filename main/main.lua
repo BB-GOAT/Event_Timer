@@ -24,11 +24,15 @@ MOD_util:AddPlayerPostInit(function(world, player)
             -- 首次加载（快速初始化）
             for warningevent, data in pairs(GLOBAL.ClientWarningEvents) do
                 if data.remotegettimefn and (not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] or data.ForceEnableRemotegettimefn) then
-                    data.remotegettimefn()
+                    if check_ThePlayer() then
+                        data.remotegettimefn()
+                    end
                     GLOBAL.Sleep(0.1)
                 end
                 if data.remotegettextfn and (not GLOBAL.EventTimer.GetTimeFromServerMod[warningevent] or data.ForceEnableRemotegettextfn) then
-                    data.remotegettextfn()
+                    if check_ThePlayer() then
+                        data.remotegettextfn()
+                    end
                     GLOBAL.Sleep(0.1)
                 end
             end

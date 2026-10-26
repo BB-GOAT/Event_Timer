@@ -35,6 +35,8 @@ GameEvents = {
     daywalkerspawner = RequireEvent("DST/daywalkerspawner"), -- 梦魇疯猪
     shadowthrallmanager = RequireEvent("DST/shadowthrallmanager"), -- 梦魇裂隙/墨荒(纯本地数据不完全可靠)
     toadstoolspawner = RequireEvent("DST/toadstoolspawner"), -- 毒菌蟾蜍
+    rockybossspawner = RequireEvent("DST/rockybossspawner"), -- 岩石大师(仅远程命令)
+    batbosscave = RequireEvent("DST/batbosscave"), -- 猎犬蝙蝠(仅远程命令)
     atrium_gate = RequireEvent("DST/atrium_gate"), -- 远古大门
     nightmareclock = RequireEvent("DST/nightmareclock"), -- 遗迹当前阶段(纯本地)
     quaker = RequireEvent("DST/quaker"), -- 地震(无法纯本地)
@@ -44,6 +46,7 @@ GameEvents = {
     -- 针对单个玩家的事件
     flotsamgenerator = RequireEvent("DST/flotsamgenerator"), -- 瓶中信(无法纯本地)
     yoth_knightmanager = RequireEvent("DST/yoth_knightmanager"), -- 镀金骑士(每个玩家有单独的倒计时，纯本地可能被其他玩家影响)
+    acidbatwavemanager = RequireEvent("DST/acidbatwavemanager"), -- 硝石蝙蝠(仅远程命令，当前玩家)
 }
 for k, v in pairs(GameEvents) do
     ClientWarningEvents[k] = v

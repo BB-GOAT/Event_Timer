@@ -146,6 +146,14 @@ STRINGS.eventtimer = {
     toadstoolspawner = {
 		cooldown = "<prefab=toadstool> will respawn in %s.",
     },
+    rockybossspawner = {
+        cooldown = "<prefab=rocky_boss> will try to spawn in %s",
+    },
+    batbosscave = {
+        cooldown = "Respawns in %s",
+        announce = "<prefab=bat_boss>: %s",
+        tips = "<prefab=bat_boss> has respawned!",
+    },
     atrium_gate = {
 		cooldown = "<prefab=atrium_gate> will reset in %s.",
         destabilizing = "The ruins will reset in %s.",
@@ -174,6 +182,12 @@ STRINGS.eventtimer = {
     yoth_knightmanager = {
         announce = "My <prefab=knight_yoth> will respawn in %s.",
         tips = "<prefab=knight_yoth> ready to spawn."
+    },
+
+    acidbatwavemanager = {
+        chance = "Chance of bat raid: %.1f%% (estimated: %.1f%%)",
+        next_wave_spawn = "<prefab=bat> raid (%s) arrives in %s",
+        cooldown = "<prefab=bat> attack cooldown: %s",
     },
 
     ----------------------------------------Shipwrecked----------------------------------------
