@@ -15,17 +15,34 @@ local localgettimefn = function()
             end)
         end)
     end)
-    AddPrefabPostInit("charlie_npc", function(inst) -- 查理
-        inst:DoTaskInTime(0.2, function(inst)
-            inst:ListenForEvent("onremove", function(inst)
-                if inst and inst:IsValid() and inst.AnimState then
-                    local bank, anim, frame = inst.AnimState:GetHistoryData()
-                    if anim:find("spawn_out") then
-                        SaveTimeData("shadow_riftspawner", TUNING.RIFTS_SPAWNDELAY) -- 暗影裂隙生成倒计时
-                    end
-                end
-            end)
-        end)
+    AddPrefabPostInit("atrium_gate", function(inst)
+        if TheWorld.ismastersim then
+            -- 主机直接监听真正解锁裂隙的事件；钥石过场不会触发此事件。
+            inst:ListenForEvent("shadowrift_opened", function()
+                SaveTimeData("shadow_riftspawner", TUNING.RIFTS_SPAWNDELAY)
+            end, TheWorld)
+            return
+        end
+
+        -- charliecutscene:Finish 与 FinishKeySocket 都会解除镜头锁定，
+        -- 但只有修复大门的过场开始时仍使用 atrium_gate（未修复）build。
+        -- socketing_key / _running 等字段不向客户端同步，不能用于区分。
+        local repairing_gate = false
+        local function OnCameraLockedDirty()
+            local cutscene = inst.components.charliecutscene
+            if not (cutscene and cutscene._iscameralocked) then return end
+
+            if cutscene._iscameralocked:value() then
+                repairing_gate = repairing_gate or inst.AnimState:GetBuild() == "atrium_gate"
+            elseif repairing_gate then
+                repairing_gate = false
+                SaveTimeData("shadow_riftspawner", TUNING.RIFTS_SPAWNDELAY)
+            end
+        end
+
+        inst:ListenForEvent("iscameralockeddirty", OnCameraLockedDirty)
+        -- 与原版组件一样，在同步完成后读取一次，兼容过场期间进入视野。
+        inst:DoTaskInTime(0, OnCameraLockedDirty)
     end)
 end
 
