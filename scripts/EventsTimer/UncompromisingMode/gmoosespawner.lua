@@ -85,6 +85,8 @@ local remotegettextfn = function(Thread)
             if target_name then
                 local str = string.format(STRINGS.eventtimer.gmoosespawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.gmoosespawner_time))
                 SaveTextData("gmoosespawner", str)
+            else
+                SaveTextData("gmoosespawner", "")
             end
         end
     end)
@@ -110,8 +112,6 @@ info = {
                 if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("gmoosespawner", res.time)
-                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.gmoosespawner.cooldown), TimeToString(res.time))
-                SaveTextData("gmoosespawner", str)
             elseif res and res.not_found then
                 -- 取消数据更新任务
                 if Thread then KillThreadsWithID(Thread.id) end

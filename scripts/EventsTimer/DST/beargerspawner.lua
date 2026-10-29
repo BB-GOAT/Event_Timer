@@ -82,6 +82,8 @@ local remotegettextfn = function(Thread)
             if target_name then
                 local str = string.format(STRINGS.eventtimer.beargerspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.beargerspawner_time))
                 SaveTextData("beargerspawner", str)
+            else
+                SaveTextData("beargerspawner", "")
             end
         else
             target_name = nil
@@ -110,8 +112,6 @@ info = {
                 if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("beargerspawner", res.time)
-                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.beargerspawner.cooldown), TimeToString(res.time))
-                SaveTextData("beargerspawner", str)
             end
         end)
     end,

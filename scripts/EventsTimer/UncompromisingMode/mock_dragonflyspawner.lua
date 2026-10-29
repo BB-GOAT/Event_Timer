@@ -87,6 +87,8 @@ local remotegettextfn = function(Thread)
             if target_name then
                 local str = string.format(STRINGS.eventtimer.mock_dragonflyspawner.targeted, target_name, TimeToString(ThePlayer.HUD.WarningEventTimeData.mock_dragonflyspawner_time))
                 SaveTextData("mock_dragonflyspawner", str)
+            else
+                SaveTextData("mock_dragonflyspawner", "")
             end
         end
     end)
@@ -112,8 +114,6 @@ info = {
                 if Thread then KillThreadsWithID(Thread.id) end
             elseif res and res.time then
                 SaveTimeData("mock_dragonflyspawner", res.time)
-                local str = string.format(ReplacePrefabName(STRINGS.eventtimer.mock_dragonflyspawner.cooldown), TimeToString(res.time))
-                SaveTextData("mock_dragonflyspawner", str)
             elseif res and res.not_found then
                 -- 取消数据更新任务
                 if Thread then KillThreadsWithID(Thread.id) end
