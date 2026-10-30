@@ -42,7 +42,7 @@ info = {
         end)
     end,
     remotegettextfninterval = function()
-        return target_time_interval
+        return math.min(60, target_time_interval or 60)
     end,
     image = {
         atlas = "images/inventoryimages2.xml",

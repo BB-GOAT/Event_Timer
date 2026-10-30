@@ -104,11 +104,13 @@ local info
 info = {
     remotegettimefn = remotegettimefn,
     remotegettextfn = remotegettextfn,
-    remotegettimefninterval = function() -- 直接返回CalcTimeOfDay的话会因未初始化而变为nil
-        return CalcTimeOfDay()
+    remotegettimefninterval = function()
+        local CalcTimeOfDay = CalcTimeOfDay()
+        return math.min(60, CalcTimeOfDay)
     end,
-    remotegettextfninterval = function() -- 直接返回CalcTimeOfDay的话会因未初始化而变为nil
-        return CalcTimeOfDay()
+    remotegettextfninterval = function()
+        local CalcTimeOfDay = CalcTimeOfDay()
+        return math.min(60, CalcTimeOfDay)
     end,
     DisableClientPredictionClearText = true,
     anim = {

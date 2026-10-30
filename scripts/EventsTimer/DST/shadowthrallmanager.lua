@@ -108,7 +108,7 @@ local info
 info = {
     remotegettextfn = remotegettextfn,
     remotegettextfninterval = function()
-        return target_text_interval
+        return math.min(60, target_text_interval or 60)
     end,
     DisableClientPredictionClearText = true, -- 正常情况下没有time信息，需要此选项避免text被删除
     image = {

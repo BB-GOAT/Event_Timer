@@ -92,8 +92,9 @@ local info
 info = {
     remotegettimefn = remotegettimefn,
     remotegettextfn = not IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) and remotegettextfn, -- 没开冬季盛宴活动的情况下，天亮的时候触发一次
-    remotegettextfninterval = function() -- 直接返回CalcTimeOfDay的话会因未初始化而变为nil
-        return CalcTimeOfDay()
+    remotegettextfninterval = function()
+        local CalcTimeOfDay = CalcTimeOfDay()
+        return math.min(60, CalcTimeOfDay)
     end,
     ForceEnableRemotegettextfn = true, -- 第三方模组并不能给赃物袋消失时间
     DisableClientPredictionClearText = true,

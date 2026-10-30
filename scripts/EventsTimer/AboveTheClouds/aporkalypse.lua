@@ -151,7 +151,7 @@ batted = {
         end)
     end,
     remotegettextfninterval = function()
-        return math.min(_bat_attack_time, _bat_regen_time) + 1
+        return math.min(_bat_attack_time, _bat_regen_time, 59) + 1
     end,
     anim = {
         scale = 0.08,

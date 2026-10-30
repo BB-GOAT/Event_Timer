@@ -163,9 +163,6 @@ info = {
         end)
     end,
     remotegettextfn = remotegettextfn,
-    remotegettextfninterval = function()
-        return ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and (ThePlayer.HUD.WarningEventTimeData.hounded_time + 5)
-    end,
     DisableSaveTime = true, -- 不同世界都有这个事件，保存了会数据冲突
     imagechangefn = function(self)
         local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
