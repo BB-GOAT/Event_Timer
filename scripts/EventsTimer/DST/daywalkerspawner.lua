@@ -105,6 +105,7 @@ info = {
         return math.min(60, CalcTimeOfDay)
     end,
     remotegettextfninterval = function()
+        local CalcTimeOfDay = CalcTimeOfDay()
         return math.min(60, CalcTimeOfDay)
     end,
     DisableClientPredictionClearText = true,
