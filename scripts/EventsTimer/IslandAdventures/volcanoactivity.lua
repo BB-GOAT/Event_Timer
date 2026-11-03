@@ -39,12 +39,12 @@ info = {
                 SaveTimeData("volcanoactivity", 0)
                 SaveTextData("volcanoactivity", "")
                 local time = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.volcanomanager_time
-                target_time_interval = time ~= 0 and (time + 1) or nil
+                target_time_interval = time and time ~= 0 and (time + 1) or nil
             end
         end)
     end,
     remotegettimefninterval = function()
-        return math.min(30, target_time_interval)
+        return math.min(30, target_time_interval or 30)
     end,
     image = {
         atlas = "images/Volcano_Active.xml",

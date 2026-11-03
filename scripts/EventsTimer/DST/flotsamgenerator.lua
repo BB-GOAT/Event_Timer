@@ -41,7 +41,7 @@ info = {
             end
         end)
     end,
-    remotegettextfninterval = function()
+    remotegettimefninterval = function()
         return math.min(60, target_time_interval or 60)
     end,
     image = {

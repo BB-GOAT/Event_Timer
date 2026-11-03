@@ -29,8 +29,8 @@ info = {
             end
         end)
     end,
-    remotegettextfninterval = function()
-        return math.min(60, target_time_interval)
+    remotegettimefninterval = function()
+        return math.min(60, target_time_interval or 60)
     end,
     anim = {
         scale = 0.08,
