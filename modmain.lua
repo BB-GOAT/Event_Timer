@@ -663,6 +663,11 @@ local file_env = {
     AddComponentPostInit = AddComponentPostInit,
     ---
     GetWorldSettingsTimeLeft = GetWorldSettingsTimeLeft, -- 从worldsettingstimer或TimerPrefabs获取倒计时
+    GetRemoteThreadList = function() -- 线程列表在玩家初始化后才创建，调用时再读取
+        if env.GetRemoteThreadList then
+            return env.GetRemoteThreadList()
+        end
+    end,
     CombineLines = CombineLines, -- 合并字符串
     ---
     ChangeanimByWintersFeast = ChangeanimByWintersFeast, -- 根据冬季盛宴活动决定anim

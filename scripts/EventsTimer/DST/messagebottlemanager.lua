@@ -6,9 +6,7 @@ local remotegettextfn = function(Thread)
             for _ in pairs(self.active_treasure_hunt_markers) do
                 count = count + 1
             end
-            if count > 0 then
-                return DataDumper({count = count, max = TUNING.MAX_ACTIVE_TREASURE_HUNTS})
-            end
+            return DataDumper({count = count, max = TUNING.MAX_ACTIVE_TREASURE_HUNTS})
         ]]
     BBGOAT_util:remote(cmd, nil, function(res)
         if res and res.err then

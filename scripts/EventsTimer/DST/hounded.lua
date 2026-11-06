@@ -109,7 +109,7 @@ local remotegettextfn = function(Thread)
             SaveTextData("hounded", "")
             print('[警告] hounded remotegettextfn error:', res.err)
             if Thread then KillThreadsWithID(Thread.id) end
-        elseif res.not_found then
+        elseif res and res.not_found then
             -- 取消数据更新任务
             if Thread then KillThreadsWithID(Thread.id) end
         elseif res then

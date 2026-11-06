@@ -17,18 +17,17 @@ aporkalypse = {
                     SaveTextData("aporkalypse", Next_Aporkalypse_Time and Next_Aporkalypse_Time > 0 and string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(Next_Aporkalypse_Time)) or "")
 
                     -- 状态变化，刷新相关事件计时
-                    if Next_Aporkalypse_Time == 0 and not flag then
-                        flag = true
-                        self.inst:DoTaskInTime(1, function()
-                            batted.remotegettextfn()
-                            aporkalypse_attack.remotegettextfn()
-                        end)
-                    elseif flag then
-                        flag = false
-                        self.inst:DoTaskInTime(1, function()
-                            batted.remotegettextfn()
-                            aporkalypse_attack.remotegettextfn()
-                        end)
+                    local active = Next_Aporkalypse_Time == 0
+                    if active ~= flag then
+                        flag = active
+                        if EventTimer.GetTimeFromRemoteCommand then
+                            self.inst:DoTaskInTime(1, function()
+                                if EventTimer.GetTimeFromRemoteCommand then
+                                    batted.remotegettextfn()
+                                    aporkalypse_attack.remotegettextfn()
+                                end
+                            end)
+                        end
                     end
                 end
             end)
@@ -51,9 +50,13 @@ aporkalypse = {
         local time = ThePlayer.HUD.WarningEventTimeData.aporkalypse_time
 
         if (JustEntered(time) and time < 2400) then
-            return true, string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(time)), 10, nil, 1
+            return true, function()
+                return string.format(STRINGS.eventtimer.aporkalypse.cooldown, TimeToString(ThePlayer.HUD.WarningEventTimeData.aporkalypse_time))
+            end, 10, nil, 1
         elseif time == 480 then
-            return true, string.format(STRINGS.eventtimer.aporkalypse.tips, TimeToString(time)), 10, nil, 2
+            return true, function()
+                return string.format(STRINGS.eventtimer.aporkalypse.tips, TimeToString(ThePlayer.HUD.WarningEventTimeData.aporkalypse_time))
+            end, 10, nil, 2
         elseif time == 0 then -- 这个写法比较特殊..为了保证大灾变确实开始了
             return true, not (GetTime() < 10) and StringToFunction(STRINGS.eventtimer.aporkalypse.tips_ready), 5, 1, 3 -- 延迟1秒是因为大灾变在1秒后才真正开始
         end

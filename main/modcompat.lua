@@ -122,11 +122,12 @@ if Ismodloaded("workshop-3511498282") then
     -- 事件列表
     local events = {
         hound = "hounded", -- 猎犬/蠕虫/鳄狗
+        worm = "hounded", -- 洞穴蠕虫
         deerclops_timetoattack = "deerclopsspawner", -- 独眼巨鹿
         klaussack_spawntimer = "klaussackspawner", -- 赃物袋
         rage = "sinkholespawner", -- 蚁狮
         bearger_timetospawn = "beargerspawner", -- 熊獾
-        dragonfly_spawner = "dragonfly_spawner", -- 龙蝇
+        regen_dragonfly = "dragonfly_spawner", -- 龙蝇
         beequeen = "beequeenhive", -- 蜂后
         regen_crabking = "crabkingspawner", -- 帝王蟹
         lordfruitfly_spawntime = "farming_manager", -- 果蝇王
@@ -184,7 +185,7 @@ if Ismodloaded("workshop-3511498282") then
     local rift_type
     local function get_rift_type()
         if TheWorld then
-            rift_type = (GetWorldtypeStr() == "cave" or GetWorldtypeStr() == "volcano" and "shadow_riftspawner") or "lunar_riftspawner"
+            rift_type = (GetWorldtypeStr() == "cave" or GetWorldtypeStr() == "volcano") and "shadow_riftspawner" or "lunar_riftspawner"
         end
         return rift_type
     end
@@ -243,7 +244,6 @@ if Ismodloaded("workshop-3511498282") then
                         cooldown_mode == 2 and string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(item.time))
                     )
                 else
-                    atrium_gate_events[item.name] = nil
                     SaveTimeData("atrium_gate", 0)
                     SaveTextData("atrium_gate", "")
                 end

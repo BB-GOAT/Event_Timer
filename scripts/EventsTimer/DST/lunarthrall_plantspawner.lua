@@ -4,15 +4,24 @@ local remotegettextfn = function(Thread)
         if not self then return end
 
         if not _G.EventTimerClient.lunarthrall_plant_inst then
-            _G.EventTimerClient.lunarthrall_plant_inst = {}
+            local plants = {}
+            _G.EventTimerClient.lunarthrall_plant_inst = plants
+            local function TrackPlant(inst)
+                table.insert(plants, inst)
+                inst:ListenForEvent("onremove", function()
+                    table.removearrayvalue(plants, inst)
+                end)
+            end
+            for _, inst in pairs(Ents) do
+                if inst.prefab == "lunarthrall_plant" and inst:IsValid() then
+                    TrackPlant(inst)
+                end
+            end
             local prefab = _G.Prefabs["lunarthrall_plant"]
             local _fn = prefab.fn
-            prefab.fn = function()
-                local inst = _fn()
-                table.insert(_G.EventTimerClient.lunarthrall_plant_inst, inst)
-                inst:ListenForEvent("onremove", function(inst)
-                    table.removearrayvalue(_G.EventTimerClient.lunarthrall_plant_inst, inst)
-                end)
+            prefab.fn = function(...)
+                local inst = _fn(...)
+                TrackPlant(inst)
                 return inst
             end
         end

@@ -29,7 +29,7 @@ local remotegettextfn = function(Thread)
         local self = TheWorld.components.tigersharker
         if not self then return DataDumper({ not_found = true })end
         if self.shark then
-            return DataDumper({ shark = self.shark })
+            return DataDumper({ shark = true })
         elseif self:CanSpawn(true, true) then
             return DataDumper({ canspawn = true })
         end

@@ -29,7 +29,7 @@ local remotegettextfn = function(Thread)
             SaveTextData("banditmanager", "")
             print('[警告] banditmanager remotegettextfn error:', res.err)
             if Thread then KillThreadsWithID(Thread.id) end
-        elseif res.not_found then
+        elseif res and res.not_found then
             -- 取消数据更新任务
             if Thread then KillThreadsWithID(Thread.id) end
         elseif res then
@@ -38,9 +38,9 @@ local remotegettextfn = function(Thread)
             local active_bandit = res.active_bandit
             if not (stolen_oincs and active_bandit) then return end
             if active_bandit == "true" then
-                return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext), stolen_oincs)
+                SaveTextData("banditmanager", string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext), stolen_oincs))
             elseif time then
-                return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown), TimeToString(time), stolen_oincs, active_bandit)
+                SaveTextData("banditmanager", string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown), TimeToString(time), stolen_oincs, active_bandit))
             end
         end
     end)

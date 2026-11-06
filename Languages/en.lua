@@ -94,7 +94,7 @@ STRINGS.eventtimer = {
         tips = "WARNING: <prefab=lordfruitfly> attack starts!"
     },
     piratespawner = {
-        cooldown = "Pirate Raid may occur in %s\nDecay rate: %sx"
+        cooldown = "Pirate Raid may occur in %s"
     },
     forestdaywalkerspawner = {
         cooldown = "<prefab=daywalker2> will respawn in %s.",

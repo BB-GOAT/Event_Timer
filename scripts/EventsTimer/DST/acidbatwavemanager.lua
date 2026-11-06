@@ -30,6 +30,7 @@ local info = {
             return DataDumper({ time = 0 })
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
+            if not res then return end
             if res.err or res.not_found then
                 SaveTimeData("acidbatwavemanager", 0)
                 SaveTextData("acidbatwavemanager", "")
