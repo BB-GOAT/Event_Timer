@@ -29,7 +29,7 @@ info = {
     DisableShardRPC = true, -- 我觉得同步这个意义不大
     announcefn = function(context)
         local time = context.time
-        local quaker = TheWorld.net and TheWorld.net.components.quaker
+        local quaker = TheWorld.net.components.quaker
         local text = quaker and quaker:IsQuaking() and STRINGS.eventtimer.quaker.remaining or STRINGS.eventtimer.quaker.cooldown
         return string.format(text, TimeToString(time))
     end,

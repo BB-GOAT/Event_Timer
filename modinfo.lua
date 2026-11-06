@@ -18,8 +18,8 @@ Click an event to announce its information in chat
 点击事件可宣告其信息
 ]])
 author = "冰冰羊，Jerry"
-version = "1.0.4" -- 模组版本
-version_compatible = "1.0" -- 最低兼容版本
+version = "1.1" -- 模组版本
+version_compatible = "1.1" -- 最低兼容版本
 api_version = 10
 
 --[[
