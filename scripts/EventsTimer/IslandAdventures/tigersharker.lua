@@ -8,15 +8,15 @@ info = {
     end,
     gettextfn = function(self, time)
         if self.shark then
-            return ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
+            return STRINGS.eventtimer.tigersharker.exists
         elseif self.CanSpawn and self:CanSpawn(true, true) then
             if time and time > 0 then
-                return string.format(ReplacePrefabName(STRINGS.eventtimer.tigersharker.cooldown), TimeToString(time))
+                return string.format(STRINGS.eventtimer.tigersharker.cooldown, TimeToString(time))
             else
                 return STRINGS.eventtimer.tigersharker.readytext
             end
         end
-        return ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn)
+        return STRINGS.eventtimer.tigersharker.nospawn
     end,
     anim = {
         scale = 0.03,

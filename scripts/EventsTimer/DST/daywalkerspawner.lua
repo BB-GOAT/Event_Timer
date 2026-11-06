@@ -22,7 +22,7 @@ info = {
     end,
     gettextfn = function(self, time)
         if self.daywalker ~= nil then
-            return ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner.ready)
+            return STRINGS.eventtimer.daywalkerspawner.ready
         end
     end,
     anim = {

@@ -27,7 +27,7 @@ aporkalypse = {
         if not Next_Aporkalypse_Time or Next_Aporkalypse_Time > 0 then return end
         local next_bat_attack = Upvaluehelper.GetUpvalue(self.OnUpdate, "_bat_time") -- 蝙蝠袭击倒计时
         if not (next_bat_attack and next_herald_attack) then return end
-        return string.format(ReplacePrefabName(STRINGS.eventtimer.aporkalypse.attack), TimeToString(next_bat_attack), TimeToString(next_herald_attack))
+        return string.format(STRINGS.eventtimer.aporkalypse.attack, TimeToString(next_bat_attack), TimeToString(next_herald_attack))
     end,
     imagechangefn = function(self, context)
         if Extract_by_format(context.text, ReplacePrefabName(STRINGS.eventtimer.aporkalypse.attack)) then

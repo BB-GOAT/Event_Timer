@@ -24,9 +24,9 @@ info = {
     end,
     gettextfn = function(self, time)
         if self.bigjunk ~= nil then
-            return ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.ready)
+            return STRINGS.eventtimer.forestdaywalkerspawner.ready
         elseif self.daywalker ~= nil then
-            return ReplacePrefabName(STRINGS.eventtimer.forestdaywalkerspawner.exists)
+            return STRINGS.eventtimer.forestdaywalkerspawner.exists
         end
     end,
     anim = {

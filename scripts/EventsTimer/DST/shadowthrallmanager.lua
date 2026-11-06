@@ -1,10 +1,10 @@
 -- 梦魇裂隙/墨荒信息，参考了Insight代码 https://steamcommunity.com/sharedfiles/filedetails/?id=2189004162 @penguin0616
 
 local THRALL_NAMES = setmetatable({
-    shadowthrall_hands = STRINGS.NAMES.SHADOWTHRALL_HANDS_ALLEGIANCE,
-    shadowthrall_horns = STRINGS.NAMES.SHADOWTHRALL_HORNS_ALLEGIANCE,
-    shadowthrall_wings = STRINGS.NAMES.SHADOWTHRALL_WINGS_ALLEGIANCE,
-    shadowthrall_mouth = STRINGS.NAMES.SHADOWTHRALL_MOUTH_ALLEGIANCE,
+    shadowthrall_hands = "<prefab=shadowthrall_hands_allegiance>",
+    shadowthrall_horns = "<prefab=shadowthrall_horns_allegiance>",
+    shadowthrall_wings = "<prefab=shadowthrall_wings_allegiance>",
+    shadowthrall_mouth = "<prefab=shadowthrall_mouth_allegiance>",
 }, {
     __index = function(self, index)
         rawset(self, index, "???")
@@ -58,7 +58,7 @@ info = {
             end
 
             if data.dreadstonecooldown then
-                fissure_string = string.format(ReplacePrefabName(STRINGS.eventtimer.shadowthrallmanager.dreadstone_regen), TimeToString(data.dreadstonecooldown))
+                fissure_string = string.format(STRINGS.eventtimer.shadowthrallmanager.dreadstone_regen, TimeToString(data.dreadstonecooldown))
             end
         elseif data.cooldown then
             fissure_string = string.format(STRINGS.eventtimer.shadowthrallmanager.fissure_cooldown, TimeToString(data.cooldown))

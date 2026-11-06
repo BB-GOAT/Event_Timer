@@ -7,7 +7,7 @@ local info
 info = {
     gettimefn = nil, -- gettimefn有必要吗？也许没必要，月亮裂隙也没有。位置留给裂隙生成倒计时
     gettextfn = function(inst)
-        local stage_info = string.format(ReplacePrefabName(STRINGS.eventtimer.riftspawner.stage), inst._stage, TUNING.RIFT_SHADOW1_MAXSTAGE)
+        local stage_info = string.format(STRINGS.eventtimer.riftspawner.stage, inst._stage, TUNING.RIFT_SHADOW1_MAXSTAGE)
         local rift_close_time
 
         if inst.components.timer:TimerExists(RIFT_CLOSE_TIMER) then
@@ -15,7 +15,7 @@ info = {
         end
 
         if rift_close_time and inst._stage == TUNING.RIFT_SHADOW1_MAXSTAGE then
-            stage_info = stage_info .. ": " .. string.format(ReplacePrefabName(STRINGS.eventtimer.shadowrift_portal.close), TimeToString(rift_close_time))
+            stage_info = stage_info .. ": " .. string.format(STRINGS.eventtimer.shadowrift_portal.close, TimeToString(rift_close_time))
         elseif inst.components.timer and inst.components.timer:TimerExists(STAGE_GROWTH_TIMER) then
             stage_info = stage_info .. ": " .. string.format(STRINGS.eventtimer.rift_portal.next_stage, TimeToString(inst.components.timer:GetTimeLeft(STAGE_GROWTH_TIMER)))
         end

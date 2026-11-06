@@ -75,9 +75,9 @@ info = {
         end
 
         if next_wave_is_wormboss then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(time))
+            return string.format(STRINGS.eventtimer.hounded.cooldowns.worm_boss, TimeToString(time))
         elseif chance > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(time), chance * 100)
+            return string.format(STRINGS.eventtimer.hounded.worm_boss_chance, TimeToString(time), chance * 100)
         end
     end,
     imagechangefn = function(self, context)

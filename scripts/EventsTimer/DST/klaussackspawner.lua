@@ -15,7 +15,7 @@ info ={
 
         local sack = Upvaluehelper.GetUpvalue(self.GetDebugString, "_sack")
         if sack and sack:IsValid() and sack.despawnday and sack_can_despawn(sack) then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.klaussackspawner.despawntext), sack.despawnday)
+            return string.format(STRINGS.eventtimer.klaussackspawner.despawntext, sack.despawnday)
         end
     end,
     anim = {

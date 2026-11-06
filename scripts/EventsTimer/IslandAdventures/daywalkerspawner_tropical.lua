@@ -35,7 +35,7 @@ info = {
     end,
     gettextfn = function(self, time)
         if self.daywalker ~= nil then
-            return ReplacePrefabName(STRINGS.eventtimer.daywalkerspawner_tropical.ready)
+            return STRINGS.eventtimer.daywalkerspawner_tropical.ready
         end
     end,
     anim = {

@@ -6,7 +6,7 @@ info = {
     gettextfn = function(self, time)
         local data = self:OnSave()
         if data.roc then
-            return ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)
+            return STRINGS.eventtimer.rocmanager.exists
         end
     end,
     image = {

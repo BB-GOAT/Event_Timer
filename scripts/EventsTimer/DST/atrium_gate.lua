@@ -9,7 +9,7 @@ info = {
     gettextfn = function(self, time)
         if time and time > 0 then
             if GetWorldSettingsTimeLeft("cooldown", self) then
-                return string.format(ReplacePrefabName(STRINGS.eventtimer.atrium_gate.cooldown), TimeToString(time))
+                return string.format(STRINGS.eventtimer.atrium_gate.cooldown, TimeToString(time))
             else
                 return string.format(STRINGS.eventtimer.atrium_gate.destabilizing, TimeToString(time))
             end

@@ -14,7 +14,7 @@ info = {
         end
         local sack = Upvaluehelper.GetUpvalue(self.GetDebugString, "_sack")
         if sack and sack:IsValid() and sack.despawnday and sack_can_despawn(sack) then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.islandsklaussackspawner.despawntext), sack.despawnday)
+            return string.format(STRINGS.eventtimer.islandsklaussackspawner.despawntext, sack.despawnday)
         else
             return time and TimeToString(time)
         end

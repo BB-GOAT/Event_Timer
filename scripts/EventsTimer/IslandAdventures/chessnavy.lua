@@ -4,7 +4,7 @@ info = {
         return self.spawn_timer
     end,
     gettextfn = function(self, time)
-        return time and time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.chessnavy.cooldown), TimeToString(time)) or STRINGS.eventtimer.chessnavy.readytext
+        return time and time > 0 and string.format(STRINGS.eventtimer.chessnavy.cooldown, TimeToString(time)) or STRINGS.eventtimer.chessnavy.readytext
     end,
     anim = {
         scale = 0.09,

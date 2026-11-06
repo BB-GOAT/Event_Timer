@@ -9,7 +9,7 @@ info = {
         if time and target and target.name then
             description = string.format(STRINGS.eventtimer.gmoosespawner.targeted, target.name, TimeToString(time))
         elseif time then
-            description = string.format(ReplacePrefabName(STRINGS.eventtimer.gmoosespawner.cooldown), TimeToString(time))
+            description = string.format(STRINGS.eventtimer.gmoosespawner.cooldown, TimeToString(time))
         end
 
         return description

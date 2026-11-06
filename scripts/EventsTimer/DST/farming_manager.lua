@@ -18,7 +18,7 @@ info = {
     end,
     gettextfn = function(self, time)
         if lordfruitfly_spawned then
-            return ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
+            return STRINGS.eventtimer.farming_manager.ready
         end
     end,
     anim = {

@@ -51,7 +51,7 @@ info = {
 
         -- 显示可用晶体的数量
         if available_crystals > 0 then
-            crystal_count_info = string.format(ReplacePrefabName(STRINGS.eventtimer.rift_portal.crystals), available_crystals, current_crystals, max_crystals)
+            crystal_count_info = string.format(STRINGS.eventtimer.rift_portal.crystals, available_crystals, current_crystals, max_crystals)
         end
 
         -- 显示晶体再生时间
@@ -75,7 +75,7 @@ info = {
             end
 
             if time then
-                crystal_spawn_info = string.format(ReplacePrefabName(STRINGS.eventtimer.rift_portal.next_crystal), TimeToString(time))
+                crystal_spawn_info = string.format(STRINGS.eventtimer.rift_portal.next_crystal, TimeToString(time))
             end
         end
 

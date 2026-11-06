@@ -6,13 +6,13 @@ info = {
     end,
     gettextfn = function(self, time)
         if self.kraken then
-            return ReplacePrefabName(STRINGS.eventtimer.krakener.exists)
+            return STRINGS.eventtimer.krakener.exists
         elseif (self.spawn_chance_mod or 1) <= 0 then
             return
         elseif time and time > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
+            return string.format(STRINGS.eventtimer.krakener.cooldown, TimeToString(time))
         elseif self.CanSpawn and self:CanSpawn() then
-            return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
+            return STRINGS.eventtimer.krakener.ready
         end
     end,
     animchangefn = ChangeanimByWintersFeast,

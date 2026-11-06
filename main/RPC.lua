@@ -386,23 +386,18 @@ local function Client_Init()
         local format = TimerMode == 2 and Getformat_format_2 or Getformat_format_1
         local daytime = TimerMode == 2 and 3600 or GLOBAL.TUNING.TOTAL_DAY_TIME
         -- 只替换时间片段，玩家名字和其它文本中的百分号不参与格式化
-        return ReplacePrefabName(datatext):gsub(format, function(d, m, s)
+        return datatext:gsub(format, function(d, m, s)
             local time = tonumber(d) * daytime + tonumber(m) * 60 + tonumber(s)
             return TimeToString(math.max(0, time - 1))
         end)
     end
 
     local eventstime = {} -- ThePlayer.HUD.WarningEventTimeData
-    for warningevent, data in pairs(GLOBAL.WarningEvents) do
-        -- 个人事件需要单独的展示数据
-        if not SERVER_SIDE or data.playerly then -- 客户端初始全部数据，主机玩家初始playerly数据
-            eventstime[warningevent] = {}
-        end
-    end
 
     function ClientWarningTimer:OnWarningEventDirty(warningevent, type, shardid, data)
         if not data then return end
         -- 初始化
+        eventstime[warningevent] = eventstime[warningevent] or {}
         if not eventstime[warningevent][shardid] then
             eventstime[warningevent][shardid] = {
                 time = 0,
@@ -410,9 +405,12 @@ local function Client_Init()
             }
         end
 
-        -- 为其它世界的事件添加前缀标记。值得一提的是主机玩家会因为这个功能重复标记其它世界的数据，但如果存在主机玩家就不存在多层世界
-        if type == "text" and GLOBAL.EventTimer.MarkDataSource and shardid ~= current_shardid then
-            data = data ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. (world_list[shardid] or "???") .. ")\n" .. data) or ""
+        if type == "text" then
+            -- 同步数据保留Prefab标记，收到后才按本机语言替换名称
+            data = ReplacePrefabName(data)
+            if GLOBAL.EventTimer.MarkDataSource and shardid ~= current_shardid then
+                data = data ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. (world_list[shardid] or "???") .. ")\n" .. data) or ""
+            end
         end
 
         eventstime[warningevent][shardid][type] = data
@@ -482,13 +480,11 @@ local function Client_Init()
             local data_type, value = GetPlayerEventData(warningevent, playerly_data, GLOBAL.ThePlayer.userid)
             self:OnWarningEventDirty(warningevent, data_type, shardid, value)
         else -- 非玩家数据
-            eventstime[warningevent] = warningtimer[warningevent] -- 直接使用权威值
-            local row = eventstime[warningevent] and eventstime[warningevent][shardid]
-            if row then -- 设置默认值避免nil
-                row.time = row.time or 0
-                row.text = row.text or ""
+            local row = warningtimer[warningevent] and warningtimer[warningevent][shardid]
+            if row then -- 主机也使用独立的展示数据，避免本地化和预测改写同步数据
+                self:OnWarningEventDirty(warningevent, "time", shardid, row.time or 0)
+                self:OnWarningEventDirty(warningevent, "text", shardid, row.text or "")
             end
-            self:RefreshPrediction(warningevent, shardid)
         end
     end
 

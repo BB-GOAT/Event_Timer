@@ -9,9 +9,9 @@ info = {
         if not (stolen_oincs and active_bandit) then return end
         active_bandit = active_bandit == "true" and STRINGS.UI.CONTROLSSCREEN.YES or active_bandit == "false" and STRINGS.UI.CONTROLSSCREEN.NO or active_bandit
         if active_bandit == STRINGS.UI.CONTROLSSCREEN.YES then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.readytext), stolen_oincs)
+            return string.format(STRINGS.eventtimer.banditmanager.readytext, stolen_oincs)
         elseif time then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.banditmanager.cooldown), TimeToString(time), stolen_oincs, active_bandit)
+            return string.format(STRINGS.eventtimer.banditmanager.cooldown, TimeToString(time), stolen_oincs, active_bandit)
         end
     end,
     image = {

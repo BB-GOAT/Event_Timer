@@ -9,7 +9,7 @@ local function DescribeBatWaveData(self, data)
         local official_chance = data.odds_to_spawn_wave
         local estimated_chance = easing.inQuad(data.target_prefab_count, 0, 1, self.max_target_prefab)
 
-        chance_string = string.format(ReplacePrefabName(STRINGS.eventtimer.acidbatwavemanager.chance),
+        chance_string = string.format(STRINGS.eventtimer.acidbatwavemanager.chance,
             official_chance * 100,
             estimated_chance * 100
         )
@@ -22,7 +22,7 @@ local function DescribeBatWaveData(self, data)
         local number_of_bats = math.floor(items_percent * (TUNING.ACIDBATWAVE_SPAWN_COUNT_MAX - TUNING.ACIDBATWAVE_SPAWN_COUNT_MIN) + TUNING.ACIDBATWAVE_SPAWN_COUNT_MIN)
 
         local next_spawn_time = (data.spawn_wave_time - GetTime()) + self.update_time_seconds
-        spawn_wave_string = string.format(ReplacePrefabName(STRINGS.eventtimer.acidbatwavemanager.next_wave_spawn),
+        spawn_wave_string = string.format(STRINGS.eventtimer.acidbatwavemanager.next_wave_spawn,
             number_of_bats,
             TimeToString(next_spawn_time)
         )
@@ -33,7 +33,7 @@ local function DescribeBatWaveData(self, data)
         -- This is the cooldown (i.e. "immunity period") after being subject to a bat raid.
         local wave_cooldown = (data.next_wave_time - GetTime())
         if wave_cooldown >= 0 then
-            wave_cooldown_string = string.format(ReplacePrefabName(STRINGS.eventtimer.acidbatwavemanager.cooldown), TimeToString(wave_cooldown))
+            wave_cooldown_string = string.format(STRINGS.eventtimer.acidbatwavemanager.cooldown, TimeToString(wave_cooldown))
         end
     end
 
