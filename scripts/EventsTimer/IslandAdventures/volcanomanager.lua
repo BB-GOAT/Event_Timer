@@ -11,6 +11,7 @@ info = {
         local cmd = [[
             local self = TheWorld.components.volcanomanager
             if not self then return DataDumper({ not_found = true }) end
+            if not self:IsScheduleActive() then return DataDumper({ time = 0 }) end
 
             local ActualTime = (TUNING.TOTAL_DAY_TIME * (TheWorld.state.time * 100)) / 100
             local ActualSeg = math.floor(ActualTime / 30)

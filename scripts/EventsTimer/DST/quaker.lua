@@ -7,10 +7,7 @@ info = {
             local self = TheWorld.net.components.quaker
             if not self then return DataDumper({ not_found = true }) end
             local _task = BBGOAT_FN.getval(self.GetDebugString, "_task")
-            if _task and GetTaskRemaining(_task) then
-                local time = GetTaskRemaining(_task)
-                return DataDumper({ time = time })
-            end
+            return DataDumper({ time = _task and GetTaskRemaining(_task) or 0 })
         ]]
         BBGOAT_util:remote(cmd, nil, function(res)
             if res and res.err then
@@ -33,7 +30,9 @@ info = {
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.quaker_time
         if time > 0 then
-            return string.format(STRINGS.eventtimer.quaker.cooldown, TimeToString(time))
+            local quaker = TheWorld.net and TheWorld.net.components.quaker
+            local text = quaker and quaker:IsQuaking() and STRINGS.eventtimer.quaker.remaining or STRINGS.eventtimer.quaker.cooldown
+            return string.format(text, TimeToString(time))
         end
     end,
 }
