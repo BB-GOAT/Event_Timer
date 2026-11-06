@@ -12,20 +12,13 @@ local game_ready = false
 local last_tips_cache = {} -- 记录事件是否提示过（如果保存在ThePlayer.HUD里 换人时会丢数据）
 
 
-local world_type_list = {
-    [STRINGS.eventtimer.worldtype.forest] = "forest",
-    [STRINGS.eventtimer.worldtype.cave] = "cave",
-    [STRINGS.eventtimer.worldtype.shipwrecked] = "shipwrecked",
-    [STRINGS.eventtimer.worldtype.volcano] = "volcano",
-    [STRINGS.eventtimer.worldtype.porkland] = "porkland",
-    [STRINGS.eventtimer.worldtype.unknown] = "unknown",
-}
-
 local function GetShardInfo(shardid) -- 根据世界ID获取世界类型和名称
     local world_list = EventTimer.WorldList or {}
-    local world_str = world_list[shardid] or STRINGS.eventtimer.worldtype.unknown
-    local world_type = world_type_list[world_str] or "unknown"
-    return world_type, world_str
+    local world_type = world_list[shardid] or "unknown"
+    if not STRINGS.eventtimer.worldtype[world_type] then
+        world_type = "unknown"
+    end
+    return world_type, STRINGS.eventtimer.worldtype[world_type]
 end
 
 local function AddWarningEvents(self)

@@ -38,7 +38,15 @@ info = {
     },
     DisableShardRPC = true,
     announcefn = function(context)
-        local desc = string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(context.time))
+        local ready = ReplacePrefabName(STRINGS.eventtimer.farming_manager.ready)
+        local desc
+        if string.find(context.text or "", ready, 1, true) then
+            desc = ready
+        elseif context.time and context.time > 0 then
+            desc = string.format(ReplacePrefabName(STRINGS.eventtimer.farming_manager.cooldown), TimeToString(context.time))
+        else
+            return
+        end
         desc = MarkData(desc, context)
         return desc
     end,

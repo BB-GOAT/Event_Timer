@@ -349,21 +349,21 @@ if SERVER_SIDE then
     })
 end
 
--- 返回当前世界类型对应的字符串
+-- 同步固定世界类型标识，显示时再按客户端语言转换
 local function GetWorldType()
     local TheWorld = GLOBAL.TheWorld
     if TheWorld:HasTag("porkland") then
-        return STRINGS.eventtimer.worldtype.porkland
+        return "porkland"
     elseif TheWorld:HasTag("island") then
-        return STRINGS.eventtimer.worldtype.shipwrecked
+        return "shipwrecked"
     elseif TheWorld:HasTag("volcano") then
-        return STRINGS.eventtimer.worldtype.volcano
+        return "volcano"
     elseif TheWorld:HasTag("cave") then
-        return STRINGS.eventtimer.worldtype.cave
+        return "cave"
     elseif TheWorld:HasTag("forest") then
-        return STRINGS.eventtimer.worldtype.forest
+        return "forest"
     else
-        return STRINGS.eventtimer.worldtype.unknown
+        return "unknown"
     end
 end
 
@@ -409,7 +409,8 @@ local function Client_Init()
             -- 同步数据保留Prefab标记，收到后才按本机语言替换名称
             data = ReplacePrefabName(data)
             if GLOBAL.EventTimer.MarkDataSource and shardid ~= current_shardid then
-                data = data ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. (world_list[shardid] or "???") .. ")\n" .. data) or ""
+                local world_str = STRINGS.eventtimer.worldtype[world_list[shardid]] or STRINGS.eventtimer.worldtype.unknown
+                data = data ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. world_str .. ")\n" .. data) or ""
             end
         end
 
@@ -501,7 +502,7 @@ end
 
 ---------------------------------------主入口---------------------------------------
 
-local cache_world_type = STRINGS.eventtimer.worldtype.unknown -- 默认：未知世界类型
+local cache_world_type = "unknown" -- 默认：未知世界类型
 AddPrefabPostInit("world", function(self)
     if CLIENT_SIDE then
         Client_Init()

@@ -1,7 +1,8 @@
 local info
 info = {
     gettimefn = function(self)
-        if not self.TimeUntilCanAppear and self.TimeUntilRespawn then return end
+        if not (self.TimeUntilCanAppear and self.TimeUntilRespawn and self.CanSpawn) then return end
+        if self.shark or not self:CanSpawn(true, true) then return end
         local appear_time = self:TimeUntilCanAppear()
         local respawn_time = self:TimeUntilRespawn()
         return math.max(appear_time, respawn_time)
@@ -32,8 +33,8 @@ info = {
     announcefn = function(context)
         local time = context.time
         local text = context.text
-        local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
-        local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
+        local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists), 1, true)
+        local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn), 1, true)
         local desc
         if exists then
             desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
@@ -49,6 +50,12 @@ info = {
     end,
     tipsfn = function(context)
         local time = context.time
+        local text = context.text or ""
+        if string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists), 1, true)
+            or string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn), 1, true)
+        then
+            return false
+        end
         if ready_attack(time) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.tigersharker.tips)
             desc = MarkData(desc, context)

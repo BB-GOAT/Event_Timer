@@ -1,4 +1,3 @@
-local stagetimne = TUNING.BEEQUEEN_RESPAWN_TIME / 3
 local info
 info = {
     gettimefn = function(beequeenhive)
@@ -11,10 +10,11 @@ info = {
             return
         end
 
+        local stage_time = TUNING.BEEQUEEN_RESPAWN_TIME / 3
         if timer:GetTimeLeft("hivegrowth1") then
-            return 2 * stagetimne + timer:GetTimeLeft("hivegrowth1")
+            return 2 * stage_time + timer:GetTimeLeft("hivegrowth1")
         elseif timer:GetTimeLeft("hivegrowth2") then
-            return stagetimne + timer:GetTimeLeft("hivegrowth2")
+            return stage_time + timer:GetTimeLeft("hivegrowth2")
         else
             return timer:GetTimeLeft("hivegrowth")
         end
