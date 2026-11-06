@@ -454,7 +454,7 @@ end
 local pagename = zh and "事件计时器" or "Events Timer"
 local pageorder = 1
 local buttonname = pagename
-local pagetitle = zh and "全局事件计时器模组设置" or "Global Events Timer Config"
+local pagetitle = zh and "全局事件计时器模组设置" or "Global Events Timer Settings"
 local enabledisableoption = {
     { text = zh and "开启" or "Enabled", data = true },
     { text = zh and "关闭" or "Disabled", data = false },
@@ -465,7 +465,7 @@ MOD_util:CreatePage(pagename, {
     order = pageorder,
     all_options = {
         {
-            description = zh and "醒目提示" or "Highlight Tips",
+            description = zh and "醒目提示" or "Event Alerts",
             key = "EventsTimer_ShowTips",
             default = true,
             options = enabledisableoption,
@@ -475,7 +475,7 @@ MOD_util:CreatePage(pagename, {
             end
         },
         {
-            description = zh and "UI开关何时显示" or "UI Button Visibility",
+            description = zh and "UI开关何时显示" or "Button Visibility",
             key = "EventsTimer_UIButton",
             default = "always",
             options = {
@@ -492,7 +492,7 @@ MOD_util:CreatePage(pagename, {
             end
         },
         {
-            description = zh and "重置计时器面板打开按钮位置" or "Reset timer panel open button position",
+            description = zh and "重置计时器面板打开按钮位置" or "Reset Timer Button Position",
             onclickfn = function()
                 if table.typecheckedgetfield(ThePlayer, "table","HUD", "EventTimerButton", "openbutton") and EventTimer.UIButton == "always" then
                     local x, y = -55, 200

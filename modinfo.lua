@@ -6,9 +6,10 @@ end
 
 name = en_zh("Global Events Timer - Client", "全局事件计时器 - 客户端版") -- 模组名称
 description = en_zh([[
-Adds a widget in-game that opens an event timer panel.
-The panel displays countdowns for various events and BOSS respawns.
-You can tick the checkbox on the right side of the panel to keep the timer always visible in the top-left corner of the screen.
+Adds an in-game button that opens the event timer panel.
+Track countdowns for world events and boss respawns.
+Select a checkbox on the right to pin that timer to the top-left corner of the screen.
+Click an event to announce its information in chat.
 ]],
 [[
 在游戏内添加一个小部件，点开后显示事件计时器面板。
@@ -87,7 +88,7 @@ configuration_options = {
     {
         name = "language",
         label = en_zh("Language", "语言"),
-        hover = en_zh("Select the language you want to use", "选择你想要使用的语言"),
+        hover = en_zh("Choose the language for the mod", "选择你想要使用的语言"),
         options =
         {
             {description = "中文(Chinese)", data = "zh", hover = ""},
@@ -97,25 +98,25 @@ configuration_options = {
     },
     {
         name = "GetTimeFromRemoteCommand",
-        label = en_zh("Get Time from Server", "从服务器获取数据"),
-        hover = en_zh("Get event time from server via remote command, It only works when you are server admin", "通过远程命令从服务器获取事件时间，只有你是管理员的时候才有效果"),
+        label = en_zh("Get Data from Server", "从服务器获取数据"),
+        hover = en_zh("Retrieve event times directly from the server. Requires server administrator permissions.", "通过远程命令从服务器获取事件时间，只有你是管理员的时候才有效果"),
         options = toggle,
         default = true,
     },
     {
         name = "BossTimer",
-        label = en_zh("Boss Timing Format", "Boss计时格式"),
+        label = en_zh("Boss Timer Format", "Boss计时格式"),
         options =
         {
-            {description = en_zh("day:m:s", "天:分:秒"), data = 1, hover = en_zh("Game Time", "游戏时间,一天8分钟")},
-            {description = en_zh("h:m:s", "时:分:秒"), data = 2, hover = en_zh("Real Time", "现实时间")},
+            {description = en_zh("Days:Min:Sec", "天:分:秒"), data = 1, hover = en_zh("In-game days (8 minutes per day), minutes, and seconds", "游戏时间,一天8分钟")},
+            {description = en_zh("Hrs:Min:Sec", "时:分:秒"), data = 2, hover = en_zh("Real-world hours, minutes, and seconds", "现实时间")},
         },
         default = 1,
     },
     {
         name = "UIButton",
         label = en_zh("Button Visibility", "按钮显示"),
-        hover = en_zh("Choose when the event timer panel toggle button appears", "选择事件计时器面板的开关在什么情况下显示"),
+        hover = en_zh("Choose when to show the event timer button", "选择事件计时器面板的开关在什么情况下显示"),
         options = {
             {description = en_zh("Always Visible", "始终显示"), data = "always"},
             {description = en_zh("Pause Menu", "在暂停页面显示"), hover = en_zh("Visible when you press ESC to open the pause menu", "按ESC打开暂停页面时显示"), data = "pause_screen"},
@@ -131,8 +132,8 @@ configuration_options = {
     },
     {
         name = "ShowTips",
-        label = en_zh("Highlight Tips", "醒目提示"),
-        hover = en_zh("Show a noticeable alert when entering the game or when an event countdown is about to end", "当进入游戏时/事件倒计时即将结束时发出醒目提示"),
+        label = en_zh("Event Alerts", "醒目提示"),
+        hover = en_zh("Show prominent alerts when you enter the game or an event countdown is about to end", "当进入游戏时/事件倒计时即将结束时发出醒目提示"),
         options = toggle,
         default = true,
     },
