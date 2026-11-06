@@ -28,7 +28,7 @@ info = {
         local time = context.time
         local text = context.text
         local desc
-        if string.find(text, ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)) then
+        if string.find(text, ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists), 1, true) then
             desc = ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists)
         elseif time > 0 then
             desc = string.format(ReplacePrefabName(STRINGS.eventtimer.rocmanager.cooldown), TimeToString(time))
@@ -43,7 +43,7 @@ info = {
             return true, info.announcefn, 10, nil, 2
         elseif JustEntered(time) and time < 960 then
             return true, info.announcefn, 10, nil, 2
-        elseif text == ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists) then
+        elseif string.find(text, ReplacePrefabName(STRINGS.eventtimer.rocmanager.exists), 1, true) then
             local desc = ReplacePrefabName(STRINGS.eventtimer.rocmanager.tips)
             desc = MarkData(desc, context)
             return true, StringToFunction(desc), 10, nil, 3

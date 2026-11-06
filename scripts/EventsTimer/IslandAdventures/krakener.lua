@@ -1,13 +1,19 @@
 local info
 info = {
     gettimefn = function(self)
+        if self.kraken or (self.spawn_chance_mod or 1) <= 0 then return end
         return self.TimeUntilCanSpawn and self:TimeUntilCanSpawn()
     end,
     gettextfn = function(self, time)
-        if time and time > 0 then
+        if self.kraken then
+            return ReplacePrefabName(STRINGS.eventtimer.krakener.exists)
+        elseif (self.spawn_chance_mod or 1) <= 0 then
+            return
+        elseif time and time > 0 then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
+        elseif self.CanSpawn and self:CanSpawn() then
+            return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
         end
-        return ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
     end,
     animchangefn = ChangeanimByWintersFeast,
     defaultanim = {
@@ -35,10 +41,14 @@ info = {
     announcefn = function(context)
         local time = context.time
         local desc
-        if time > 0 then
+        local exists = ReplacePrefabName(STRINGS.eventtimer.krakener.exists)
+        local ready = ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
+        if string.find(context.text, exists, 1, true) then
+            desc = exists
+        elseif time > 0 then
             desc = string.format(ReplacePrefabName(STRINGS.eventtimer.krakener.cooldown), TimeToString(time))
-        else
-            desc = ReplacePrefabName(STRINGS.eventtimer.krakener.ready)
+        elseif string.find(context.text, ready, 1, true) then
+            desc = ready
         end
         desc = MarkData(desc, context)
         return desc

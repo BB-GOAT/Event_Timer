@@ -214,8 +214,9 @@ STRINGS.eventtimer = {
     },
     krakener = {
         cooldown = "<prefab=kraken> will respawn in %s",
+        exists = "<prefab=kraken> is present",
         ready = "<prefab=kraken> is waiting for you to drag it out",
-        tips = "<prefab=kraken> has respawned!",
+        tips = "<prefab=kraken> is ready to be summoned!",
     },
     tigersharker = {
         cooldown = "<prefab=tigershark> will respawn in %s",

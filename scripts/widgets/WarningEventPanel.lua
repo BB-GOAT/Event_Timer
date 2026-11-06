@@ -332,8 +332,8 @@ local WarningEventHUD = Class(Widget, function(self, owner)
     }))
     -----------------------------------------------------------------------------------
     self:UpdateDestItem() -- 立刻更新一次数据，防止暂停时没数据
-    -- Scheduler:ExecutePeriodic(period, fn, limit, initialdelay, id, ...)
-    self.updatetask = scheduler:ExecutePeriodic(FRAMES * 10, self.UpdateDestItem, nil, 0, "updatedestitems", self) -- 持续刷新数据
+    -- 绑定控件实体，HUD销毁时同步取消刷新任务
+    self.updatetask = self.inst:DoPeriodicTask(FRAMES * 10, function() self:UpdateDestItem() end, 0)
 
     -- 最后要把滚动条挂到父组件上的 self.default_focus 对象上去
     self.default_focus = self.scrollpanel
@@ -345,12 +345,19 @@ end)
 -- 关闭面板
 function WarningEventHUD:Close()
     if self.isopen then
-        self.attach = nil
-        self.panel:Kill()
-        self.isopen = false
+        self:Kill()
+    end
+end
+
+-- 关闭面板和销毁HUD共用清理，移除整个控件及其监听。
+function WarningEventHUD:Kill()
+    self.attach = nil
+    self.isopen = false
+    if self.updatetask then
         self.updatetask:Cancel()
         self.updatetask = nil
     end
+    Widget.Kill(self)
 end
 
 -- 定义每一项内的控件布局

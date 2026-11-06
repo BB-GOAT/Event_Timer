@@ -55,14 +55,29 @@ info = {
     end,
     gettextfn = function(self, time)
         if not time then return end
+        if not TheWorld:HasTag("cave") then return end
 
         local next_wave_is_wormboss = Upvaluehelper.GetUpvalue(self.DoWarningSpeech, "_wave_pre_upgraded")
-        local _wave_override_chance = self:OnSave().wave_override_chance
+        local data = self:OnSave()
+        local settings = Upvaluehelper.GetUpvalue(self.SetWaveOverrideSettings, "_wave_override_settings") or {}
+        local setting = settings.worm_boss or 1
+        local tracker = TheWorld.components.atriumritualorgantracker
+        local chance = data.wave_override_chance or 0
+
+        -- 与原版特殊波次判定保持一致，包含关闭、倍率和必定升级条件
+        if setting == 0 then
+            chance = 0
+        elseif setting == 9999 or data.wave_upgraded_record or
+            (tracker and tracker:NeedsRitualOrgan("atrium_ritual_organ_worm")) then
+            chance = 1
+        else
+            chance = math.max(0, math.min(1, chance * setting))
+        end
 
         if next_wave_is_wormboss then
             return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(time))
-        elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
-            return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(time), _wave_override_chance * 100)
+        elseif chance > 0 then
+            return string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(time), chance * 100)
         end
     end,
     imagechangefn = function(self, context)

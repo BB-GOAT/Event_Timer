@@ -1,6 +1,5 @@
 local SyncTimer = GLOBAL.EventTimer.SyncTimer
 local UpdateTime = GLOBAL.EventTimer.UpdateTime
-local unpack = GLOBAL.unpack
 local STRINGS = GLOBAL.STRINGS
 
 local SERVER_SIDE = GLOBAL.TheNet:GetIsServer() -- 专服+主机环境
@@ -50,7 +49,8 @@ end
 ---@param type "event_timerpc"|"event_textrpc"
 ---@param data number|string 数据
 ---@param shardid number 世界ID
-function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
+---@param targetplayer table|nil 仅向指定玩家同步，省略时同步给所有玩家
+function SyncEventData(event, data, type, shardid, targetplayer) -- 同步数据到客户端
     if GLOBAL.WarningEvents[event].playerly then -- 单独处理playerly数据
         if GLOBAL.type(data) ~= "string" then return end
         local textdata
@@ -60,25 +60,25 @@ function SyncEventData(event, data, type, shardid) -- 同步数据到客户端
             textdata = GLOBAL.json.decode(data)
         end
         if GLOBAL.type(textdata) ~= "table" then return end
-        for userid, player in pairs(cache_players) do
-            local data_type, value = GetPlayerEventData(event, textdata, userid)
+        for _, player in pairs(targetplayer and { targetplayer } or cache_players) do
+            local data_type, value = GetPlayerEventData(event, textdata, player.userid)
             local rpc_type = data_type == "time" and "event_timerpc" or "event_textrpc"
             if need_sync(player, event, value, rpc_type, shardid) then
-                SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][rpc_type], userid, event, value, shardid)
+                SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][rpc_type], player.userid, event, value, shardid)
             end
         end
 
-        if CLIENT_SIDE then -- 主机玩家
+        if CLIENT_SIDE and not targetplayer then -- 主机玩家
             ClientWarningTimer:OnHostEventDirty(event, shardid, textdata)
         end
     else
-        for k,v in ipairs(GLOBAL.AllPlayers) do
+        for k,v in ipairs(targetplayer and { targetplayer } or GLOBAL.AllPlayers) do
             if need_sync(v, event, data, type, shardid) then
                 SendModRPCToClient(CLIENT_MOD_RPC["EventTimer"][type], v.userid, event, data, shardid)
             end
         end
 
-        if CLIENT_SIDE then -- 主机玩家
+        if CLIENT_SIDE and not targetplayer then -- 主机玩家
             ClientWarningTimer:OnHostEventDirty(event, shardid)
         end
     end
@@ -136,6 +136,13 @@ AddModRPCHandler("EventTimer", "get_shard_data", function(player)
 
         player:DoTaskInTime(1, function ()
             player.event_timer_geted_shard_data = true
+            -- 世界信息发送后补发已有事件，避免等待下一轮更新而错过入场提示
+            for event, shards in pairs(warningtimer) do
+                for shardid, data in pairs(shards) do
+                    SyncEventData(event, data.time or 0, "event_timerpc", shardid, player)
+                    SyncEventData(event, data.text or "", "event_textrpc", shardid, player)
+                end
+            end
         end)
     end
 end)
@@ -175,19 +182,19 @@ local function AddTimerDescriptor(self, warningevent, data)
 
     initialdelay = initialdelay + 1
     local inst = self.inst or self
-    inst:DoPeriodicTask(UpdateTime, function()
-        -- 初始化数据重复次数表
+    -- 注册时立即占位，防止首次更新前重复启动任务
+    local descriptor = {
+        inst = inst,
+        time_last = 0,
+        time_sametick = 0,
+        time_valid = false,
+        text_sametick = 0,
+        text_valid = false,
+    }
+    valid_data[warningevent] = descriptor
+    descriptor.task = inst:DoPeriodicTask(UpdateTime, function()
+        if valid_data[warningevent] ~= descriptor then return end
         if not (ShardId and warningtimer[warningevent]) then return end
-        if not valid_data[warningevent] then
-            valid_data[warningevent] = {
-                time_last = 0, -- 上次记录的时间
-                time_sametick = 0, -- 重复次数
-                time_valid = false, -- 数据是否有效(这个字段用于防止一直触发time = 0)
-
-                text_sametick = 0,
-                text_valid = false,
-            }
-        end
 
         local time
         if data.gettimefn then
@@ -255,6 +262,7 @@ local function AddTimerDescriptor(self, warningevent, data)
             end
         end
     end, initialdelay * GLOBAL.FRAMES)
+    return descriptor
 end
 
 local TimerPrefabList = {
@@ -282,23 +290,38 @@ GLOBAL.EventTimer.AddTimerDescriptor = function(warningevent, data)
 
     -- AddPrefabPostInit 和 AddComponentPostInit 保证了有实体的时候计时器才开始工作，避免浪费性能。缺点是必须在游戏加载完成前就注册，否则无效
     if data.timerprefab then
-        AddPrefabPostInit(data.timerprefab, function(self)
-            AddTimerDescriptor(self, warningevent, data)
+        local function TrackPrefab(self)
+            local descriptor = AddTimerDescriptor(self, warningevent, data)
+            if not descriptor then return end
             self:ListenForEvent("onremove", function()
+                if valid_data[warningevent] ~= descriptor then return end
                 MOD_util:Warning(GLOBAL.tostring(warningevent) .. "事件依赖的实体" .. GLOBAL.tostring(data.timerprefab) .. "已被移除")
+                if descriptor.task then
+                    descriptor.task:Cancel()
+                    descriptor.task = nil
+                end
                 valid_data[warningevent] = nil
-                warningtimer[warningevent][ShardId] = {
-                    time = 0,
-                    text = "",
-                }
-                SyncEventData(warningevent, 0, "event_timerpc", ShardId)
-                SyncEventData(warningevent, "", "event_textrpc", ShardId)
-                if not data.DisableShardRPC then
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
-                    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
+                if ShardId and warningtimer[warningevent] then
+                    warningtimer[warningevent][ShardId] = { time = 0, text = "" }
+                    SyncEventData(warningevent, 0, "event_timerpc", ShardId)
+                    SyncEventData(warningevent, "", "event_textrpc", ShardId)
+                    if SyncTimer and not data.DisableShardRPC then
+                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], nil, warningevent, 0)
+                        SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], nil, warningevent, "")
+                    end
+                end
+
+                -- 只在当前实体移除时寻找接替者，正常更新不扫描实体
+                if self == GLOBAL.TheWorld or not (GLOBAL.TheWorld and GLOBAL.TheWorld:IsValid()) then return end
+                for _, candidate in pairs(GLOBAL.Ents) do
+                    if candidate ~= self and candidate.prefab == data.timerprefab and candidate:IsValid() then
+                        TrackPrefab(candidate)
+                        break
+                    end
                 end
             end)
-        end)
+        end
+        AddPrefabPostInit(data.timerprefab, TrackPrefab)
     else
         AddComponentPostInit(warningevent, function(self)
             AddTimerDescriptor(self, warningevent, data)
@@ -347,10 +370,8 @@ end
 ---------------------------------------客户端更新逻辑---------------------------------------
 
 local function Client_Init()
-    local Extract_by_format = Extract_by_format
     local ReplacePrefabName = ReplacePrefabName
     local TimeToString = TimeToString
-    local StringToTime = StringToTime
     local TimerMode = GLOBAL.EventTimer.TimerMode
 
     local day_str = STRINGS.eventtimer.time.day
@@ -361,34 +382,14 @@ local function Client_Init()
     local Getformat_format_1 = "(%d+)".. day_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
     local Getformat_format_2 = "(%d+)" .. hour_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
 
-    local function Getformat(text)
+    local function get_new_text(datatext)
         local format = TimerMode == 2 and Getformat_format_2 or Getformat_format_1
-        return string.gsub(text, format, "%%s")
-    end
-
-    local function get_new_text(v, datatext)
-        local results = { Extract_by_format(datatext, v) }
-        if results[1] then
-            for k1, v1 in pairs(results) do
-                if string.find(v1, min_str .. "(.*)" .. sec_str) then
-                    v1 = StringToTime(v1) -- 尝试将字符串转为数字
-                    if type(v1) == "number" then
-                        v1 = v1 - 1
-                        if v1 < 0 then
-                            results[k1] = TimeToString(0) -- 小于0时停止计算
-                        else
-                            results[k1] = TimeToString(v1) -- 减一后转换为字符串保存到results对应的值里
-                        end
-                    end
-                end
-            end
-            v = v:gsub("%%([^sd%%])", "%%%%%1")
-            v = v:gsub("%%$", "%%%%")
-            local new_text = string.format(ReplacePrefabName(v), unpack(results))
-            return new_text
-        else
-            return
-        end
+        local daytime = TimerMode == 2 and 3600 or GLOBAL.TUNING.TOTAL_DAY_TIME
+        -- 只替换时间片段，玩家名字和其它文本中的百分号不参与格式化
+        return ReplacePrefabName(datatext):gsub(format, function(d, m, s)
+            local time = tonumber(d) * daytime + tonumber(m) * 60 + tonumber(s)
+            return TimeToString(math.max(0, time - 1))
+        end)
     end
 
     local eventstime = {} -- ThePlayer.HUD.WarningEventTimeData
@@ -409,7 +410,7 @@ local function Client_Init()
             }
         end
 
-        -- 为其它世界的事件添加前缀标记。值得一提的是主机玩家会因为这个功能重复标记其它世界的数据，但如果存在主机玩家就不存在多层世界。
+        -- 为其它世界的事件添加前缀标记。值得一提的是主机玩家会因为这个功能重复标记其它世界的数据，但如果存在主机玩家就不存在多层世界
         if type == "text" and GLOBAL.EventTimer.MarkDataSource and shardid ~= current_shardid then
             data = data ~= "" and (string.format(STRINGS.eventtimer.worldid, shardid) .. "(" .. (world_list[shardid] or "???") .. ")\n" .. data) or ""
         end
@@ -461,7 +462,7 @@ local function Client_Init()
         local new_text
         local datatext = eventstime[warningevent][shardid].text or "" -- 本世界text
         if datatext ~= "" then
-            new_text = get_new_text(Getformat(datatext), datatext)
+            new_text = get_new_text(datatext)
             -- 如果get_new_text失败了，直接使用上方的time
             if not new_text then
                 if time >= 0 then

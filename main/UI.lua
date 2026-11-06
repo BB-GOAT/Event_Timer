@@ -139,7 +139,7 @@ local function AddWarningEvents(self)
     local panel_data_snapshot = {}
     local panel_data_revision = 0
     TarnsferPanel.UpdateDestItem = function(self)
-        if not ThePlayer then
+        if not (ThePlayer and ThePlayer.HUD == self.owner) then
             if self.updatetask then
                 self.updatetask:Cancel()
                 self.updatetask = nil

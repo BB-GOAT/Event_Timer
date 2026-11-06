@@ -214,8 +214,9 @@ STRINGS.eventtimer = {
     },
     krakener = { -- 海妖
         cooldown = "<prefab=kraken>会重生于%s后",
+        exists = "<prefab=kraken>正在出没",
         ready = "<prefab=kraken>正在等你去拖出",
-        tips = "<prefab=kraken>已重生！",
+        tips = "<prefab=kraken>已准备就绪！",
     },
     tigersharker = { -- 虎鲨
         cooldown = "<prefab=tigershark>会重生于%s后",
