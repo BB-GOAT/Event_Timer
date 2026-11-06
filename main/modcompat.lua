@@ -370,8 +370,8 @@ if Ismodloaded("workshop-2510473186") then
 
             -- 更新裂隙信息
             local function ReFreshRiftData()
-                if rift_current_phase == 0 and rift_time_to_next_phase then
-                    SaveTimeData(riftspawner_type, rift_time_to_next_phase) -- 裂隙生成倒计时
+                if rift_current_phase == 0 then
+                    SaveTimeData(riftspawner_type, rift_time_to_next_phase or 0) -- 裂隙生成倒计时
                     SaveTextData(rift_portal_type, "") -- 清空裂隙信息
                 elseif rift_current_phase and rift_current_phase > 0 then
                     SaveTimeData(riftspawner_type, 0) -- 清空裂隙生成倒计时

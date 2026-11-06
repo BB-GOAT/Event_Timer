@@ -351,34 +351,14 @@ local client_prediction_tasks = {} -- 预测倒计时任务列表
 local Getformat_format_1 = "(%d+)".. day_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
 local Getformat_format_2 = "(%d+)" .. hour_str .. "(%d+)" .. min_str .. "(%d+)" .. sec_str
 
-local function Getformat(text)
+local function get_new_text(datatext)
     local format = TimerMode == 2 and Getformat_format_2 or Getformat_format_1
-    return string.gsub(text, format, "%%s")
-end
-
-local function get_new_text(v, datatext)
-    local results = { Extract_by_format(datatext, v) }
-    if results[1] then
-        for k1, v1 in pairs(results) do
-            if string.find(v1, min_str .. "(.*)" .. sec_str) then
-                v1 = StringToTime(v1) -- 尝试将字符串转为数字
-                if type(v1) == "number" then
-                    v1 = v1 - 1
-                    if v1 < 0 then
-                        results[k1] = TimeToString(0) -- 小于0时停止计算
-                    else
-                        results[k1] = TimeToString(v1) -- 减一后转换为字符串保存到results对应的值里
-                    end
-                end
-            end
-        end
-        v = v:gsub("%%([^sd%%])", "%%%%%1")
-        v = v:gsub("%%$", "%%%%")
-        local new_text = string.format(ReplacePrefabName(v), unpack(results))
-        return new_text
-    else
-        return
-    end
+    local daytime = TimerMode == 2 and 3600 or TUNING.TOTAL_DAY_TIME
+    -- 只替换时间片段，玩家名字和其它文本中的百分号不参与格式化
+    return ReplacePrefabName(datatext):gsub(format, function(d, m, s)
+        local time = tonumber(d) * daytime + tonumber(m) * 60 + tonumber(s)
+        return TimeToString(math.max(0, time - 1))
+    end)
 end
 
 -- 更新客户端预测倒计时
@@ -414,7 +394,7 @@ local function UpdateClientPrediction(name)
     -- text
     local datatext = ThePlayer.HUD.WarningEventTimeData[name .. "_text"]
     if datatext and datatext ~= "" then
-        local new_text = get_new_text(Getformat(datatext), datatext)
+        local new_text = get_new_text(datatext)
         SaveTextData(name, new_text or "", true)
     end
 end

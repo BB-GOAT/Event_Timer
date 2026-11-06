@@ -1,6 +1,7 @@
 local roc
 local info
 info = {
+    DisableClientPredictionClearText = true, -- 大鹏存在时保留出没提示
     remotegettimefn = function(Thread)
         GetWorldSettingsTimeLeft("ROC_RESPAWN_TIMER", nil, function(res)
             if res and res.err then

@@ -14,6 +14,7 @@ end
 -- 纯本地获取方式
 local localgettimefn = function()
     local walrus_list = {} -- 需要计时的海象重生列表
+    local cleanup_task
 
     local SessionId
     local function SaveData()
@@ -29,13 +30,29 @@ local localgettimefn = function()
     end
 
     local function RefreshData()
+        if cleanup_task then
+            cleanup_task:Cancel()
+            cleanup_task = nil
+        end
+        local world_time = GetWorldTime()
+        -- 旧版存档可能有数组空洞，重新收集有效记录并移除过期数据
+        local pending_walrus = {}
+        for _, targe_time in pairs(walrus_list) do
+            if checknumber(targe_time) and targe_time > world_time then
+                table.insert(pending_walrus, targe_time)
+            end
+        end
+        table.sort(pending_walrus)
+        walrus_list = pending_walrus
         SaveData()
         walrus_house_num = #walrus_list -- 更新海象数量
 
         local lines = {}
+        local next_cleanup
         for i, targe_time in ipairs(walrus_list) do
-            local time_left = targe_time - GetWorldTime()
+            local time_left = targe_time - world_time
             if time_left > 0 then
+                next_cleanup = math.min(next_cleanup or time_left, time_left)
                 local time_str = TimeToString(time_left)
                 table.insert(lines, string.format(STRINGS.eventtimer.walrus_camp.cooldown, i, time_str))
             end
@@ -45,6 +62,12 @@ local localgettimefn = function()
             description = description .. (i == 1 and "" or GetSeparator(i)) .. line
         end
         SaveTextData("walrus_camp", description)
+        if next_cleanup then
+            cleanup_task = TheWorld:DoTaskInTime(next_cleanup, function()
+                cleanup_task = nil
+                RefreshData()
+            end)
+        end
     end
     AddPrefabPostInit("walrus", function(inst)
         inst:ListenForEvent("onremove", function(inst)
@@ -54,10 +77,6 @@ local localgettimefn = function()
                     local world_time = GetWorldTime()
                     local targe_time = world_time + TUNING.WALRUS_REGEN_PERIOD
                     table.insert(walrus_list, targe_time)
-                    TheWorld:DoTaskInTime(TUNING.WALRUS_REGEN_PERIOD, function()
-                        table.removetablevalue(walrus_list, targe_time)
-                        RefreshData()
-                    end)
                     RefreshData()
                 end
             end

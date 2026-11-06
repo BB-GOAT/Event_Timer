@@ -237,6 +237,7 @@ STRINGS.eventtimer = {
         tips = "<prefab=waterdrop> has regenerate!",
     },
     banditmanager = {
+        exists = "<prefab=pigbandit> is roaming.",
         cooldown = "Try to spawn in: %s\n[Stolen Oincs: %s , Active Bandit: %s]",
         announce_cooldown = "<prefab=pigbandit> will try to spawn in %s    Currently stolen Oincs: %s",
         announce_time = "<prefab=pigbandit> will try to spawn in %s",

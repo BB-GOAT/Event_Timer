@@ -99,7 +99,20 @@ local remotegettextfn = function(Thread)
         if not self then return DataDumper({ not_found = true })end
 
         local next_wave_is_wormboss = BBGOAT_FN.getval(self.DoWarningSpeech, "_wave_pre_upgraded")
-        local _wave_override_chance = self:OnSave().wave_override_chance
+        local data = self:OnSave()
+        local settings = BBGOAT_FN.getval(self.SetWaveOverrideSettings, "_wave_override_settings") or {}
+        local setting = settings.worm_boss or 1
+        local tracker = TheWorld.components.atriumritualorgantracker
+        local _wave_override_chance = data.wave_override_chance or 0
+
+        if setting == 0 then
+            _wave_override_chance = 0
+        elseif setting == 9999 or data.wave_upgraded_record or
+            (tracker and tracker:NeedsRitualOrgan("atrium_ritual_organ_worm")) then
+            _wave_override_chance = 1
+        else
+            _wave_override_chance = math.max(0, math.min(1, _wave_override_chance * setting))
+        end
 
         return DataDumper({next_wave_is_wormboss = next_wave_is_wormboss, _wave_override_chance = _wave_override_chance})
     ]]
@@ -121,6 +134,8 @@ local remotegettextfn = function(Thread)
             elseif checknumber(_wave_override_chance) and _wave_override_chance > 0 then
                 local str = string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.worm_boss_chance), TimeToString(ThePlayer.HUD.WarningEventTimeData.hounded_time), _wave_override_chance * 100)
                 SaveTextData("hounded", str, true)
+            else
+                SaveTextData("hounded", "", true)
             end
         end
     end)

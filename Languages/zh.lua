@@ -237,6 +237,7 @@ STRINGS.eventtimer = {
         tips = "<prefab=waterdrop>已刷新！",
     },
     banditmanager = { -- 蒙面猪人
+        exists = "<prefab=pigbandit>正在出没。",
         cooldown = "尝试刷新于: %s后\n[被盗的呼噜币数量: %s，当前盗贼出没: %s]",
         announce_time = "<prefab=pigbandit>将于%s后尝试刷新。",
         announce_cooldown = "<prefab=pigbandit>将于%s后尝试刷新。当前已盗走%s个呼噜币。",
