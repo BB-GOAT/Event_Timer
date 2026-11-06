@@ -2,6 +2,9 @@ local remotegettimefn = function(Thread)
     local cmd = [[
         local self = TheWorld.components.tigersharker
         if not self then return DataDumper({ not_found = true }) end
+        if self.shark or not self:CanSpawn(true, true) then
+            return DataDumper({ time = 0 })
+        end
 
         local appear_time = self:TimeUntilCanAppear()
         local respawn_time = self:TimeUntilRespawn()
@@ -47,6 +50,7 @@ local remotegettextfn = function(Thread)
             local nospawn = res.nospawn
             if shark then
                 SaveTextData("tigersharker", ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
+                SaveTimeData("tigersharker", 0)
             elseif canspawn then
                 local time = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData and ThePlayer.HUD.WarningEventTimeData.tigersharker_time
                 if time and time > 0 then
@@ -56,6 +60,7 @@ local remotegettextfn = function(Thread)
                 end
             elseif nospawn then
                 SaveTextData("tigersharker", ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
+                SaveTimeData("tigersharker", 0)
             end
         end
     end)
@@ -65,9 +70,12 @@ end
 
 -- 虎鲨出现/消失时刷新数据
 if not EventTimer.GetTimeFromServerMod["tigersharker"] and EventTimer.GetTimeFromRemoteCommand then
-    AddPrefabPostInit("tigearshark", function(inst)
-        -- remotegettimefn() -- 时间理论上是0，更新了个寂寞
-        remotegettextfn()
+    AddPrefabPostInit("tigershark", function(inst)
+        -- 等待生成器接管虎鲨后再查询，兼容主机同步执行远程命令
+        inst:DoTaskInTime(0, function()
+            remotegettimefn()
+            remotegettextfn()
+        end)
         inst:ListenForEvent("onremove", function()
             remotegettimefn()
             remotegettextfn()
@@ -96,8 +104,8 @@ info = {
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.tigersharker_time
         local text = ThePlayer.HUD.WarningEventTimeData.tigersharker_text
-        local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists))
-        local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn))
+        local exists = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists), 1, true)
+        local nospawn = string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn), 1, true)
         if exists then
             return ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists)
         elseif nospawn then
@@ -110,6 +118,12 @@ info = {
     end,
     tipsfn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.tigersharker_time
+        local text = ThePlayer.HUD.WarningEventTimeData.tigersharker_text or ""
+        if string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.exists), 1, true)
+            or string.find(text, ReplacePrefabName(STRINGS.eventtimer.tigersharker.nospawn), 1, true)
+        then
+            return false
+        end
         if ready_attack(time) then
             return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.tigersharker.tips)), 10, time, 2
         end
