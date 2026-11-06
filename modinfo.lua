@@ -6,10 +6,10 @@ end
 
 name = en_zh("Global Events Timer - Client", "全局事件计时器 - 客户端版") -- 模组名称
 description = en_zh([[
-Adds an in-game button that opens the event timer panel.
-Track countdowns for world events and boss respawns.
-Select a checkbox on the right to pin that timer to the top-left corner of the screen.
-Click an event to announce its information in chat.
+Adds an in-game button that opens the event timer panel
+Track countdowns for world events and boss respawns
+Select a checkbox on the right to pin that timer to the top-left corner of the screen
+Click an event to announce its information in chat
 ]],
 [[
 在游戏内添加一个小部件，点开后显示事件计时器面板。
@@ -18,7 +18,7 @@ Click an event to announce its information in chat.
 点击事件可宣告其信息
 ]])
 author = "冰冰羊"
-version = "0.3" -- 模组版本
+version = "0.3.0" -- 模组版本
 api_version = 10
 
 --[[
@@ -99,7 +99,7 @@ configuration_options = {
     {
         name = "GetTimeFromRemoteCommand",
         label = en_zh("Get Data from Server", "从服务器获取数据"),
-        hover = en_zh("Retrieve event times directly from the server. Requires server administrator permissions.", "通过远程命令从服务器获取事件时间，只有你是管理员的时候才有效果"),
+        hover = en_zh("Retrieve event times directly from the server. Requires server administrator permissions", "通过远程命令从服务器获取事件时间，只有你是管理员的时候才有效果"),
         options = toggle,
         default = true,
     },
