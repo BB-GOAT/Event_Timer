@@ -9,10 +9,11 @@ info = {
         end)
     end,
     gettimefn = function(self)
+        if not self:IsScheduleActive() then return end -- 火山爆发禁用后可能仍保留旧爆发计划
         local ActualTime = (TUNING.TOTAL_DAY_TIME * (TheWorld.state.time * 100)) / 100
         local ActualSeg = math.floor(ActualTime / 30)
         local TimeInSeg = ActualTime - (ActualSeg * 30)
-        local SegUntilEruption = TheWorld.components.volcanomanager:GetNumSegmentsUntilEruption() or 0
+        local SegUntilEruption = self:GetNumSegmentsUntilEruption() or 0
         local SecondUntilEruption = math.floor((SegUntilEruption * 30) - TimeInSeg)
         return SecondUntilEruption > 0 and SecondUntilEruption or 0
     end,

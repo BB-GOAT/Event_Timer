@@ -174,7 +174,8 @@ STRINGS.eventtimer = {
         cooldown_none = "%s remaining in the current Ruins phase",
     },
     quaker = {
-        cooldown = "An earthquake will occur in %s"
+        cooldown = "An earthquake will occur in %s",
+        remaining = "The earthquake will end in %s",
     },
 
     ----------------------------------------player----------------------------------------

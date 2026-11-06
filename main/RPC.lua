@@ -88,6 +88,36 @@ local SyncEventData = SyncEventData
 ----------------------------------------多层世界同步---------------------------------------
 
 local ShardId
+local cache_world_type = "unknown" -- 默认：未知世界类型
+
+-- 重连时补发完整本地状态，没有实体的事件也必须发送空值以清除旧缓存
+local function SyncShardSnapshot(shardid)
+    if not ShardId then return end
+    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["sync_world_type"], shardid, cache_world_type)
+    if not SyncTimer then return end
+
+    for event, data in pairs(GLOBAL.WarningEvents) do
+        if not data.DisableShardRPC and not data.playerly then
+            local row = warningtimer[event] and warningtimer[event][ShardId]
+            SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_time_shardrpc"], shardid, event, row and row.time or 0)
+            -- 纯时间事件由接收端生成文本，避免空文本覆盖刚收到的倒计时
+            if data.gettextfn then
+                SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["event_text_shardrpc"], shardid, event, row and row.text or "")
+            end
+        end
+    end
+end
+
+AddShardModRPCHandler("EventTimer", "request_event_snapshot", function(shardid)
+    if ShardId == shardid then return end
+    SyncShardSnapshot(shardid)
+end)
+
+local function ResyncShard(shardid)
+    SyncShardSnapshot(shardid)
+    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["request_event_snapshot"], shardid)
+end
+
 AddShardModRPCHandler("EventTimer", "event_time_shardrpc", function(shardid, event, timedata)
     if ShardId == shardid then return end
     if not SyncTimer then return end -- 未开启同步功能，取消同步
@@ -502,7 +532,6 @@ end
 
 ---------------------------------------主入口---------------------------------------
 
-local cache_world_type = "unknown" -- 默认：未知世界类型
 AddPrefabPostInit("world", function(self)
     if CLIENT_SIDE then
         Client_Init()
@@ -536,11 +565,17 @@ AddPrefabPostInit("world", function(self)
     GLOBAL.EventTimer.EventTimerData = warningtimer -- 方便从其它地方获取事件数据
 end)
 
--- 服务器世界互联时同步世界类型
+-- 等原版完成分片连接登记后，双向补发世界类型和事件状态
 local _Shard_UpdateWorldState = GLOBAL.Shard_UpdateWorldState
-GLOBAL.Shard_UpdateWorldState = function(...)
-    SendModRPCToShard(SHARD_MOD_RPC["EventTimer"]["sync_world_type"], nil, cache_world_type)
-    return _Shard_UpdateWorldState(...)
+GLOBAL.Shard_UpdateWorldState = function(world_id, state, ...)
+    if state == GLOBAL.REMOTESHARDSTATE.READY and GLOBAL.TheWorld then
+        GLOBAL.TheWorld:DoTaskInTime(0, function()
+            if ShardId and GLOBAL.Shard_IsWorldAvailable(world_id) then
+                ResyncShard(world_id)
+            end
+        end)
+    end
+    return _Shard_UpdateWorldState(world_id, state, ...)
 end
 
 -- 玩家进入游戏后同步世界类型数据
