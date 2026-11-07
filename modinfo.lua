@@ -18,7 +18,7 @@ Click an event to announce its information in chat
 点击事件可宣告其信息
 ]])
 author = "冰冰羊"
-version = "0.3.2" -- 模组版本
+version = "0.3.3" -- 模组版本
 api_version = 10
 
 --[[

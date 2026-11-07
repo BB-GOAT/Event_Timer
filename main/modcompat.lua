@@ -295,7 +295,9 @@ if Ismodloaded("workshop-2510473186") then
         dragonfly_spawner = "dragonfly_spawner",   -- 龙蝇
         crabking_spawner  = "crabkingspawner",     -- 帝王蟹
         nightmare_werepig = "daywalkerspawner",    -- 梦魇疯猪
-        scrappy_werepig   = "forestdaywalkerspawner" -- 拾荒疯猪
+        scrappy_werepig   = "forestdaywalkerspawner", -- 拾荒疯猪
+        rock_master       = "rockybossspawner",    -- 岩石大师
+        batbosscave       = "batbosscave",         -- 猎犬蝙蝠
     }
 
     -- 远古大门相关事件
@@ -305,8 +307,10 @@ if Ismodloaded("workshop-2510473186") then
     }
 
     -- 初始化GetTimeFromServerMod表
-    for _, name in pairs(events) do
-        EventTimer.GetTimeFromServerMod[name] = true
+    for name, event in pairs(events) do
+        if bosses_table and bosses_table.worldtimerkey[name] then
+            EventTimer.GetTimeFromServerMod[event] = true
+        end
     end
     EventTimer.GetTimeFromServerMod["atrium_gate"] = true -- 远古大门
     EventTimer.GetTimeFromServerMod["lunarthrall_plantspawner"] = true -- 致命亮茄

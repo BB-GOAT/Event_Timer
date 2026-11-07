@@ -30,7 +30,7 @@ info = {
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.quaker_time
         if time > 0 then
-            local quaker = TheWorld.net and TheWorld.net.components.quaker
+            local quaker = TheWorld.net.components.quaker
             local text = quaker and quaker:IsQuaking() and STRINGS.eventtimer.quaker.remaining or STRINGS.eventtimer.quaker.cooldown
             return string.format(text, TimeToString(time))
         end
