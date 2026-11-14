@@ -113,6 +113,8 @@ end
 ----------------------------------------检查是否需要运行---------------------------------------
 
 local mode_list = {
+    quagmire = true, -- 暴食
+    lavaarena = true, -- 熔炉
     OceanFishing = true, -- 海钓随机物品
     DC_FGC_PVP = true, -- 花花世界-淘汰系统
 }

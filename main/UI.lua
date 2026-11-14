@@ -47,7 +47,7 @@ local function AddWarningEvents(self)
             for _, fn in ipairs(DataFilePostInitFN) do
                 fn(filedata[SessionId])
             end
-        else
+        elseif SessionId then
             filedata[SessionId] = {}
             need_save = true
         end

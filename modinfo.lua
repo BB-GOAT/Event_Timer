@@ -18,7 +18,7 @@ Click an event to announce its information in chat
 点击事件可宣告其信息
 ]])
 author = "冰冰羊"
-version = "0.3.3" -- 模组版本
+version = "0.3.4" -- 模组版本
 api_version = 10
 
 --[[
@@ -33,6 +33,8 @@ api_version = 10
 priority = -100 -- 模组加载优先级
 
 dst_compatible = true -- 兼容联机版
+forge_compatible = true -- 兼容熔炉
+gorge_compatible = true -- 兼容暴食
 dont_starve_compatible = false -- 不兼容单机版
 
 all_clients_require_mod = false
