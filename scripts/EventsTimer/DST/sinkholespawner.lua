@@ -1,7 +1,8 @@
 local info
 info = {
-    gettimefn = function(self)
-        return GetWorldSettingsTimeLeft("rage", self.inst)
+    timerprefab = "antlion",
+    gettimefn = function(inst)
+        return GetWorldSettingsTimeLeft("rage", inst)
     end,
     anim = {
         scale = 0.05,
