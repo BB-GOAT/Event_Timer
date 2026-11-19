@@ -14,15 +14,20 @@ local THRALL_NAMES = setmetatable({
 
 local info
 info = {
-    gettextfn = function(self)
+    gettimefn = function(self)
+        if not self:GetControlledFissure() then
+            return self:OnSave().cooldown
+        end
+    end,
+    gettextfn = function(self, time)
         local thrall_string -- 奴隶
         local fissure_string -- 裂隙
 
-        local data = self:OnSave()
         local fissure = self:GetControlledFissure()
 
         -- 检查是否有裂缝（和奴隶）
         if fissure then
+            local data = self:OnSave()
             local thralls_alive = {}
             local thralls_alive_string = {}
 
@@ -60,8 +65,9 @@ info = {
             if data.dreadstonecooldown then
                 fissure_string = string.format(STRINGS.eventtimer.shadowthrallmanager.dreadstone_regen, TimeToString(data.dreadstonecooldown))
             end
-        elseif data.cooldown then
-            fissure_string = string.format(STRINGS.eventtimer.shadowthrallmanager.fissure_cooldown, TimeToString(data.cooldown))
+        elseif time and time > 0 then
+            -- 复用本轮 gettimefn 的结果，避免重复读取冷却。
+            fissure_string = string.format(STRINGS.eventtimer.shadowthrallmanager.fissure_cooldown, TimeToString(time))
         end
 
         local description = CombineLines(thrall_string, fissure_string)
@@ -75,11 +81,24 @@ info = {
             x = 0,
             y = -2,
         },
+        offset = {
+            x = 0,
+            y = 10,
+        },
     },
     announcefn = function(context)
         local text = context.text
         text = string.gsub(text,"\n",", ")
         return STRINGS.NAMES.SHADOWTHRALL_MOUTH .. ": " .. text
+    end,
+    tipsfn = function(context)
+        local time = context.time
+        if ready_attack(time) then
+            local desc = STRINGS.eventtimer.shadowthrallmanager.tips
+            desc = MarkData(desc, context)
+            return true, StringToFunction(desc), 10, time, 1
+        end
+        return false
     end,
 }
 
