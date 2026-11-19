@@ -26,6 +26,10 @@ info = {
         atlas = "images/inventoryimages.xml",
         tex = "rocks.tex",
         scale = 0.8,
+        offset = {
+            x = 0,
+            y = 20,
+        },
     },
     announcefn = function()
         local time = ThePlayer.HUD.WarningEventTimeData.quaker_time

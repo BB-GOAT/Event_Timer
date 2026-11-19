@@ -139,6 +139,7 @@ STRINGS.eventtimer = {
         tips = "<prefab=daywalker>已刷新！",
     },
     shadowthrallmanager = { -- 梦魇裂隙/墨荒
+		tips = "墨荒已准备就绪！",
 		fissure_cooldown = "%s后可控制下一裂隙",
 		waiting_for_players = "等待一个玩家接近",
 		thralls_alive = "活着的奴隶 (%s): %s",

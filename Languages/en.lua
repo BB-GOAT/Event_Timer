@@ -138,6 +138,7 @@ STRINGS.eventtimer = {
         tips = "<prefab=daywalker> has respawned!",
     },
     shadowthrallmanager = {
+		tips = "Shadow thralls are ready!",
 		fissure_cooldown = "Next fissure can be taken over in %s",
 		waiting_for_players = "Waiting for a player to come near",
 		thralls_alive = "Thralls alive (%s): %s",
