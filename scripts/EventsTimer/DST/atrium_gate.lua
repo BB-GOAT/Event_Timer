@@ -1,23 +1,83 @@
 -- 纯本地获取方式
 local localgettimefn = function()
+    local phase_task
+
+    local function CancelPhaseTask()
+        if phase_task then
+            phase_task:Cancel()
+            phase_task = nil
+        end
+    end
+
+    local function ClearPrediction()
+        CancelPhaseTask()
+        SaveTimeData("atrium_gate", 0)
+        SaveTextData("atrium_gate", "")
+    end
+
+    local function RefreshPrediction(end_time)
+        CancelPhaseTask()
+        local time = end_time - GetWorldTime()
+        if time <= 0 then
+            ClearPrediction()
+            return
+        end
+
+        -- 文件中保留最终冷却结束时间，界面只显示当前阶段的剩余时间
+        local resetting = time > TUNING.ATRIUM_GATE_COOLDOWN -- 大门冷却时长；超过此值说明遗迹尚未重置
+        if resetting then
+            time = time - TUNING.ATRIUM_GATE_COOLDOWN -- 扣除重置后的大门冷却时长，得到重置剩余时间
+        end
+        SaveTimeData("atrium_gate", time, true)
+        SaveTextData("atrium_gate", string.format(
+            ReplacePrefabName(resetting and STRINGS.eventtimer.atrium_gate.destabilizing or STRINGS.eventtimer.atrium_gate.cooldown),
+            TimeToString(time)
+        ))
+        phase_task = TheWorld:DoTaskInTime(time, function()
+            phase_task = nil
+            RefreshPrediction(end_time)
+        end)
+    end
+
     AddPrefabPostInit("atrium_gate", function(inst)
         inst:DoTaskInTime(0.2, function(inst)
             if inst and inst:IsValid() and inst.AnimState then
                 local bank, anim, frame = inst.AnimState:GetHistoryData()
                 if anim:find("idle") then
-                    SaveTimeData("atrium_gate", 0)
+                    ClearPrediction()
                 end
             end
         end)
     end)
 
-    HookDeath("stalker_atrium", "atrium_gate", function(event, inst)
-        -- local time = TUNING.ATRIUM_GATE_DESTABILIZE_TIME + TUNING.ATRIUM_GATE_DESTABILIZE_WARNING_TIME
-        -- SaveTimeData(event, time) -- 远古犀牛倒计时（远古遗迹重置倒计时）
-        -- inst:DoTaskInTime(time, function() -- 这样穿越世界时会丢数据
-        --     SaveTimeData(event, TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_DELAY) -- 远古大门冷却倒计时
-        -- end)
-        SaveTimeData(event, TUNING.ATRIUM_GATE_COOLDOWN + TUNING.ATRIUM_GATE_DESTABILIZE_DELAY + TUNING.ATRIUM_GATE_DESTABILIZE_TIME + TUNING.ATRIUM_GATE_DESTABILIZE_WARNING_TIME)
+    AddPrefabPostInit("stalker_atrium", function(inst) -- 远古织影者
+        ClearPrediction()
+        local started = false
+        local function OnDeath(inst)
+            -- 正常死亡时音乐状态同步为3，衰败消失不会进入此状态
+            if started or not (inst._music and inst._music:value() == 3) then
+                return
+            end
+            started = true
+            local time = TUNING.ATRIUM_GATE_DESTABILIZE_DELAY -- 开始失稳前的延迟
+                + TUNING.ATRIUM_GATE_DESTABILIZE_TIME -- 失稳持续时间，结束时重置遗迹
+                + TUNING.ATRIUM_GATE_COOLDOWN -- 遗迹重置后的大门冷却时长
+            SaveTimeData("atrium_gate", time)
+            RefreshPrediction(GetWorldTime() + time)
+        end
+
+        if TheWorld.ismastersim then
+            inst:ListenForEvent("death", OnDeath) -- 主机直接接收死亡事件
+        else
+            inst:ListenForEvent("musicdirty", OnDeath) -- 客机接收死亡音乐状态的网络同步
+        end
+    end)
+
+    AddLoadDataFilePostInit(function(world_data)
+        local end_time = world_data.atrium_gate
+        if checknumber(end_time) then
+            RefreshPrediction(end_time)
+        end
     end)
 end
 
