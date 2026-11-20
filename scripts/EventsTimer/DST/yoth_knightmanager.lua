@@ -1,8 +1,42 @@
--- 镀金骑士冷却倒计时
+-- 纯本地获取方式
+local localgettimefn = function()
+    HookDeath("knight_yoth", "yoth_knightmanager", function(event)
+        local player = ThePlayer
+        local inventory = player and player.replica.inventory
+        if not inventory then return end
+
+        local x, y, z = player.Transform:GetWorldPosition()
+        for _, ent in ipairs(TheSim:FindEntities(x, y, z, 80, nil, {"FX", "DECOR", "INLIMBO", "NOCLICK", "player"})) do
+            if ent.prefab == "knight_yoth" and not IsEntityDead(ent) then
+                return
+            end
+        end
+
+        -- 身上有公主裙或公主帽时开始倒计时
+        local item_lists = {inventory:GetItems(), inventory:GetEquips(), {inventory:GetActiveItem()}}
+        for container_inst in pairs(inventory:GetOpenContainers() or {}) do
+            local container = container_inst.replica.container
+            if container then
+                item_lists[#item_lists + 1] = container:GetItems()
+            end
+        end
+        for _, items in ipairs(item_lists) do
+            for _, item in pairs(items) do
+                if item.prefab == "costume_princess_body" or item.prefab == "mask_princesshat" then
+                    SaveTimeData(event, TUNING.YOTH_PRINCESS_SUMMON_COOLDOWN)
+                    return
+                end
+            end
+        end
+    end)
+end
+
+----------------------------------------------------------------------------------------------
 
 local target_time_interval
 local info
 info = {
+    localgettimefn = localgettimefn,
     remotegettimefn = function(Thread)
         local cmd = [[
             local player = ThePlayer

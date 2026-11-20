@@ -24,6 +24,7 @@ STRINGS.eventtimer = {
             forest = "<prefab=hound> will attack in %s",
             cave = "<prefab=worm> will attack in %s",
             worm_boss = "<prefab=worm_boss> will attack in %s",
+            worm_boss_uncertain = "<prefab=worm_boss> will attack within %s",
             shipwrecked = "<prefab=crocodog> will attack in %s",
             volcano =  "<prefab=crocodog> will attack in %s",
             porkland = "<prefab=vampirebat> will attack in %s",
