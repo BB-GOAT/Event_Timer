@@ -58,35 +58,61 @@ end)
 ----------------------------------------------------------------------------------------------
 
 -- 纯本地获取方式
+local need_tips = false
 local localgettimefn = function()
     local hounded_warning = {
-        hound = true,
-        worm  = true,
-        crocodog = true,
+        hound = true, -- 猎犬
+        worm  = true, -- 洞穴蠕虫
+        crocodog = true, -- 鳄狗
     }
     local current_level
+    local reset_task
+    local function ResetWarningAfter(time)
+        if reset_task then
+            reset_task:Cancel()
+        end
+        reset_task = TheWorld:DoTaskInTime(time, function()
+            current_level = nil
+            reset_task = nil
+        end)
+    end
+
     for attacker in pairs(hounded_warning) do
-        for i = 2, 4 do
+        for i = 1, 4 do
             local level = tostring(i)
             AddPrefabPostInit(attacker .. "warning_lvl" .. level, function(inst)
-                -- 初始时间 = (5 - level) * 30 （level=2→90s，level=3→60s，level=4→30s）
+                -- 按预警等级上限估算：1→120秒，2→90秒，3→60秒，4→30秒
                 if not current_level or current_level < i then
+                    current_level = i
                     local initial_time = (5 - i) * 30
+                    SaveTextData("hounded", "", true)
                     SaveTimeData("hounded", initial_time)
-
-                    -- 猎犬袭击后 重置等级记录以便下次警告
-                    if i == 4 then
-                        if TheWorld then
-                            TheWorld:DoTaskInTime(60, function()
-                                current_level = nil
-                            end)
-                        end
-                    end
+                    -- 袭击后复位；即使漏收后续等级，也不会阻塞下一轮预警
+                    ResetWarningAfter(initial_time + 30)
                 end
-                current_level = i
             end)
         end
     end
+
+    AddPrefabPostInit("wormwarning_worm_boss", function(inst) -- 巨大洞穴蠕虫预警
+        if current_level == 5 then return end
+        current_level = 5
+        -- 巨大蠕虫没有预警等级，首次收到时按最长120秒估算
+        local initial_time = 120
+        SaveTextData("hounded", string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss), TimeToString(initial_time)), true)
+        SaveTimeData("hounded", initial_time)
+        ResetWarningAfter(initial_time + 30)
+    end)
+
+    AddPrefabPostInit("worm_boss", function(inst) -- 巨大洞穴蠕虫
+        local data = ThePlayer and ThePlayer.HUD and ThePlayer.HUD.WarningEventTimeData
+        -- 只提前结束本轮预测；自然倒计时已进入攻击提示阶段时不重复提醒
+        if current_level ~= 5 or not data or data.hounded_time <= 0 then return end
+        -- 先清零，令tipsfn返回false以复位提示缓存，再触发一次攻击提示
+        SaveTimeData("hounded", 0)
+        need_tips = data.hounded_time > 1
+        SaveTextData("hounded", "", true)
+    end)
 end
 
 ----------------------------------------------------------------------------------------------
@@ -279,6 +305,10 @@ info = {
         return (is_worm_boss and text) or (time > 0 and string.format(ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns[GetWorldtypeStr()]), TimeToString(time)))
     end,
     tipsfn = function()
+        if need_tips then
+            need_tips = false
+            return true, StringToFunction(ReplacePrefabName(STRINGS.eventtimer.hounded.attack.worm_boss)), 10, nil, 3
+        end
         local time = ThePlayer.HUD.WarningEventTimeData.hounded_time
         local text = ThePlayer.HUD.WarningEventTimeData.hounded_text
         local is_worm_boss = text ~= "" and Extract_by_format(text, ReplacePrefabName(STRINGS.eventtimer.hounded.cooldowns.worm_boss))
